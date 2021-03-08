@@ -1,0 +1,59 @@
+/*
+https://stackoverflow.com/a/50409270
+*/
+.body-container {
+    height: 90vh;
+    // overflow-y: hidden;
+}
+
+.example-icon {
+    padding: 0 14px;
+}
+
+.example-spacer {
+    flex: 1 1 auto;
+}
+
+// defines your custom class using theme pallete
+// https://stackoverflow.com/a/46632197
+
+@import '~@angular/material/theming';
+@include mat-core();
+
+$primary: mat-palette($mat-indigo);
+$accent:  mat-palette($mat-yellow);
+$warn:    mat-palette($mat-red);
+
+.candy-carousel {
+    // Get the default hue for a palette.
+    color: mat-color($primary);
+
+    // Get a specific hue for a palette.
+    // See https://material.io/archive/guidelines/style/color.html#color-color-palette for hues.
+    background-color: mat-color($accent, 300);
+
+    // Get a relative color for a hue ('lighter' or 'darker')
+    outline-color: mat-color($accent, lighter);
+
+    // Get a contrast color for a hue by adding `-contrast` to any other key.
+    border-color: mat-color($primary, '100-contrast');
+}
+
+@mixin exam-nav-theme($theme) {
+    $nav-list-icon-padding: 12px !default;
+    $toolbar-title-padding: 16px !default;
+
+    .list-item-active {
+      font-weight: bold;
+      color: mat-color(map-get($theme, accent), darker) !important;
+      background: rgba(0, 0, 0, 0.04);
+    }
+
+    .nav-list-icon {
+      margin: 0 $nav-list-icon-padding 0 $nav-list-icon-padding;
+    }
+
+    .toolbar-title {
+      margin: 0 $toolbar-title-padding 0 $toolbar-title-padding;
+    }
+}

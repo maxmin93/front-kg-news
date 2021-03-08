@@ -1,0 +1,36 @@
+<div fxLayout="column" fxLayoutAlign="space-around center" fxLayoutGap="10px">
+<div *ngIf="detail" class="news-view">
+    <div class="news-view-head">
+        <h1 class="news-title">{{ detail.title }}</h1>
+        <div class="news-info">
+            <div>
+                <span class="news-provider">{{ detail.provider }}</span>
+                <span class="news-cate">{{ detail.cate }}</span>
+            </div>
+            <div class="news-date">{{ detail.wdate | date:'mediumDate' }}</div>
+        </div>
+        <div class="news-buttons">
+            <div class="news-buttons-func">
+                <!-- button type="button" class="btn btn-xsm btn-light" (click)="goSource()">기사원문</button -->
+                <a mat-stroked-button href="{{ detail.link }}" target="_blank">Link</a>
+            </div>
+            <div class="news-buttons-view"></div>
+        </div>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="space-around center" fxLayoutGap="10px" class="news-view-body">
+        <p>{{ detail.content }}</p>
+    </div>
+    <div fxLayout="column" fxLayoutAlign="space-around center" fxLayoutGap="10px">
+
+    <mat-card style="width: 95%">
+    Simple card
+    <p>{{ news.tokens }}</p>
+    </mat-card>
+
+    <mat-card style="width: 95%">
+    Simple card
+    </mat-card>
+
+    </div>
+</div>
+</div>
