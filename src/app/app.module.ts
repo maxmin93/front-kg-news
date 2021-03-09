@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, Title } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -47,6 +47,11 @@ import { RegisterComponent } from './components/register/register.component';
 import { DocsComponent } from './components/docs/docs.component';
 import { DetailComponent } from './components/detail/detail.component';
 
+// services
+import { NewsApiService } from './services/news-api.service';
+import { UiApiService } from './services/ui-api.service';
+
+
 // ** if you miss "--routing" option:
 // 0) ng generate module app-routing --flat --module=app
 
@@ -66,58 +71,64 @@ import { DetailComponent } from './components/detail/detail.component';
 // ng generate guard auth-guard
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    DashboardComponent,
-    ListComponent,
-    RegisterComponent,
-    DocsComponent,
-    DetailComponent
-  ],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    HttpClientModule,
-    FormsModule,
-    ReactiveFormsModule,
-    FlexLayoutModule,
-    AppRoutingModule,
+    declarations: [
+        AppComponent,
+        DashboardComponent,
+        ListComponent,
+        RegisterComponent,
+        DocsComponent,
+        DetailComponent
+    ],
+    imports: [
+        BrowserModule,
+        BrowserAnimationsModule,
+        HttpClientModule,
+        FormsModule,
+        ReactiveFormsModule,
+        FlexLayoutModule,
+        AppRoutingModule,
 
-    // Materials
-    MatCheckboxModule,
-    MatCheckboxModule,
-    MatButtonModule,
-    MatInputModule,
-    MatAutocompleteModule,
-    MatDatepickerModule,
-    MatFormFieldModule,
-    MatRadioModule,
-    MatSelectModule,
-    MatSliderModule,
-    MatSlideToggleModule,
-    MatMenuModule,
-    MatSidenavModule,
-    MatToolbarModule,
-    MatListModule,
-    MatGridListModule,
-    MatCardModule,
-    MatStepperModule,
-    MatTabsModule,
-    MatExpansionModule,
-    MatButtonToggleModule,
-    MatChipsModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatProgressBarModule,
-    MatDialogModule,
-    MatTooltipModule,
-    MatSnackBarModule,
-    MatTableModule,
-    MatSortModule,
-    MatPaginatorModule,
-    LayoutModule
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
+        // Materials
+        MatCheckboxModule,
+        MatCheckboxModule,
+        MatButtonModule,
+        MatInputModule,
+        MatAutocompleteModule,
+        MatDatepickerModule,
+        MatFormFieldModule,
+        MatRadioModule,
+        MatSelectModule,
+        MatSliderModule,
+        MatSlideToggleModule,
+        MatMenuModule,
+        MatSidenavModule,
+        MatToolbarModule,
+        MatListModule,
+        MatGridListModule,
+        MatCardModule,
+        MatStepperModule,
+        MatTabsModule,
+        MatExpansionModule,
+        MatButtonToggleModule,
+        MatChipsModule,
+        MatIconModule,
+        MatProgressSpinnerModule,
+        MatProgressBarModule,
+        MatDialogModule,
+        MatTooltipModule,
+        MatSnackBarModule,
+        MatTableModule,
+        MatSortModule,
+        MatPaginatorModule,
+        LayoutModule
+    ],
+    providers: [
+        Title,
+        UiApiService,
+        NewsApiService
+    ],
+    bootstrap: [
+        AppComponent
+    ]
 })
 export class AppModule { }

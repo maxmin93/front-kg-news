@@ -28,20 +28,20 @@
   </mat-toolbar-row>
   <!-- mat-toolbar-row style="background-color: #512DA8;" -->  <!-- NOT WORKING: mat-color($primary) -->
   <mat-toolbar-row class="candy-carousel">
-    <h2 class="toolbar-title">SimpleCRM helps you easily manage your contacts</h2>
+    <h2 class="toolbar-title">{{ current_title }}</h2>
   </mat-toolbar-row>
 </mat-toolbar>
 
 <mat-sidenav-container autosize>
   <mat-sidenav #sidenav>
     <mat-nav-list>
-      <a mat-list-item (click)="sidenav.close()" [routerLink]="'/docs'" routerLinkActive="list-item-active"> News List </a>
+      <a mat-list-item (click)="goToMenu('/docs')" [routerLink]="" routerLinkActive="list-item-active"> News List </a>
       <a mat-list-item (click)="sidenav.close()" [routerLink]="'/create-account'" routerLinkActive="list-item-active"> Create Account</a>
       <a mat-list-item (click)="sidenav.close()" [routerLink]="'/contacts'" routerLinkActive="list-item-active"> Contacts </a>
       <a mat-list-item (click)="sidenav.close()" [routerLink]="'/create-contact'" routerLinkActive="list-item-active"> Create Contact </a>
       <a mat-list-item (click)="sidenav.close()" [routerLink]="'/activities'" routerLinkActive="list-item-active"> Activities </a>
       <a mat-list-item (click)="sidenav.close()" [routerLink]="'/create-activity'" routerLinkActive="list-item-active"> Create Activity </a>
-      <a mat-list-item (click)="sidenav.close()" href="" mat-list-item>Close</a>
+      <a mat-list-item (click)="sidenav.close()" href="">Close</a>
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>

@@ -15,25 +15,26 @@ const routes: Routes = [
   //   component: LoginComponent
   // },
   {
-    path: 'register',
+    path: 'register', data :{ title: "Resister" },
     component: RegisterComponent
   },
   {
-    path: 'detail/:id',
+    path: 'detail/:id', data :{ title: "Detail of Document" },
     component: DetailComponent
   },
   {
-    path: 'docs',
+    path: 'docs', data :{ title: "Document List" },
     component: DocsComponent
   },
   {
-    path: 'dashboard',
+    path: 'dashboard', data :{ title: "Dashboard" },
     component: DashboardComponent
   },
   {
     path: '', redirectTo: '/docs', pathMatch: 'full',
     // canActivate: [AuthGuardService]
-  }
+  },
+  // { path: '**', component: PageNotFoundComponent },  // Wildcard route for a 404 page
 ];
 
 @NgModule({

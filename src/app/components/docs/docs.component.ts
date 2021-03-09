@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 
 import { News, NewsResponse } from '../../services/news-models';
 import { NewsApiService } from '../../services/news-api.service';
+import { UiApiService } from '../../services/ui-api.service';
 
 const DEFAULT_PAGE_SIZE: number = 10;
 const DEFAULT_PAGE_INDEX: number = 0;
@@ -15,6 +16,7 @@ const DEFAULT_PAGE_INDEX: number = 0;
 })
 export class DocsComponent implements OnInit {
 
+    data: any;
     docs: News[] = [];
 
     // for pagination
@@ -28,10 +30,15 @@ export class DocsComponent implements OnInit {
 
     constructor(
         private route: ActivatedRoute,
+        private uiService: UiApiService,
         private newsService: NewsApiService
     ) { }
 
     ngOnInit(): void {
+        // data of routes
+        this.route.data.subscribe(data => {
+            this.uiService.pushRouterData(data);
+        });
         // 최신 뉴스 리스트: q=''
         this.onSearch(DEFAULT_PAGE_SIZE, DEFAULT_PAGE_INDEX);
     }

@@ -1,6 +1,6 @@
 {
-  "name": "ng11-app01",
-  "version": "0.0.0",
+  "name": "front-kg-news",
+  "version": "0.0.1",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
