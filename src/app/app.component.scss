@@ -1,16 +1,20 @@
-/*
-https://stackoverflow.com/a/50409270
-*/
-.body-container {
-    height: 90vh;
-    // overflow-y: hidden;
+// https://stackoverflow.com/a/61769711
+.toolbar-container {
+    position: relative;
+    z-index: 10;
+    top: 0;
 }
 
-.example-icon {
-    padding: 0 14px;
+// https://stackoverflow.com/a/50409270
+.content-container {
+    min-height: 82vh;
+    overflow-y: hidden;
+    padding: .9em .6em .9em .6em;
+    border-radius: .2em;
+    background-color: #eee;     // default: #fafafa
 }
 
-.example-spacer {
+.toolbar-spacer {
     flex: 1 1 auto;
 }
 
@@ -31,14 +35,13 @@ $warn:    mat-palette($mat-red);
     // Get a specific hue for a palette.
     // See https://material.io/archive/guidelines/style/color.html#color-color-palette for hues.
     background-color: mat-color($primary, 300);
-
     // Get a relative color for a hue ('lighter' or 'darker')
     outline-color: mat-color($accent, lighter);
-
     // Get a contrast color for a hue by adding `-contrast` to any other key.
     border-color: mat-color($primary, '100-contrast');
 
-    padding-left: 25px;
+    padding-left: 2vw;
+    max-height: 6vh;
 }
 
 @mixin exam-nav-theme($theme) {

@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 import { map, mergeMap, take } from 'rxjs/operators';
 
 import { NewsConfig } from '../app.config';
-import { News, NewsResponse } from './news-models';
+import { Document, NewsResponse, Sentence, Term } from './news-models';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +19,7 @@ export class NewsApiService {
     private country = "kr";
 
     // URL to web api
-    private api_url = 'http://newsapi.org/v2/top-headlines?country=kr&apiKey=';
+    private api_url = 'http://127.0.0.1:8888/news';   // 'http://newsapi.org/v2/top-headlines?country=kr&apiKey=';
 
     constructor(private http: HttpClient) { }
 
@@ -42,17 +42,14 @@ export class NewsApiService {
             try{
                 d.wdate = new Date(d.timestamp);
             }catch(e){
-                d.wdate = null
+                d.wdate = undefined
             }
         }
         return x;
     }
 
-    getNewsById(docid:string): Observable<News[]>{
-        const docs:News[] = NEWS_SAMPLES.filter(x=>x.id == docid)
-        // return of(docs).pipe( mergeMap(x=>x), take(1));
-
-        let url = `http://127.0.0.1:8888/news/${docid}`;
+    getNewsById(docid:string): Observable<Document[]>{
+        let url = `${this.api_url}/${docid}`;
         return this.http.get<NewsResponse>(url).pipe(
             map(x=>this.convertStr2Date(x)),
             map(x=>x.documents),
@@ -61,20 +58,31 @@ export class NewsApiService {
     }
 
     getNewsResponse(text:string='', size=10, page=0): Observable<NewsResponse>{
-        let url = `http://127.0.0.1:8888/news/search?size=${size}&page=${page}&q=${encodeURIComponent(text)}`;
+        let url = `${this.api_url}/search?size=${size}&page=${page}&q=${encodeURIComponent(text)}`;
         return this.http.get<NewsResponse>(url).pipe(
             map(x=>this.convertStr2Date(x))
         );
     }
 
+    getSentences(docid:string): Observable<Sentence[]>{
+        let url = `${this.api_url}/${docid}/sentences`;
+        return this.http.get<Sentence[]>(url);
+    }
+
+    getTerms(docid:string, grp:string='nouns'): Observable<Term[]>{
+        let url = `${this.api_url}/${docid}/terms?grp=${grp}`;
+        return this.http.get<Term[]>(url);
+    }
+
 }
 
-const NEWS_SAMPLES:News[] = [
+/*
+const NEWS_SAMPLES:Document[] = [
 {
   "id": "D10354072",
   "title": "4월 16일 제주·호남 토막 소식",
   "content": "대안문화예술학교 참가자 모집 광주문화재단 문화예술교육지원센터는 매주 토요일 문을 여는 대안문화예술학교 강좌인 '광주창의예술학교-삶과 예술 배움청'에 참가할 어린이와 청소년을 26일까지 모집한다. 강좌는 북구문화의집의 '바퀴 달린 학교'(초등 50명), 청소년문화의집의 '보헤미안 여행학교'(청소년 40명), 교육문화공동체 결의 '도시축제 창의학교'(18~34살 45명) 등 세 분야로 나뉘어 진행된다. (062)670-5761. 담양 대나무 분재학교 수강모집 전남 담양군은 26일까지 대나무 분재학교에 참여할 수강생을 모집한다. 이 학교는 5월 중순부터 10월 중순까지 담양의 특산물인 대나무를 활용한 분재와 조경의 이론을 알려주고 실습을 도와주는 방식으로 수업을 진행한다. 군이 수강생 수업료를 전액 지원한다. 수강생들은 내년 5월 대나무축제 때 열리는 대나무분재 경연대회에 참가해 솜씨를 겨룬다. (061)380-2912. 제주박물관, '부처의 미소'전 국립제주박물관은 16일부터 6월16일까지 2개월 동안 '제주에서 만나는 부처의 미소전'을 연다. 삼국과 통일신라, 고려, 조선 등 시대별 불상 26점을 통해 불상 종류와 형태, 양식 변천, 특징 등을 파악할 수 있다. 이번 전시회에서는 불상을 설명하는 영상물을 전시장에서 상영하고, 체험 코너도 운영한다. (064)720-8103. 제주여성영화제 '미리보기' 상영회 제주여민회 제주여성영화제 집행위원회는 16일 저녁 7시30분 제주영화문화예술센터에서 '달콤 쌉싸름한 여성영화 맛보기'를 진행한다. 이번 행사는 9월26일부터 나흘 동안 개최하는 제주여성영화제의 '미리보기' 행사로 열린다. 상영작은 2차 세계대전 당시 유대인 학살을 다룬 < 사라의 열쇠 > 이다.",
-  "tokens": "참가자모집 어린이와청소년 청소년문화의집 보헤미안 청소년 34살 담양대나무 담양군 대나무 대나무축제 국립제주박물관 삼국과통일신라 집행위원회 2차세계대전 유대인 유대인학살 사라의열쇠",
+  //"tokens": "참가자모집 어린이와청소년 청소년문화의집 보헤미안 청소년 34살 담양대나무 담양군 대나무 대나무축제 국립제주박물관 삼국과통일신라 집행위원회 2차세계대전 유대인 유대인학살 사라의열쇠",
   "cate1": "사회",
   "cate2": "사회일반",
   "provider": "한겨례",
@@ -214,3 +222,4 @@ const NEWS_SAMPLES:News[] = [
   "link": "http://www.ahatv.co.kr/News/Detail.aspx?cSn=3&pSn=25087"
 },
 ]
+*/

@@ -1,61 +1,41 @@
-export class User {
-    id: number;
-    username: string;
-    email: string;
-}
-
-export class UserRegister extends User {
-    password: string;
-    fullName: string;
-    imageUrl: string;
-}
-
-export interface News {
+export interface Element {
+    datasource: string
+    timestamp: string;
     id: string;
+    label: string;
+    wdate?: Date;
+}
+
+export interface Sentence extends Element {
+    seq: number;
+    root: string;
+    terms: string;
+    tokens?: string[];
+}
+
+export interface Term extends Element {
+    sid: string;
+    seq: number;
+    head: string;
+    text: string;
+    p_tag: string;
+    d_tag: string;
+    e_tag: string;
+}
+
+export interface Document extends Element {
     title: string;
     content: string;
+    provider: string;
     link: string;       // .split(" ")
-    tokens?: string;
     cate1?: string;
     cate2?: string;
-    provider: string;
-    timestamp: string;
-    wdate?: Date;
+    labels?: any;
 }
 
 export interface NewsResponse {
     hits: number;
     page_size: number;
     page_index: number;
-    documents: News[];
-}
-
-export class Articles {
-    status: string;
-    totalResults: number;
-    articles: Article[];
-}
-
-// https://medium.com/@slevrard2/building-a-news-aggregator-web-app-with-angular-4f57079ebe51
-
-export class Article {
-    author: string;
-    content: string;
-    description: string;
-    publishedAt: string;
-    source: Source;
-    title: string;
-    url: string;
-    urlToImage: string;
-}
-
-export class Source {
-    id: string;
-    name: string;
-}
-
-export const initialArticles: Articles = {
-    status: '',
-    totalResults: 0,
-    articles: []
+    documents: Document[];
 }

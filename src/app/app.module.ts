@@ -37,6 +37,10 @@ import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
 
+// services
+import { NewsApiService } from './services/news-api.service';
+import { UiApiService } from './services/ui-api.service';
+
 // components
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -46,10 +50,9 @@ import { ListComponent } from './components/list/list.component';
 import { RegisterComponent } from './components/register/register.component';
 import { DocsComponent } from './components/docs/docs.component';
 import { DetailComponent } from './components/detail/detail.component';
-
-// services
-import { NewsApiService } from './services/news-api.service';
-import { UiApiService } from './services/ui-api.service';
+import { LayoutComponent } from './components/layout/layout.component';
+import { BrowserComponent } from './components/browser/browser.component';
+import { CanvasComponent } from './components/browser/canvas/canvas.component';
 
 
 // ** if you miss "--routing" option:
@@ -77,7 +80,10 @@ import { UiApiService } from './services/ui-api.service';
         ListComponent,
         RegisterComponent,
         DocsComponent,
-        DetailComponent
+        DetailComponent,
+        LayoutComponent,
+        BrowserComponent,
+        CanvasComponent
     ],
     imports: [
         BrowserModule,

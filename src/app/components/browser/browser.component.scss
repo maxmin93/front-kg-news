@@ -1,0 +1,12 @@
+.canvas-container {
+    width: 98vw;
+    height: 84vh;
+    padding: 0;
+    // background-color: blue;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}

@@ -7,14 +7,12 @@ import { UiApiService } from '../../services/ui-api.service';
 
 import { Document, Sentence, Term } from 'src/app/services/news-models';
 
-// import { map } from 'rxjs/operators';
-
 @Component({
-  selector: 'app-detail',
-  templateUrl: './detail.component.html',
-  styleUrls: ['./detail.component.scss']
+    selector: 'app-browser',
+    templateUrl: './browser.component.html',
+    styleUrls: ['./browser.component.scss']
 })
-export class DetailComponent implements OnInit, OnDestroy {
+export class BrowserComponent implements OnInit, OnDestroy {
 
     docid: string;
     document: Document;
@@ -38,16 +36,21 @@ export class DetailComponent implements OnInit, OnDestroy {
             // console.log('paramMap:', params.get('id'));
             this.docid = params.get('id');
             console.log('docid:', this.docid);
+
             if( this.docid ){
                 // data of routes
                 this.route.data.subscribe(data => {
                     data['docid'] = this.docid;
                     this.uiService.pushRouterData(data);
                 });
-                // loading data
+                // get data
                 this.handler_document = this.getDocument(this.docid);
                 this.handler_sentences = this.getSentences(this.docid);
                 this.handler_terms = this.getTerms(this.docid);
+            }
+            else{
+                // data of routes
+                this.route.data.subscribe(data => this.uiService.pushRouterData(data));
             }
         });
         this.route.queryParams.subscribe(params => {
@@ -56,9 +59,9 @@ export class DetailComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void{
-        this.handler_document.unsubscribe();
-        this.handler_sentences.unsubscribe();
-        this.handler_terms.unsubscribe();
+        if(this.handler_document) this.handler_document.unsubscribe();
+        if(this.handler_sentences) this.handler_sentences.unsubscribe();
+        if(this.handler_terms) this.handler_terms.unsubscribe();
     }
 
     goSource(){
@@ -96,4 +99,7 @@ export class DetailComponent implements OnInit, OnDestroy {
             this.terms = x;
         });
     }
+
+    //////////////////////////////////////////////
+
 }

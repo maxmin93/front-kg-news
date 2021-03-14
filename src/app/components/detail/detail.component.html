@@ -1,36 +1,30 @@
 <div fxLayout="column" fxLayoutAlign="space-around center" fxLayoutGap="10px">
-<div *ngIf="detail" class="news-view">
-    <div class="news-view-head">
-        <h1 class="news-title">{{ detail.title }}</h1>
-        <div class="news-info">
-            <div>
-                <span class="news-provider">{{ detail.provider }}</span>
-                <span class="news-cate">{{ detail.cate }}</span>
-            </div>
-            <div class="news-date">{{ detail.wdate | date:'mediumDate' }}</div>
-        </div>
-        <div class="news-buttons">
-            <div class="news-buttons-func">
-                <!-- button type="button" class="btn btn-xsm btn-light" (click)="goSource()">기사원문</button -->
-                <a mat-stroked-button href="{{ detail.link }}" target="_blank">Link</a>
-            </div>
-            <div class="news-buttons-view"></div>
-        </div>
-    </div>
-    <div fxLayout="row" fxLayoutAlign="space-around center" fxLayoutGap="10px" class="news-view-body">
-        <p>{{ detail.content }}</p>
-    </div>
-    <div fxLayout="column" fxLayoutAlign="space-around center" fxLayoutGap="10px">
 
-    <mat-card style="width: 95%">
-    Simple card
-    <p>{{ news.tokens }}</p>
+    <mat-card class="news-card">
+    <mat-card-header fxLayout="column">
+        <!-- div mat-card-avatar [ngStyle]="{'background': 'url(../assets/images/' + article.source.id + '.png)'}"
+           class="example-header-image"></div -->
+        <mat-card-title>
+            {{ document.title }}
+        </mat-card-title>
+    </mat-card-header>
+    <!-- img mat-card-image class="img-article" src="{{ article.urlToImage }}" alt="" -->
+    <div class="news-subtitle">
+        <span class="news-provider">{{ document.provider }}</span>
+        <span class="news-cate">{{ document.cate1 }}/{{ document.cate2 }}</span>
+        <span class="subtitle-spacer"></span>
+        <span class="news-wdate">{{ document.wdate | date:'mediumDate' }}</span>
+    </div>
+    <mat-card-content>
+      <!-- p class="news-content" -->
+        {{ document.content }}
+      <!-- /p -->
+    </mat-card-content>
+    <mat-card-actions class="action-buttons">
+      <button mat-button><mat-icon>thumb_up_alt</mat-icon> NLP/NER(개체명)</button>
+      <button mat-button><mat-icon>comment</mat-icon> 연관어(Node2Vec)</button>
+      <button mat-button><mat-icon>share</mat-icon> 키워드트렌드</button>
+    </mat-card-actions>
     </mat-card>
 
-    <mat-card style="width: 95%">
-    Simple card
-    </mat-card>
-
-    </div>
-</div>
-</div>
+<div>

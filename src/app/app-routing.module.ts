@@ -1,19 +1,26 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
+import { LayoutComponent } from './components/layout/layout.component';
 import { ListComponent } from './components/list/list.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { DetailComponent } from './components/detail/detail.component';
 import { DocsComponent } from './components/docs/docs.component';
 import { RegisterComponent } from './components/register/register.component';
+import { BrowserComponent } from './components/browser/browser.component';
+import { CanvasComponent } from './components/browser/canvas/canvas.component';
 
 // import { AuthGuardService } from './services/auth-guard.service';
 
 const routes: Routes = [
-  // {
-  //   path: 'login',
-  //   component: LoginComponent
-  // },
+  {
+    path: 'list', data :{ title: "Table example" },
+    component: ListComponent
+  },
+  {
+    path: 'layout', data :{ title: "Layout Test" },
+    component: LayoutComponent
+  },
   {
     path: 'register', data :{ title: "Resister" },
     component: RegisterComponent
@@ -21,6 +28,14 @@ const routes: Routes = [
   {
     path: 'detail/:id', data :{ title: "Detail of Document" },
     component: DetailComponent
+  },
+  {
+    path: 'browser/:id', data :{ title: "Graph of Document" },
+    component: BrowserComponent
+  },
+  {
+    path: 'browser', data :{ title: "Graph of Document" },
+    component: BrowserComponent
   },
   {
     path: 'docs', data :{ title: "Document List" },

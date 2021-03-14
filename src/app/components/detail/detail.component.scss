@@ -1,65 +1,20 @@
-.news-view {
-    width: 70%;
-    // align-items: center;
-    padding: 10px;
-    height: auto;
-    min-height: 100px;
-    overflow: auto;
-
-    .news-view-head {
-        // width: 90%;
-        padding-left: 2vw;
-        .title {
-            font-size: 25px;
-            line-height: 2;
-            letter-spacing: -1.25px;
-            color: #222222;
-            font-weight: 500;
-        }
-
-        .news-info, .news-buttons {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .news-info{
-            .news-provider {
-                font-size: 13px;
-                font-weight: 700;
-                color: #6a7e88;
-                margin-right: 7px;
-            }
-            .news-cate{
-                font-size: 12px;
-                color: #666666;
-                background: #f5f5f5;
-                border-radius: 3px;
-                padding: 4px;
-                margin-right: 4px;
-            }
-            .news-date{
-                display: inline-block;
-                font-size: 12px;
-                color: #666;
-                margin-right: 2vw;
-            }
-        }
-    }
-
-    .news-view-content {
-        padding-top: 25px;
-        font-size: 14px;
-        color: #000;
-        word-break: break-word;
-        line-height: 1.7;
-        font-weight: 510;
-
-        .img {
-            text-align: center;
-            margin: 0 0 15px;
-        }
-    }
+.detail-container {
+    width: 98vw;
+    height: 84vh;
+    padding: 0;
+    // display: block;
+    border: 1px solid rgba(111, 111, 111, 0.50);
 }
 
+/*
+::ng-deep .mat-list-base .mat-list-item{
+    max-width: 200px;
+    max-width: 800px;
+    padding: 5px;
+}
 
+md-list-item-text {
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+*/

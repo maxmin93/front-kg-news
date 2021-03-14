@@ -42,11 +42,17 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        // 탭 타이틀 설정
         this.setTapTitle(this.tap_title);
+        // 상단 타이틀 설정: router.data 로부터 받아옴
         this.title$_handler = this.uiService.popRouterData().subscribe((data: any)=>{
-            console.log('router_data =', data);
+            // console.log('router_data =', data);
             // 주의! ExpressionChangedAfterItHasBeenCheckedError
-            setTimeout(()=>{ this.current_title = data['title']; }, 1);
+            setTimeout(()=>{
+                this.current_title = data['title'] + (
+                    data.hasOwnProperty('docid') ? ': '+data['docid'] : ''
+                );
+            }, 1);
         });
     }
 

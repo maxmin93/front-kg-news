@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute } from '@angular/router';
 
-import { News, NewsResponse } from '../../services/news-models';
+import { Document, NewsResponse } from '../../services/news-models';
 import { NewsApiService } from '../../services/news-api.service';
 import { UiApiService } from '../../services/ui-api.service';
 
@@ -17,7 +17,7 @@ const DEFAULT_PAGE_INDEX: number = 0;
 export class DocsComponent implements OnInit {
 
     data: any;
-    docs: News[] = [];
+    docs: Document[] = [];
 
     // for pagination
     length = 0;
