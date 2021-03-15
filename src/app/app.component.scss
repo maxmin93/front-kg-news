@@ -7,11 +7,12 @@
 
 // https://stackoverflow.com/a/50409270
 .content-container {
-    min-height: 82vh;
+    min-height: 84vh;
     overflow-y: hidden;
-    padding: .9em .6em .9em .6em;
+    padding: .6em .0em .0em .0em;
     border-radius: .2em;
     background-color: #eee;     // default: #fafafa
+    // background-color: yellow;     // default: #fafafa
 }
 
 .toolbar-spacer {

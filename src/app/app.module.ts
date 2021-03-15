@@ -54,6 +54,7 @@ import { DetailComponent } from './components/detail/detail.component';
 import { LayoutComponent } from './components/layout/layout.component';
 import { BrowserComponent } from './components/browser/browser.component';
 import { CanvasComponent } from './components/browser/canvas/canvas.component';
+import { TextrankComponent } from './components/textrank/textrank.component';
 
 
 // ** if you miss "--routing" option:
@@ -84,7 +85,8 @@ import { CanvasComponent } from './components/browser/canvas/canvas.component';
         DetailComponent,
         LayoutComponent,
         BrowserComponent,
-        CanvasComponent
+        CanvasComponent,
+        TextrankComponent
     ],
     imports: [
         BrowserModule,

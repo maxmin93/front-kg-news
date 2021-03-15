@@ -9,6 +9,7 @@ import { DocsComponent } from './components/docs/docs.component';
 import { RegisterComponent } from './components/register/register.component';
 import { BrowserComponent } from './components/browser/browser.component';
 import { CanvasComponent } from './components/browser/canvas/canvas.component';
+import { TextrankComponent } from './components/textrank/textrank.component';
 
 // import { AuthGuardService } from './services/auth-guard.service';
 
@@ -24,6 +25,10 @@ const routes: Routes = [
   {
     path: 'register', data :{ title: "Resister" },
     component: RegisterComponent
+  },
+  {
+    path: 'textrank/:id', data :{ title: "Summary by TextRank" },
+    component: TextrankComponent
   },
   {
     path: 'detail/:id', data :{ title: "Detail of Document" },

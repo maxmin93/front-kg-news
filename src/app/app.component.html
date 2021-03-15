@@ -11,17 +11,17 @@
     <span class="toolbar-spacer"></span>
     <!-- 상단 메뉴 : 데스크탑 전체 화면용 (모바일 전환시 감춰짐) -->
     <div fxShow="true" fxHide.lt-md="true">
-      <a href="#" mat-button>
+      <a mat-button [routerLink]="'/dashboard'">
         <mat-icon>notifications</mat-icon>
-        Notifications
+        Dashboard
       </a>
-      <a mat-button [routerLink]="'/list'">
+      <a mat-button [routerLink]="'/docs'">
         <mat-icon>message</mat-icon>
-        Messages
+        News
       </a>
       <a mat-button [routerLink]="'/register'">
         <mat-icon>account_box</mat-icon>
-        My Account
+        Account
       </a>
     </div>
   </mat-toolbar-row>
@@ -34,11 +34,9 @@
   <mat-sidenav #sidenav>
     <mat-nav-list>
       <a mat-list-item (click)="sidenav.close()" [routerLink]="'/docs'" routerLinkActive="list-item-active"> News List </a>
-      <a mat-list-item (click)="sidenav.close()" [routerLink]="'/create-account'" routerLinkActive="list-item-active"> Create Account</a>
-      <a mat-list-item (click)="sidenav.close()" [routerLink]="'/contacts'" routerLinkActive="list-item-active"> Contacts </a>
-      <a mat-list-item (click)="sidenav.close()" [routerLink]="'/create-contact'" routerLinkActive="list-item-active"> Create Contact </a>
-      <a mat-list-item (click)="sidenav.close()" [routerLink]="'/activities'" routerLinkActive="list-item-active"> Activities </a>
-      <a mat-list-item (click)="sidenav.close()" [routerLink]="'/create-activity'" routerLinkActive="list-item-active"> Create Activity </a>
+      <a mat-list-item (click)="sidenav.close()" [routerLink]="'/list'" routerLinkActive="list-item-active"> Most Similar </a>
+      <a mat-list-item (click)="sidenav.close()" [routerLink]="'/browser'" routerLinkActive="list-item-active"> Graph Browser </a>
+      <a mat-list-item (click)="sidenav.close()" [routerLink]="'/layout'" routerLinkActive="list-item-active"> Layout Test </a>
       <a mat-list-item (click)="sidenav.close()" href="">Close</a>
     </mat-nav-list>
   </mat-sidenav>

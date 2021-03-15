@@ -97,43 +97,48 @@ export class CanvasComponent implements OnInit {
         var b = cy.getElementById('b');
         var ab = cy.getElementById('ab');
 
-        var makeDiv = function(text){
-            var div = document.createElement('div');
+        var makeTippy = function(ele, text){
+            var ref = ele.popperRef();
 
-            div.classList.add('popper-div');
+            // Since tippy constructor requires DOM element/elements, create a placeholder
+            var dummyDomEle = document.createElement('div');
 
-            div.innerHTML = text;
+            var tip = tippy( dummyDomEle, {
+                getReferenceClientRect: ref.getBoundingClientRect,
+                trigger: 'manual', // mandatory
+                // dom element inside the tippy:
+                content: function(){ // function can be better for performance
+                    var div = document.createElement('div');
 
-            document.body.appendChild( div );
+                    div.innerHTML = text;
 
-            return div;
+                    return div;
+                },
+                // your own preferences:
+                arrow: true,
+                placement: 'bottom',
+                hideOnClick: false,
+                sticky: "reference",
+
+                // if interactive:
+                interactive: true,
+                appendTo: document.body // or append dummyDomEle to document.body
+            } );
+
+            return tip;
         };
 
-        var popperA = a.popper({
-            content: function(){ return makeDiv('Sticky position div'); }
-        });
+        var tippyA = makeTippy(a, 'foo');
 
-        var updateA = function(){
-            popperA.update();
-        };
+        tippyA.show();
 
-        a.on('position', updateA);
-        cy.on('pan zoom resize', updateA);
+        var tippyB = makeTippy(b, 'bar');
 
-        var popperB = b.popper({
-            content: function(){ return makeDiv('One time position div'); }
-        });
+        tippyB.show();
 
-        var popperAB = ab.popper({
-            content: function(){ return makeDiv('Sticky position div'); }
-        });
+        var tippyAB = makeTippy(ab, 'baz');
 
-        var updateAB = function(){
-            popperAB.update();
-        };
-
-        ab.connectedNodes().on('position', updateAB);
-        cy.on('pan zoom resize', updateAB);
+        tippyAB.show();
     }
 
     ngOnDestroy(): void{

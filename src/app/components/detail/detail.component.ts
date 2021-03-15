@@ -3,7 +3,7 @@ import { MatAccordion } from '@angular/material/expansion';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 
-import { NewsApiService } from 'src/app/services/news-api.service';
+import { NewsApiService } from '../../services/news-api.service';
 import { UiApiService } from '../../services/ui-api.service';
 
 import { Document, Sentence, Term } from 'src/app/services/news-models';
