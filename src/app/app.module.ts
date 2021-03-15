@@ -6,6 +6,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 // Angular Material Components
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatBadgeModule } from '@angular/material/badge';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -95,6 +96,7 @@ import { CanvasComponent } from './components/browser/canvas/canvas.component';
         AppRoutingModule,
 
         // Materials
+        MatBadgeModule,
         MatCheckboxModule,
         MatCheckboxModule,
         MatButtonModule,

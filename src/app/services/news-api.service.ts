@@ -69,6 +69,16 @@ export class NewsApiService {
         return this.http.get<Sentence[]>(url);
     }
 
+    getAggTerms(docid:string): Observable<any>{
+        let url = `${this.api_url}/${docid}/terms/agg`;
+        return this.http.get<any>(url);
+    }
+
+    getEntityNouns(docid:string): Observable<any>{
+        let url = `${this.api_url}/${docid}/nouns/agg`;
+        return this.http.get<any>(url);
+    }
+
     getTerms(docid:string, grp:string='nouns'): Observable<Term[]>{
         let url = `${this.api_url}/${docid}/terms?grp=${grp}`;
         return this.http.get<Term[]>(url);
