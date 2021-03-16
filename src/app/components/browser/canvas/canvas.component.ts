@@ -103,23 +103,22 @@ export class CanvasComponent implements OnInit {
             // Since tippy constructor requires DOM element/elements, create a placeholder
             var dummyDomEle = document.createElement('div');
 
+            // https://atomiks.github.io/tippyjs/v6/all-props/#trigger
             var tip = tippy( dummyDomEle, {
                 getReferenceClientRect: ref.getBoundingClientRect,
-                trigger: 'manual', // mandatory
+                trigger: 'manual',      // mandatory
                 // dom element inside the tippy:
-                content: function(){ // function can be better for performance
+                content: function(){    // function can be better for performance
                     var div = document.createElement('div');
-
                     div.innerHTML = text;
-
                     return div;
                 },
                 // your own preferences:
                 arrow: true,
                 placement: 'bottom',
-                hideOnClick: false,
+                hideOnClick: true,
                 sticky: "reference",
-
+                theme: 'translucent',
                 // if interactive:
                 interactive: true,
                 appendTo: document.body // or append dummyDomEle to document.body
@@ -129,16 +128,22 @@ export class CanvasComponent implements OnInit {
         };
 
         var tippyA = makeTippy(a, 'foo');
-
-        tippyA.show();
+        a.scratch('_tippy', tippyA);
+        // tippyA.show();
 
         var tippyB = makeTippy(b, 'bar');
-
-        tippyB.show();
+        b.scratch('_tippy', tippyB);
+        // tippyB.show();
 
         var tippyAB = makeTippy(ab, 'baz');
+        ab.scratch('_tippy', tippyAB);
+        // tippyAB.show();
 
-        tippyAB.show();
+        cy.on('tap', 'node', function(evt){
+            var node = evt.target;
+            node.scratch('_tippy').show();
+            console.log(node.scratch('_tippy'));
+        });
     }
 
     ngOnDestroy(): void{

@@ -9,8 +9,7 @@ export interface Element {
 export interface Sentence extends Element {
     seq: number;
     root: string;
-    terms: string;
-    tokens?: string[];
+    terms: string[];
 }
 
 export interface Term extends Element {

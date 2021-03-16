@@ -25,4 +25,21 @@
     </mat-card-actions -->
     </mat-card>
 
+    <mat-card *ngIf="sentences" class="news-card">
+    <mat-card-header>
+        <mat-card-title>핵심문장 추출 (TextRank)</mat-card-title>
+        <mat-card-subtitle>
+            Rank = {{ sentenceList.selectedOptions.selected[0] ? sentenceList.selectedOptions.selected[0]?.value[0]+1 : '' }}, &nbsp;
+            Score = {{ sentenceList.selectedOptions.selected[0]?.value[1] }}
+        </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+        <mat-selection-list #sentenceList [multiple]="false">
+            <mat-list-option *ngFor="let sentence of sentences; index as i;" [value]="sentence" (click)="highlight(sentence[3])">
+                <p><span class="news-provider">[{{sentence[1]}}]</span> &nbsp; {{sentence[3]}}</p>
+            </mat-list-option>
+        </mat-selection-list>
+    </mat-card-content>
+    </mat-card>
+
 </div>

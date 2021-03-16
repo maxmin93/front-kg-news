@@ -13,12 +13,16 @@ import { Subscription } from 'rxjs';
 })
 export class TextrankComponent implements OnInit, OnDestroy {
 
+    typesOfShoes: string[] = ['Boots', 'Clogs', 'Loafers', 'Moccasins', 'Sneakers'];
+
     docid: string;
     debug: boolean = false;
 
     document_content:string = 'ABC<mark>EFG</mark>HIJ';
     document: Document;
-    handler_document:Subscription;
+    sentences: any[];
+    handler_document: Subscription;
+    handler_sentences: Subscription;
 
     constructor(
         private route: ActivatedRoute,
@@ -40,6 +44,7 @@ export class TextrankComponent implements OnInit, OnDestroy {
                 });
                 // loading data
                 this.handler_document = this.getDocument(this.docid);
+                this.handler_sentences = this.getSentences(this.docid);
             }
         });
         this.route.queryParams.subscribe(params => {
@@ -50,6 +55,7 @@ export class TextrankComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void{
         this.handler_document.unsubscribe();
+        this.handler_sentences.unsubscribe();
     }
 
     //////////////////////////////////////////////////
@@ -63,6 +69,22 @@ export class TextrankComponent implements OnInit, OnDestroy {
             this.document_content = this.document.content;
             // console.log('document:', this.document);
         });
+    }
+
+    getSentences(docid:string): Subscription{
+        return this.newsService.getTextRank(docid).subscribe(x=>{
+            if( x.length == 0 ){
+                console.log(`Empty response by docid=[${docid}]`);
+            }
+            console.log('sentences:', x);
+            this.sentences = x;
+        });
+    }
+
+    highlight(term:string){
+        const re = new RegExp(`(${ term })`, 'gi');
+        let text = this.document.content;
+        this.document_content = text.replace(re, `<mark>${term}</mark>`);
     }
 
 }

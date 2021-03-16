@@ -84,6 +84,11 @@ export class NewsApiService {
         return this.http.get<Term[]>(url);
     }
 
+    getTextRank(docid:string): Observable<any[]>{
+        let url = `${this.api_url}/${docid}/textrank`;
+        return this.http.get<any[]>(url);
+    }
+
 }
 
 /*
