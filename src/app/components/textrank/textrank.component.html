@@ -27,8 +27,9 @@
 
     <mat-card *ngIf="sentences" class="news-card">
     <mat-card-header>
-        <mat-card-title>핵심문장 추출 (TextRank)</mat-card-title>
+        <mat-card-title>요약 추출 (TextRank)</mat-card-title>
         <mat-card-subtitle>
+            Sentence Seq = {{ sentenceList.selectedOptions.selected[0] ? sentenceList.selectedOptions.selected[0]?.value[2]+1 : '' }}, &nbsp;
             Rank = {{ sentenceList.selectedOptions.selected[0] ? sentenceList.selectedOptions.selected[0]?.value[0]+1 : '' }}, &nbsp;
             Score = {{ sentenceList.selectedOptions.selected[0]?.value[1] }}
         </mat-card-subtitle>

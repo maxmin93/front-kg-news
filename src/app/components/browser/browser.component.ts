@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 
@@ -7,12 +7,20 @@ import { UiApiService } from '../../services/ui-api.service';
 
 import { Document, Sentence, Term } from 'src/app/services/news-models';
 
+import tippy from 'tippy.js';
+
+// declare const tippy:any;
+
+
 @Component({
     selector: 'app-browser',
     templateUrl: './browser.component.html',
     styleUrls: ['./browser.component.scss']
 })
-export class BrowserComponent implements OnInit, OnDestroy {
+export class BrowserComponent implements OnInit, OnDestroy, AfterViewInit {
+
+    showSearch: boolean = false;
+    searchStr: string;
 
     docid: string;
     document: Document;
@@ -23,6 +31,8 @@ export class BrowserComponent implements OnInit, OnDestroy {
     handler_document:Subscription;
     handler_sentences:Subscription;
     handler_terms:Subscription;
+
+    @ViewChild('tippy_test', {static: false}) private tippy_test: ElementRef;
 
     constructor(
         private route: ActivatedRoute,
@@ -55,6 +65,16 @@ export class BrowserComponent implements OnInit, OnDestroy {
         });
         this.route.queryParams.subscribe(params => {
             this.debug = params['debug'];
+        });
+
+    }
+
+    ngAfterViewInit(): void{
+        tippy( this.tippy_test.nativeElement, {
+            content: 'My tooltip!',
+            theme: 'light',
+            placement: 'top-start',
+            arrow: true,
         });
     }
 
@@ -101,5 +121,14 @@ export class BrowserComponent implements OnInit, OnDestroy {
     }
 
     //////////////////////////////////////////////
+
+    searchToggle(value:boolean){
+        this.showSearch = value;
+    }
+
+    searchSubmit(){
+        console.log('searchStr:', this.searchStr);
+        this.searchToggle(false);
+    }
 
 }

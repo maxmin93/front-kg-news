@@ -41,6 +41,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 // services
 import { NewsApiService } from './services/news-api.service';
 import { UiApiService } from './services/ui-api.service';
+import { ColorProviderService } from './services/color-provider.service';
 
 // components
 import { AppRoutingModule } from './app-routing.module';
@@ -52,9 +53,12 @@ import { RegisterComponent } from './components/register/register.component';
 import { DocsComponent } from './components/docs/docs.component';
 import { DetailComponent } from './components/detail/detail.component';
 import { LayoutComponent } from './components/layout/layout.component';
+import { TextrankComponent } from './components/textrank/textrank.component';
+
 import { BrowserComponent } from './components/browser/browser.component';
 import { CanvasComponent } from './components/browser/canvas/canvas.component';
-import { TextrankComponent } from './components/textrank/textrank.component';
+import { W2vBrowserComponent } from './components/w2v-browser/w2v-browser.component';
+import { W2vCanvasComponent } from './components/w2v-browser/w2v-canvas/w2v-canvas.component';
 
 
 // ** if you miss "--routing" option:
@@ -84,9 +88,11 @@ import { TextrankComponent } from './components/textrank/textrank.component';
         DocsComponent,
         DetailComponent,
         LayoutComponent,
+        TextrankComponent,
         BrowserComponent,
         CanvasComponent,
-        TextrankComponent
+        W2vBrowserComponent,
+        W2vCanvasComponent,
     ],
     imports: [
         BrowserModule,
@@ -135,7 +141,8 @@ import { TextrankComponent } from './components/textrank/textrank.component';
     providers: [
         Title,
         UiApiService,
-        NewsApiService
+        NewsApiService,
+        ColorProviderService
     ],
     bootstrap: [
         AppComponent

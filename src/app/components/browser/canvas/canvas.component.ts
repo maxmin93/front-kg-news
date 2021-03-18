@@ -68,7 +68,6 @@ export class CanvasComponent implements OnInit {
                         'content': 'data(id)'
                     }
                 },
-
                 {
                     selector: 'edge',
                     style: {
@@ -97,52 +96,66 @@ export class CanvasComponent implements OnInit {
         var b = cy.getElementById('b');
         var ab = cy.getElementById('ab');
 
+        var makeDiv = function(text){
+            var div = document.createElement('div');
+            // div.classList.add('popper-div');
+            div.innerHTML = text;
+            // div.innerHTML = `<div role="tooltip">${text}<div class="popper-arrow" data-popper-arrow></div></div>`;
+            document.body.appendChild( div );
+            return div;
+        };
+
         var makeTippy = function(ele, text){
             var ref = ele.popperRef();
 
             // Since tippy constructor requires DOM element/elements, create a placeholder
             var dummyDomEle = document.createElement('div');
 
-            // https://atomiks.github.io/tippyjs/v6/all-props/#trigger
             var tip = tippy( dummyDomEle, {
                 getReferenceClientRect: ref.getBoundingClientRect,
-                trigger: 'manual',      // mandatory
+                trigger: 'manual', // mandatory
                 // dom element inside the tippy:
-                content: function(){    // function can be better for performance
-                    var div = document.createElement('div');
-                    div.innerHTML = text;
-                    return div;
-                },
+                content: text,
+                // function(){ // function can be better for performance
+                //     var div = document.createElement('div');
+                //     // div.classList.add('popper-div');
+                //     div.innerHTML = text;
+                //     return div;
+                // },
                 // your own preferences:
+                placement: 'bottom-start',
+                distance: 120,
                 arrow: true,
-                placement: 'bottom',
-                hideOnClick: true,
+                arrowType: 'sharp',
+                arrowTransform: 'scale(0.7)',   // skinny arrow
+                hideOnClick: false,
                 sticky: "reference",
-                theme: 'translucent',
+                theme: 'ligjt',                 // 'honeybee',
                 // if interactive:
                 interactive: true,
-                appendTo: document.body // or append dummyDomEle to document.body
+                appendTo: document.body         // or append dummyDomEle to document.body
             } );
 
             return tip;
         };
 
         var tippyA = makeTippy(a, 'foo');
-        a.scratch('_tippy', tippyA);
-        // tippyA.show();
+        tippyA.show();
 
         var tippyB = makeTippy(b, 'bar');
-        b.scratch('_tippy', tippyB);
-        // tippyB.show();
+        tippyB.show();
+        // let tippyB = tippy(b.popperRef(), {
+        //     content: 'My tooltip!',
+        // });
 
         var tippyAB = makeTippy(ab, 'baz');
-        ab.scratch('_tippy', tippyAB);
-        // tippyAB.show();
+        tippyAB.show();
 
-        cy.on('tap', 'node', function(evt){
-            var node = evt.target;
-            node.scratch('_tippy').show();
-            console.log(node.scratch('_tippy'));
+        const template = document.getElementById('template');
+
+        tippy('button', {
+          content: template.innerHTML,
+          allowHTML: true,
         });
     }
 

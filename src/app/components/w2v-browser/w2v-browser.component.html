@@ -55,5 +55,7 @@
         </div>
     </mat-toolbar>
 
-    <app-canvas class="canvas-container"></app-canvas>
+    <app-w2v-canvas #canvas class="canvas-container"
+        *ngIf="graph" [graph]="graph" (readyEmitter)="readyEvent($event)"
+    ></app-w2v-canvas>
 </div>
