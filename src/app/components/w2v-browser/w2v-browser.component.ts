@@ -7,10 +7,12 @@ import { UiApiService } from '../../services/ui-api.service';
 import { ColorProviderService } from '../../services/color-provider.service';
 
 import tippy from 'tippy.js';
+// declare const tippy:any;
 
 import { ILabel, IElement, IGraph } from '../../services/graph-models';
 
-// declare const tippy:any;
+import { MatDialog } from '@angular/material/dialog';
+import { W2vDialogComponent } from './w2v-dialog/w2v-dialog.component';
 
 
 @Component({
@@ -39,7 +41,8 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         private route: ActivatedRoute,
         private uiService: UiApiService,
         private wordsService: WordsApiService,
-        private colorService: ColorProviderService
+        private colorService: ColorProviderService,
+        public pivotsDialog: MatDialog
     ) { }
 
     ngOnInit(): void {
@@ -61,12 +64,12 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit(): void{
-        tippy( this.tippy_test.nativeElement, {
-            content: 'My tooltip!',
-            theme: 'light',
-            placement: 'top-start',
-            arrow: true,
-        });
+        // tippy( this.tippy_test.nativeElement, {
+        //     content: 'My tooltip!',
+        //     theme: 'light',
+        //     placement: 'top-start',
+        //     arrow: true,
+        // });
     }
 
     ngOnDestroy(): void{
@@ -172,5 +175,13 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
 
     readyEvent(event){
         console.log('ready event:', event);
+    }
+
+    openDialog() {
+        this.pivotsDialog.open(W2vDialogComponent, {
+            data: {
+                animal: 'panda'
+            }
+        });
     }
 }

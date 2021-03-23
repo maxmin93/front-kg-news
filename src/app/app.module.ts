@@ -37,6 +37,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 
 // services
 import { NewsApiService } from './services/news-api.service';
@@ -59,6 +60,7 @@ import { BrowserComponent } from './components/browser/browser.component';
 import { CanvasComponent } from './components/browser/canvas/canvas.component';
 import { W2vBrowserComponent } from './components/w2v-browser/w2v-browser.component';
 import { W2vCanvasComponent } from './components/w2v-browser/w2v-canvas/w2v-canvas.component';
+import { W2vDialogComponent } from './components/w2v-browser/w2v-dialog/w2v-dialog.component';
 
 
 // ** if you miss "--routing" option:
@@ -93,6 +95,7 @@ import { W2vCanvasComponent } from './components/w2v-browser/w2v-canvas/w2v-canv
         CanvasComponent,
         W2vBrowserComponent,
         W2vCanvasComponent,
+        W2vDialogComponent,
     ],
     imports: [
         BrowserModule,
@@ -142,10 +145,12 @@ import { W2vCanvasComponent } from './components/w2v-browser/w2v-canvas/w2v-canv
         Title,
         UiApiService,
         NewsApiService,
-        ColorProviderService
+        ColorProviderService,
+        { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'fill' } },
     ],
     bootstrap: [
         AppComponent
-    ]
+    ],
+    entryComponents: [AppComponent, W2vDialogComponent],
 })
 export class AppModule { }

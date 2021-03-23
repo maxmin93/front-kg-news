@@ -35,7 +35,8 @@
 <div fxLayout="column" fxLayoutAlign="space-around center" fxLayoutGap="10px">
     <mat-toolbar fxLayout="row" fxLayoutAlign="space-around center" color="accent" style="margin-bottom: 3px">
         <div *ngIf="!showSearch" style="width: 100%">
-            <h2>Search Bar</h2> &nbsp; <span #tippy_test style="font-size: 14px;">(enter keyword)</span>
+            <h2 style="padding-right: 20px">Search Bar</h2> &nbsp;
+            <button mat-stroked-button (click)="openDialog()">Open dialog</button>
             <span fxFlex></span>
             <button mat-button (click)="searchToggle(true)" >
                 <mat-icon>search</mat-icon>
