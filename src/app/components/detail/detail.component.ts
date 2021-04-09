@@ -6,7 +6,7 @@ import { Subscription } from 'rxjs';
 import { NewsApiService } from '../../services/news-api.service';
 import { UiApiService } from '../../services/ui-api.service';
 
-import { Document, Sentence, Term } from 'src/app/services/news-models';
+import { Document, Sentence, Token } from 'src/app/services/news-models';
 
 
 // https://cloud.google.com/natural-language/docs/reference/rest/v1/Token?hl=ko-kr&skip_cache=true
@@ -38,6 +38,7 @@ const ENTITY_TAGS = {
     'PHONE_NUMBER': ['전화번호', 'Phone number'],
     'ADDRESS': ['주소/행정구역', 'Address'],
     'DATE': ['날짜', 'Date'],
+    'UNIT': ['단위', 'Unit'],
     'NUMBER': ['숫자', 'Pronoun'],
     'PRICE': ['가격', 'Price'],
     'OTHER': ['미분류', 'Other types of entities'],
@@ -58,7 +59,7 @@ export class DetailComponent implements OnInit, OnDestroy {
     sentences: Sentence[] = [];
     agg_terms: any;
     entity_nouns: any;
-    nouns: Term[] = []
+    nouns: Token[] = []
     pos_map: Map<string, any> = new Map();
 
     debug: boolean = false;
@@ -107,7 +108,7 @@ export class DetailComponent implements OnInit, OnDestroy {
     }
 
     goSource(){
-        window.open(this.document.link,'name','width=600,height=400')
+        window.open(this.document.out_link,'name','width=600,height=400')
     }
 
     //////////////////////////////////////////////

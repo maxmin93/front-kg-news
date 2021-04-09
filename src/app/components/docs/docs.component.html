@@ -22,7 +22,7 @@
            class="example-header-image"></div -->
         <mat-card-title style="margin-bottom: 0">
             <a class="news-title" [routerLink]="['/detail', article.id]" [queryParams]="{debug: true}">{{ article.title }}</a>
-            <a mat-buton color="primary" href="{{ article.link }}" target="_blank" style="padding-left: 10px; font-size: 24px;">
+            <a mat-buton color="primary" href="{{ article.out_link }}" target="_blank" style="padding-left: 10px; font-size: 24px;">
                 <mat-icon [inline]="true">link</mat-icon>
             </a>
         </mat-card-title>
@@ -30,7 +30,7 @@
     <!-- img mat-card-image class="img-article" src="{{ article.urlToImage }}" alt="" -->
     <div class="news-subtitle">
         <span class="news-provider">{{ article.provider }}</span>
-        <span class="news-cate">{{ article.cate1 }}/{{ article.cate2 }}</span>
+        <span class="news-cate">{{ article.category }}</span>
         <span class="subtitle-spacer"></span>
         <span class="news-wdate">{{ article.wdate | date:'mediumDate' }}</span>
     </div>

@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { NewsApiService } from 'src/app/services/news-api.service';
 import { UiApiService } from '../../services/ui-api.service';
 
-import { Document, Sentence, Term } from 'src/app/services/news-models';
+import { Document, Sentence, Token } from 'src/app/services/news-models';
 
 import tippy from 'tippy.js';
 
@@ -25,7 +25,7 @@ export class BrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     docid: string;
     document: Document;
     sentences: Sentence[] = [];
-    terms: Term[] = []
+    terms: Token[] = []
 
     debug: boolean = false;
     handler_document:Subscription;
@@ -85,7 +85,7 @@ export class BrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     goSource(){
-        window.open(this.document.link,'name','width=600,height=400')
+        window.open(this.document.out_link,'name','width=600,height=400')
     }
 
     //////////////////////////////////////////////

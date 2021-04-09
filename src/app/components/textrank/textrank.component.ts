@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { Document, Sentence, Term } from 'src/app/services/news-models';
+import { Document, Sentence, Token } from 'src/app/services/news-models';
 import { NewsApiService } from '../../services/news-api.service';
 import { UiApiService } from '../../services/ui-api.service';
 import { Subscription } from 'rxjs';
