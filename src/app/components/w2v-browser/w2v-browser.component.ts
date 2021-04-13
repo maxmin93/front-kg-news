@@ -109,7 +109,7 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         for(let e of data.nodes){
             nodes.set( e, this.createElement('nodes', ++idx, e) );
         }
-        console.log('nodes =', nodes.values());
+        // console.log('nodes =', nodes.values());
 
         let edges: IElement[] = [];
         let rnk = -1;
@@ -127,7 +127,7 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         //             nodes.get(e[0]), nodes.get(e[1]))
         //     );
         // }
-        console.log('edges =', edges);
+        // console.log('edges =', edges);
 
         return <IGraph>{
             datasource: data.pivot,
