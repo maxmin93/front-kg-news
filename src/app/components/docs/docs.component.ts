@@ -47,7 +47,7 @@ export class DocsComponent implements OnInit {
     onSearch(page_size=DEFAULT_PAGE_SIZE, page_index=DEFAULT_PAGE_INDEX){
         let text:string = this.searchInput != undefined ? this.searchInput.nativeElement.value : '';
         this.newsService.getNewsResponse(text.trim(), page_size, page_index).subscribe( (x:NewsResponse) => {
-            console.log(x.hits, x.page_size, x.page_index, x.documents.length);
+            // console.log(x.hits, x.page_size, x.page_index, x.documents.length);
             this.docs = [...x.documents];       // refresh
             this.length = x.hits;
             this.pageSize = x.page_size;
