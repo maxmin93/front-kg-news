@@ -39,6 +39,9 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 
+// chart.js (https://github.com/RinMinase/ng-charts)
+import { ChartsModule } from '@rinminase/ng-charts';
+
 // services
 import { NewsApiService } from './services/news-api.service';
 import { UiApiService } from './services/ui-api.service';
@@ -105,6 +108,9 @@ import { W2vDialogComponent } from './components/w2v-browser/w2v-dialog/w2v-dial
         ReactiveFormsModule,
         FlexLayoutModule,
         AppRoutingModule,
+
+        // chart.js
+        ChartsModule,
 
         // Materials
         MatBadgeModule,

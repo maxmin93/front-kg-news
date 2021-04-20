@@ -26,17 +26,19 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
             "aot": true,
+            "allowedCommonJsDependencies": [
+                "chart.js"
+            ],
             "assets": [
               "src/favicon.ico",
               "src/assets"
             ],
             "styles": [
               "node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css",
-              "src/styles.scss",
-              "node_modules/tippy.js/themes/light.css"
+              "node_modules/tippy.js/themes/light.css",
+              "src/styles.scss"
             ],
             "scripts": [
-                "node_modules/lodash/lodash.min.js",
                 "node_modules/cytoscape/dist/cytoscape.min.js",
                 "node_modules/@popperjs/core/dist/umd/popper-lite.min.js",
                 "node_modules/cytoscape-popper/cytoscape-popper.js",
@@ -108,11 +110,10 @@
             ],
             "styles": [
               "node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css",
-              "src/styles.scss",
-              "node_modules/tippy.js/themes/light.css"
+              "node_modules/tippy.js/themes/light.css",
+              "src/styles.scss"
             ],
             "scripts": [
-                "node_modules/lodash/lodash.min.js",
                 "node_modules/cytoscape/dist/cytoscape.min.js",
                 "node_modules/@popperjs/core/dist/umd/popper-lite.min.js",
                 "node_modules/cytoscape-popper/cytoscape-popper.js",

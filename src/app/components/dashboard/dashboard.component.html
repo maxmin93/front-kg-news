@@ -15,7 +15,35 @@
           </mat-card-title>
         </mat-card-header>
         <mat-card-content class="dashboard-card-content">
-          <div>Card Content Here</div>
+
+
+          <div *ngIf="card.chart_type == 'bar_chart'">
+            <div>
+                <!-- canvas #barChart id="barChart"></canvas -->
+                    <canvas baseChart  width="600" height="120"
+        chartType="bar"
+        [datasets]="chartData"
+        [labels]="chartLabels"
+        [legend]="chartLegend"
+        [options]="chartOptions"
+        [plugins]="chartPlugins"></canvas>
+    <button mat-button
+        mat-raised-button
+        color="primary"
+        (click)="randomizer()">
+        Randomize
+    </button>
+            </div>
+          </div>
+
+          <div *ngIf="card.chart_type == 'line_chart'">
+            <span>Card Content Here: {{card.chart_type}}</span>
+            <div>
+                <canvas #lineChart id="lineChart"></canvas>
+            </div>
+          </div>
+
+
         </mat-card-content>
       </mat-card>
     </mat-grid-tile>

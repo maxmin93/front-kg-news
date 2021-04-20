@@ -7,8 +7,8 @@ import { debounceTime } from 'rxjs/operators';
 import { IElement, IGraph, EMPTY_GRAPH, IEvent } from '../../../services/graph-models';
 import { CY_STYLES, CY_EVT_INIT } from '../../../services/cy-styles';
 
-// import { cloneDeep, concat, debounce } from 'lodash-es';
-import * as _ from 'lodash';
+import { clone, cloneDeep, concat, debounce } from 'lodash-es';
+// import * as _ from 'lodash';
 
 declare const window:any;
 declare const cytoscape:any;
@@ -126,9 +126,9 @@ export class W2vCanvasComponent implements OnInit {
         // for DEBUG
         // if( localStorage.getItem('debug')=='true' ) console.log('loadGraph', g);
 
-        let config:any = Object.assign( _.cloneDeep(CY_CONFIG), {
+        let config:any = Object.assign( cloneDeep(CY_CONFIG), {
             container: this.divCy.nativeElement,
-            elements: _.concat(g.nodes, g.edges),
+            elements: concat(g.nodes, g.edges),
             style: CY_STYLES,
             pan: { x:0, y:0 },
             ready: (e)=>{
@@ -192,19 +192,19 @@ export class W2vCanvasComponent implements OnInit {
 
         // trigger doubleTap event
         // https://stackoverflow.com/a/44160927/6811653
-        cy.on('doubleTap', _.debounce( (e, originalTapEvent) => {
+        cy.on('doubleTap', debounce( (e, originalTapEvent) => {
             if( e.target !== cy && e.target.isNode() ){
                 console.log({ type: 'node-dblclick', data: e.target });
             }
         }), 500);
 
-        cy.on('boxselect', _.debounce( (e)=>{
+        cy.on('boxselect', debounce( (e)=>{
 
         }), 500);
 
         cy.on('dragfree','node', (e)=>{
             let pos = e.target.position();
-            e.target.scratch('_pos', _.clone(pos));
+            e.target.scratch('_pos', clone(pos));
         });
 
         cy.on('select','node', (e)=>{
@@ -221,7 +221,7 @@ export class W2vCanvasComponent implements OnInit {
         });
 
         // ** node 선택을 위한 편의 기능 (뭉쳤을때)
-        cy.on('mouseover', 'node', _.debounce( (e)=>{
+        cy.on('mouseover', 'node', debounce( (e)=>{
             let node = e.target;
             if( node && !node.selected() ){
             }
