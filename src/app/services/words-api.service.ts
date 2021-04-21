@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+
+import { Observable, forkJoin } from 'rxjs';
 import { map, mergeMap, take } from 'rxjs/operators';
 
 
@@ -14,9 +15,15 @@ export class WordsApiService {
 
     constructor(private http: HttpClient) { }
 
-    getW2vPivots(): Observable<string[]>{
+
+    ///////////////////////////////////////////////////////
+    //  Words browser
+    //
+
+    // return: { label: [[token, sum_tf, df, log10_tfidf], ..]}
+    getW2vPivots(): Observable<any>{
         let url = `${this.api_url}/w2v/pivots`;
-        return this.http.get<string[]>(url);
+        return this.http.get<any>(url);
     }
 
     getW2vSynonyms(pivot: string, num: number=20): Observable<any[]>{
@@ -27,6 +34,33 @@ export class WordsApiService {
     getW2vGraph(pivot: string, num: number=20): Observable<any>{
         let url = `${this.api_url}/w2v/graph/${encodeURIComponent(pivot)}?num=${num}`;
         return this.http.get<any>(url);
+    }
+
+    ///////////////////////////////////////////////////////
+    //  Dashboard
+    //
+
+    // return: [[token, sum_tf, df, log10_tfidf], ..]
+    getW2vPivotsOfLabel(label: string): Observable<any[][]>{
+        let url = `${this.api_url}/w2v/pivots/${label.toUpperCase()}`;
+        return this.http.get<any[][]>(url);
+    }
+
+    getStatDfOfNouns(): Observable<any[][]>{
+        let url = `${this.api_url}/stat/nouns_df`;
+        return this.http.get<any[][]>(url);
+    }
+
+    getStatDfOfEntities(): Observable<any[][]>{
+        let url = `${this.api_url}/stat/entities_df`;
+        return this.http.get<any[][]>(url);
+    }
+
+    getStatDf(){
+        return forkJoin({
+            nouns: this.getStatDfOfNouns(),
+            entities: this.getStatDfOfEntities()
+        })
     }
 
 }

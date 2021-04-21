@@ -1,8 +1,8 @@
 <div #gridContainer class="grid-container">
-  <mat-grid-list cols="2" rowHeight="350px">
+  <mat-grid-list cols="{{ gridLayout.cols }}" rowHeight="{{ gridLayout.rowHeight }}">
 
     <!-- agg by month -->
-    <mat-grid-tile [colspan]="2" [rowspan]="1">
+    <mat-grid-tile [colspan]="gridLayout.cards[0].colspan" [rowspan]="gridLayout.cards[0].rowspan">
       <mat-card class="dashboard-card">
         <mat-card-header>
           <mat-card-title>
@@ -11,8 +11,7 @@
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #menu="matMenu" xPosition="before">
-              <button mat-menu-item>Expand</button>
-              <button mat-menu-item>Remove</button>
+              <button mat-menu-item (click)="reloadChart('bar')">Reload</button>
             </mat-menu>
           </mat-card-title>
         </mat-card-header>
@@ -22,7 +21,7 @@
       </mat-card>
     </mat-grid-tile>
 
-    <mat-grid-tile [colspan]="1" [rowspan]="1">
+    <mat-grid-tile [colspan]="gridLayout.cards[1].colspan" [rowspan]="gridLayout.cards[1].rowspan">
       <mat-card class="dashboard-card">
         <mat-card-header>
           <mat-card-title>
@@ -31,8 +30,7 @@
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #menu="matMenu" xPosition="before">
-              <button mat-menu-item>Expand</button>
-              <button mat-menu-item>Remove</button>
+              <button mat-menu-item (click)="reloadChart('line')">Reload</button>
             </mat-menu>
           </mat-card-title>
         </mat-card-header>
@@ -42,7 +40,7 @@
       </mat-card>
     </mat-grid-tile>
 
-    <mat-grid-tile [colspan]="1" [rowspan]="2">
+    <mat-grid-tile [colspan]="gridLayout.cards[2].colspan" [rowspan]="gridLayout.cards[2].rowspan">
       <mat-card class="dashboard-card">
         <mat-card-header>
           <mat-card-title>
@@ -51,8 +49,7 @@
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #menu="matMenu" xPosition="before">
-              <button mat-menu-item>Expand</button>
-              <button mat-menu-item>Remove</button>
+              <button mat-menu-item (click)="reloadChart(selectedEntity)">Reload</button>
             </mat-menu>
           </mat-card-title>
         </mat-card-header>
@@ -82,23 +79,24 @@
                     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
                 </table>
-                <mat-paginator #paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+                <mat-paginator #paginator
+                    [hidePageSize]="gridLayout.table.hidePageSize" [pageSize]="gridLayout.table.pageSize"
+                    [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
             </div>
         </mat-card-content>
       </mat-card>
     </mat-grid-tile>
 
-    <mat-grid-tile [colspan]="1" [rowspan]="1">
+    <mat-grid-tile [colspan]="gridLayout.cards[3].colspan" [rowspan]="gridLayout.cards[3].rowspan">
       <mat-card class="dashboard-card">
         <mat-card-header>
           <mat-card-title>
-            <span>Entities (12 types)</span>
+            <span>Entities (14 types)</span>
             <button mat-icon-button class="more-button" [matMenuTriggerFor]="menu" aria-label="Toggle menu">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #menu="matMenu" xPosition="before">
-              <button mat-menu-item>Expand</button>
-              <button mat-menu-item>Remove</button>
+              <button mat-menu-item (click)="reloadChart('pie')">Reload</button>
             </mat-menu>
           </mat-card-title>
         </mat-card-header>

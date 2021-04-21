@@ -23,6 +23,7 @@ export class NewsApiService {
 
     constructor(private http: HttpClient) { }
 
+    /*
     initSources(){
         return this.http.get('https://newsapi.org/v2/sources?language=en&apiKey='+this.api_key);
     }
@@ -35,7 +36,7 @@ export class NewsApiService {
     getArticlesByID(source: String){
         return this.http.get('https://newsapi.org/v2/top-headlines?sources='+source+'&apiKey='+this.api_key);
     }
-
+    */
 
     private convertStr2Date = function(x:NewsResponse): NewsResponse {
         for( let d of x.documents ){
@@ -49,19 +50,29 @@ export class NewsApiService {
         return x;
     }
 
+
+    ///////////////////////////////////////////////////////
+    //  Documents list
+    //
+
+    getNewsResponse(text:string='', size=10, page=0): Observable<NewsResponse>{
+        let url = `${this.api_url}/search?size=${size}&page=${page}&q=${encodeURIComponent(text)}`;
+        return this.http.get<NewsResponse>(url).pipe(
+            map(x=>this.convertStr2Date(x))
+        );
+    }
+
+
+    ///////////////////////////////////////////////////////
+    //  Document detail
+    //
+
     getNewsById(docid:string): Observable<Document[]>{
         let url = `${this.api_url}/${docid}`;
         return this.http.get<NewsResponse>(url).pipe(
             map(x=>this.convertStr2Date(x)),
             map(x=>x.documents),
             take(1)
-        );
-    }
-
-    getNewsResponse(text:string='', size=10, page=0): Observable<NewsResponse>{
-        let url = `${this.api_url}/search?size=${size}&page=${page}&q=${encodeURIComponent(text)}`;
-        return this.http.get<NewsResponse>(url).pipe(
-            map(x=>this.convertStr2Date(x))
         );
     }
 
@@ -94,6 +105,17 @@ export class NewsApiService {
             return rows;
         }));
     }
+
+
+    ///////////////////////////////////////////////////////
+    //  Dashboard
+    //
+
+    aggNewsMonth(): Observable<any>{
+        let url = `${this.api_url}/agg/month`;
+        return this.http.get<any>(url);
+    }
+
 
 }
 
