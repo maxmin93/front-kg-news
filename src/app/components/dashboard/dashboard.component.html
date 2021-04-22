@@ -6,7 +6,7 @@
       <mat-card class="dashboard-card">
         <mat-card-header>
           <mat-card-title>
-            <span>Documents by Month</span>
+            <span>Documents by Month (total={{ docCount | number:'1.0':'en-US'}})</span>
             <button mat-icon-button class="more-button" [matMenuTriggerFor]="menu" aria-label="Toggle menu">
               <mat-icon>more_vert</mat-icon>
             </button>
@@ -44,12 +44,12 @@
       <mat-card class="dashboard-card">
         <mat-card-header>
           <mat-card-title>
-            <span>Summary</span>
+            <span>Nouns ({{ selectedEntity }})</span>
             <button mat-icon-button class="more-button" [matMenuTriggerFor]="menu" aria-label="Toggle menu">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #menu="matMenu" xPosition="before">
-              <button mat-menu-item (click)="reloadChart(selectedEntity)">Reload</button>
+              <button mat-menu-item (click)="reloadChart('table')">Reload</button>
             </mat-menu>
           </mat-card-title>
         </mat-card-header>
@@ -57,27 +57,27 @@
             <div class="mat-elevation-z8">
                 <table mat-table [dataSource]="dataSource" style="width: 100%">
                     <!-- Position Column -->
-                    <ng-container matColumnDef="position">
-                        <th mat-header-cell *matHeaderCellDef> No. </th>
-                        <td mat-cell *matCellDef="let element"> {{element.position}} </td>
+                    <ng-container matColumnDef="noun">
+                        <th class="w-100 th-center" mat-header-cell *matHeaderCellDef> Noun </th>
+                        <td mat-cell *matCellDef="let col"> {{col[0]}} </td>
                     </ng-container>
                     <!-- Name Column -->
-                    <ng-container matColumnDef="name">
-                        <th mat-header-cell *matHeaderCellDef> Name </th>
-                        <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+                    <ng-container matColumnDef="sum_tf">
+                        <th class="w-75 th-center" mat-header-cell *matHeaderCellDef> sum_TF </th>
+                        <td mat-cell *matCellDef="let col"> {{col[1]}} </td>
                     </ng-container>
                     <!-- Weight Column -->
-                    <ng-container matColumnDef="weight">
-                        <th mat-header-cell *matHeaderCellDef> Weight </th>
-                        <td mat-cell *matCellDef="let element"> {{element.weight}} </td>
+                    <ng-container matColumnDef="df">
+                        <th class="w-75 th-center" mat-header-cell *matHeaderCellDef> DF </th>
+                        <td mat-cell *matCellDef="let col"> {{col[2]}} </td>
                     </ng-container>
                     <!-- Symbol Column -->
-                    <ng-container matColumnDef="symbol">
-                        <th mat-header-cell *matHeaderCellDef> Symbol </th>
-                        <td mat-cell *matCellDef="let element"> {{element.symbol}} </td>
+                    <ng-container matColumnDef="log10tf_idf">
+                        <th class="w-75 th-center" mat-header-cell *matHeaderCellDef> TF*IDF </th>
+                        <td mat-cell *matCellDef="let col"> {{ col[3] | number:'.1-5' }} </td>
                     </ng-container>
                     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onClickRecord(row)"></tr>
                 </table>
                 <mat-paginator #paginator
                     [hidePageSize]="gridLayout.table.hidePageSize" [pageSize]="gridLayout.table.pageSize"
@@ -91,7 +91,7 @@
       <mat-card class="dashboard-card">
         <mat-card-header>
           <mat-card-title>
-            <span>Entities (14 types)</span>
+            <span>Entities ({{ labelsSize }} types)</span>
             <button mat-icon-button class="more-button" [matMenuTriggerFor]="menu" aria-label="Toggle menu">
               <mat-icon>more_vert</mat-icon>
             </button>

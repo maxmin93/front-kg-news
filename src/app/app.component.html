@@ -12,16 +12,16 @@
         <!-- 상단 메뉴 : 데스크탑 전체 화면용 (모바일 전환시 감춰짐) -->
         <div fxShow="true" fxHide.lt-md="true">
             <a mat-button [routerLink]="'/dashboard'">
-                <mat-icon>notifications</mat-icon>
+                <mat-icon>dashboard</mat-icon>
                 Dashboard
             </a>
             <a mat-button [routerLink]="'/docs'">
-                <mat-icon>message</mat-icon>
+                <mat-icon>article</mat-icon>
                 News
             </a>
-            <a mat-button [routerLink]="'/register'">
-                <mat-icon>account_box</mat-icon>
-                Account
+            <a mat-button [routerLink]="'/w2v-browser'">
+                <mat-icon>extension</mat-icon>
+                Words
             </a>
         </div>
     </mat-toolbar-row>

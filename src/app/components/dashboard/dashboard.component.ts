@@ -5,7 +5,7 @@ import { Breakpoints, BreakpointObserver } from '@angular/cdk/layout';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 
-import { ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { UiApiService } from 'src/app/services/ui-api.service';
 import { NewsApiService } from 'src/app/services/news-api.service';
 import { WordsApiService } from 'src/app/services/words-api.service';
@@ -38,7 +38,6 @@ const CHART_COLORS = {
 };
 
 const PIE_COLORS = [
-    ['rgb(32, 54, 75)', 'rgba(32, 54, 75,0.2)'],      // '#20364b',
     ['rgb(44, 177, 236)', 'rgba(44, 177, 236,0.2)'],    // '#2cb1ec',
     ['rgb(49, 116, 135)', 'rgba(49, 116, 135,0.2)'],    // '#317487',
     ['rgb(95, 172, 58)', 'rgba(95, 172, 58,0.2)'],    // '#5fac3a',
@@ -52,6 +51,7 @@ const PIE_COLORS = [
     ['rgb(84, 179, 235)', 'rgba(84, 179, 235,0.2)'],    // '#54b3eb',
     ['rgb(55, 98, 105)', 'rgba(55, 98, 105,0.2)'],    // '#376269',
     ['rgb(154, 195, 54)', 'rgba(154, 195, 54,0.2)'],    // '#9ac336',
+    ['rgb(32, 54, 75)', 'rgba(32, 54, 75,0.2)'],      // '#20364b',
 ];
 
 
@@ -74,13 +74,16 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     private pieChart: any;
     @ViewChild('pieChart', {static: false}) pieChartRef: ElementRef;
 
+    docCount: number;
+    labelsSize: number;
     selectedEntity: string = 'PERSON';
-    displayedColumns: string[] = ['position', 'name', 'weight', 'symbol'];
-    dataSource = new MatTableDataSource<PeriodicElement>(ELEMENT_DATA);
+    displayedColumns: string[] = ['noun', 'sum_tf', 'df', 'log10tf_idf'];
+    dataSource = new MatTableDataSource<any[]>();
     @ViewChild('paginator', {static: false}) paginator: MatPaginator;
 
     constructor(
         private route: ActivatedRoute,
+        private router: Router,
         private uiService: UiApiService,
         breakpointObserver: BreakpointObserver,
         private newsApi: NewsApiService,
@@ -130,26 +133,34 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         this.reloadChart('bar');
         this.reloadChart('line');
         this.reloadChart('pie');
-
         // this.wordsApi.getStatDf().subscribe(data=>{
         //     console.log(data);
         // });
     }
 
     ngAfterViewInit(): void {
-        this.dataSource.paginator = this.paginator;
 
         // canvas sizes
         let width = this.gridsRef.nativeElement.offsetWidth;
         let height = this.gridsRef.nativeElement.offsetHeight;
         console.log(`width: ${width}, height: ${height}`);
 
+        // load table
+        this.loadTable(this.selectedEntity);
+        // doc count
+        this.loadDocCount();
     }
 
 
     ////////////////////////////////////////////////
     //  APIs
     //
+
+    loadDocCount(){
+        this.newsApi.cntDocuments().subscribe(data=>{
+            this.docCount = data;
+        });
+    }
 
     loadBarChart(){
         this.newsApi.aggNewsMonth().subscribe(data => {
@@ -174,6 +185,22 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         })
     }
 
+    loadPieChart(){
+        this.wordsApi.getStatLabelsOfEntities().subscribe(data=>{
+            let x_labels = data.map(x=>x[0]);
+            let y_values = data.map(x=>x[1]);
+            this.pieChart = this.initPieChart(x_labels, y_values);
+            this.labelsSize = x_labels.length;
+        });
+    }
+
+    loadTable(label: string){
+        this.wordsApi.getW2vPivotsOfLabel(label).subscribe(data=>{
+            // console.log(data);
+            this.dataSource.data = data;
+            this.dataSource.paginator = this.paginator;
+        });
+    }
 
     ////////////////////////////////////////////////
     //  chart.js
@@ -190,12 +217,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         }
         else if( target == 'pie'){
             if(this.pieChart) this.pieChart.reset();
-            setTimeout(()=>{
-                this.pieChart = this.initPieChart();
-            },100);
+            this.loadPieChart();
         }
         else{
-
+            // reload table
+            this.loadTable(this.selectedEntity);
         }
     }
 
@@ -271,14 +297,14 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         return chart;
     }
 
-    initPieChart(): any {
-        let labels = ['UNKNOWN','PERSON','LOCATION','ORGANIZATION','EVENT'
-                    ,'WORK_OF_ART','CONSUMER_GOOD','OTHER','PHONE_NUMBER','ADDRESS'
-                    ,'DATE','NUMBER','PRICE','UNIT'];
+    initPieChart(x_labels: string[], y_values: number[]): any {
+        // let labels = ['UNKNOWN','PERSON','LOCATION','ORGANIZATION','EVENT'
+        //             ,'WORK_OF_ART','CONSUMER_GOOD','OTHER','PHONE_NUMBER','ADDRESS'
+        //             ,'DATE','NUMBER','PRICE','UNIT'];
         let data = {
-          labels: labels,
+          labels: x_labels,
           datasets: [{
-            data: [65, 0, 59, 1, 80, 2, 81, 3, 56, 4, 55, 5, 40, 6],
+            data: y_values,
             borderWidth: 1,
             borderColor: PIE_COLORS.map(x=>x[0]),
             backgroundColor: PIE_COLORS.map(x=>x[1]),
@@ -313,42 +339,20 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             let activePoints = chart.getElementsAtEvent(event);
             if( activePoints.length ){
                 let _index = activePoints[0]['_index'];
-                console.log('click:', _index, labels[_index]);
+                console.log('click:', _index, x_labels[_index]);
+
+                // reload table
+                this.selectedEntity = x_labels[_index];
+                this.loadTable(this.selectedEntity);
             }
         });
 
         return chart;
     }
 
+    onClickRecord(row: any[]){
+        console.log(this.selectedEntity, row);
+        this.router.navigate(['w2v-browser', row[0]]);
+    }
 }
 
-
-export interface PeriodicElement {
-    name: string;
-    position: number;
-    weight: number;
-    symbol: string;
-}
-
-const ELEMENT_DATA: PeriodicElement[] = [
-    {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H'},
-    {position: 2, name: 'Helium', weight: 4.0026, symbol: 'He'},
-    {position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li'},
-    {position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be'},
-    {position: 5, name: 'Boron', weight: 10.811, symbol: 'B'},
-    {position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C'},
-    {position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N'},
-    {position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O'},
-    {position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F'},
-    {position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne'},
-    {position: 11, name: 'Sodium', weight: 22.9897, symbol: 'Na'},
-    {position: 12, name: 'Magnesium', weight: 24.305, symbol: 'Mg'},
-    {position: 13, name: 'Aluminum', weight: 26.9815, symbol: 'Al'},
-    {position: 14, name: 'Silicon', weight: 28.0855, symbol: 'Si'},
-    {position: 15, name: 'Phosphorus', weight: 30.9738, symbol: 'P'},
-    {position: 16, name: 'Sulfur', weight: 32.065, symbol: 'S'},
-    {position: 17, name: 'Chlorine', weight: 35.453, symbol: 'Cl'},
-    {position: 18, name: 'Argon', weight: 39.948, symbol: 'Ar'},
-    {position: 19, name: 'Potassium', weight: 39.0983, symbol: 'K'},
-    {position: 20, name: 'Calcium', weight: 40.078, symbol: 'Ca'},
-];

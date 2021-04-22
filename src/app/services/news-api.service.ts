@@ -111,6 +111,11 @@ export class NewsApiService {
     //  Dashboard
     //
 
+    cntDocuments(): Observable<number>{
+        let url = `${this.api_url}/cnt/document`;
+        return this.http.get<number>(url);
+    }
+
     aggNewsMonth(): Observable<any>{
         let url = `${this.api_url}/agg/month`;
         return this.http.get<any>(url);

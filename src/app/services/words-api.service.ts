@@ -56,6 +56,11 @@ export class WordsApiService {
         return this.http.get<any[][]>(url);
     }
 
+    getStatLabelsOfEntities(): Observable<any[][]>{
+        let url = `${this.api_url}/stat/entities_labels`;
+        return this.http.get<any[][]>(url);
+    }
+
     getStatDf(){
         return forkJoin({
             nouns: this.getStatDfOfNouns(),
