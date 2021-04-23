@@ -35,8 +35,9 @@
 <div fxLayout="column" fxLayoutAlign="space-around center" fxLayoutGap="10px">
     <mat-toolbar fxLayout="row" fxLayoutAlign="space-around center" color="accent" style="margin-bottom: 3px">
         <div *ngIf="!showSearch" style="width: 100%">
-            <h2 style="padding-right: 20px">Search Bar</h2> &nbsp;
             <button mat-stroked-button (click)="openDialog()">Open dialog</button>
+            <span>&nbsp;  &nbsp;  &nbsp;</span>
+            <h2 style="padding-right: 20px">search : &nbsp; "{{ pivot }}"</h2>
             <span fxFlex></span>
             <button mat-button (click)="searchToggle(true)" >
                 <mat-icon>search</mat-icon>
@@ -44,7 +45,7 @@
             </button>
         </div>
         <div *ngIf="showSearch" style="width: 100%">
-            <button mat-button class="md-icon-button" (click)="searchSubmit()">
+            <button mat-button class="md-icon-button" (click)="searchSubmit(searchStr)">
                 <mat-icon>search</mat-icon>
             </button>
             <mat-form-field fxFlex>
@@ -57,6 +58,6 @@
     </mat-toolbar>
 
     <app-w2v-canvas #canvas class="canvas-container"
-        *ngIf="graph" [graph]="graph" (readyEmitter)="readyEvent($event)"
+        *ngIf="graph" [graph]="graph" (userEvent)="receiveUserEvent($event)"
     ></app-w2v-canvas>
 </div>

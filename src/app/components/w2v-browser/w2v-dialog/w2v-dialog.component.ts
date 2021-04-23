@@ -1,9 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import {MatDialog, MAT_DIALOG_DATA} from '@angular/material/dialog';
-
-export interface DialogData {
-    animal: 'panda' | 'unicorn' | 'lion';
-};
+import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-w2v-dialog',
@@ -12,9 +8,18 @@ export interface DialogData {
 })
 export class W2vDialogComponent implements OnInit {
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: DialogData) { }
+    constructor(
+        public dialogRef: MatDialogRef<W2vDialogComponent>,
+        @Inject(MAT_DIALOG_DATA) public data: any
+    ) { }
 
-  ngOnInit(): void {
-  }
+    ngOnInit(): void {
+    }
 
+    selectNoun(label: string, noun: string){
+        this.dialogRef.close({
+            label: label,
+            noun: noun
+        });
+    }
 }

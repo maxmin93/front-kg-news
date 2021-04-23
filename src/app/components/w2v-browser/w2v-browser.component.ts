@@ -13,6 +13,7 @@ import { ILabel, IElement, IGraph } from '../../services/graph-models';
 
 import { MatDialog } from '@angular/material/dialog';
 import { W2vDialogComponent } from './w2v-dialog/w2v-dialog.component';
+import { W2vCanvasComponent } from './w2v-canvas/w2v-canvas.component';
 
 
 @Component({
@@ -26,16 +27,17 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     searchStr: string;
 
     pivot: string;
-    pivots: string[];
-    synonyms: any[];
+    pivots: any;            // W2vDialog { label: [[noun, tf, df, tfidf], ..], }
+    words: Set<string>;     // unique synonyms 유지 (확장시 체크)
     graph: IGraph;
 
     debug: boolean = false;
     handler_pivots:Subscription;
-    handler_synonyms:Subscription;
+    // handler_synonyms:Subscription;   // 사용 안함
     handler_graph:Subscription;
 
     @ViewChild('tippy_test', {static: false}) private tippy_test: ElementRef;
+    @ViewChild('canvas', {static: false}) private graphCanvas: W2vCanvasComponent;
 
     constructor(
         private route: ActivatedRoute,
@@ -74,38 +76,77 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
 
     ngOnDestroy(): void{
         if(this.handler_pivots) this.handler_pivots.unsubscribe();
-        if(this.handler_synonyms) this.handler_synonyms.unsubscribe();
+        // if(this.handler_synonyms) this.handler_synonyms.unsubscribe();
         if(this.handler_graph) this.handler_graph.unsubscribe();
     }
 
     load_w2v_graph(pivot: string){
         // get data
         this.handler_pivots = this.getW2vPivots();
-        this.handler_synonyms = this.getW2vSynonyms(pivot);
+        // this.handler_synonyms = this.getW2vSynonyms(pivot);
         this.handler_graph = this.getW2vGraph(pivot);
     }
 
     //////////////////////////////////////////////
+    //  APIs
+    //
 
+    // Dialog 에서 사용
+    // return: { label: [[noun, tf, df, tfidf], ..], }
     getW2vPivots(): Subscription{
-        return this.wordsService.getW2vPivots().subscribe(x=> this.pivots = x);
+        return this.wordsService.getW2vPivots().subscribe(x=>{
+            this.pivots = x;
+        });
     }
 
-    getW2vSynonyms(pivot: string): Subscription{
-        return this.wordsService.getW2vSynonyms(pivot).subscribe(x=> this.synonyms = x);
-    }
+    // 사용 안함
+    // return: [ [noun, score], .. ]
+    // getW2vSynonyms(pivot: string): Subscription{
+    //     return this.wordsService.getW2vSynonyms(pivot).subscribe(x=>{
+    //         console.log('synonyms:', x);
+    //         this.synonyms = x;
+    //     });
+    // }
 
+    // return: { pivot, nodes[], edges_syn[], edges_fof[] }
     getW2vGraph(pivot: string): Subscription{
         return this.wordsService.getW2vGraph(pivot).subscribe(x=>{
+            this.words = new Set([pivot, ...x['nodes']]);
             this.graph = this.makeGraph(x);
             console.log('graph:', this.graph);
         });
     }
 
-    makeGraph(data:any): IGraph{
-        let nodes: Map<string,IElement> = new Map();
+    // return: { pivot, nodes[], edges_syn[], edges_fof[] }
+    getW2vGraphExtend(pivot: string): Subscription{
+        return this.wordsService.getW2vGraph(pivot).subscribe(x=>{
+            let new_nodes: Set<string> = new Set(x['nodes']);
+            let diff_nodes = new Set([...new_nodes].filter(n => !this.words.has(n)));
+            let diff_edges = x['edges_syn'].filter(e => diff_nodes.has(e[1]));
+            let diff_graph = {
+                pivot: pivot,
+                nodes: [...diff_nodes],
+                edges_syn: diff_edges
+            }
+
+            let ext_graph: IGraph = this.makeGraph(diff_graph);
+            console.log('graph.extend:', ext_graph);
+            // let pivots = new Set([pivot]);
+            this.words = new Set([...this.words, ...diff_nodes]);     // union
+            console.log('words.extend:', diff_nodes);
+        });
+    }
+
+    makeGraph(data: any, nodes: Map<string,IElement> = undefined): IGraph{
         let idx = -1;
-        nodes.set( data.pivot, this.createElement('nodes', ++idx, data.pivot) );
+        if( !nodes ){
+            nodes = new Map();
+            nodes.set( data.pivot, this.createElement('nodes', ++idx, data.pivot) );
+        }
+        else{
+
+        }
+
         for(let e of data.nodes){
             nodes.set( e, this.createElement('nodes', ++idx, e) );
         }
@@ -165,23 +206,35 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         this.showSearch = value;
     }
 
-    searchSubmit(){
-        console.log('searchStr:', this.searchStr);
+    searchSubmit(searchStr: string){
+        console.log('searchStr:', searchStr);
         this.searchToggle(false);
 
-        this.pivot = this.searchStr.trim();
+        this.pivot = searchStr.trim();
         this.load_w2v_graph(this.pivot);
     }
 
-    readyEvent(event){
-        console.log('ready event:', event);
+    receiveUserEvent(event){
+        console.log('userEvent:', event);
+        if( event._type == 'dbl-click' ){
+            this.searchSubmit(event.data['name']);
+        }
+        else if( event._type == 'click' ){
+            this.getW2vGraphExtend(event.data['name']);
+            this.graphCanvas.extendGraph(undefined);
+        }
     }
 
     openDialog() {
-        this.pivotsDialog.open(W2vDialogComponent, {
-            data: {
-                animal: 'panda'
-            }
+        const dialogRef = this.pivotsDialog.open(W2vDialogComponent, {
+            width : '800px',
+            height: '740px',
+            data: this.pivots
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            this.searchStr = result.noun;
+            this.searchSubmit(this.searchStr);
         });
     }
 }

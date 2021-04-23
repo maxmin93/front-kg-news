@@ -1,15 +1,17 @@
-<h1 mat-dialog-title>Favorite Animal</h1>
+<h1 mat-dialog-title>Entity samples</h1>
 <div mat-dialog-content>
-  My favorite animal is:
-  <ul>
-    <li>
-      <span *ngIf="data.animal === 'panda'">&#10003;</span> Panda
-    </li>
-    <li>
-      <span *ngIf="data.animal === 'unicorn'">&#10003;</span> Unicorn
-    </li>
-    <li>
-      <span *ngIf="data.animal === 'lion'">&#10003;</span> Lion
-    </li>
-  </ul>
+    <mat-accordion style="padding-top: 5px; padding-bottom: 5px;">
+        <mat-expansion-panel *ngFor="let nouns of data | keyvalue"
+                style="margin-bottom: 5px"
+                (opened)="panelOpenState = true" (closed)="panelOpenState = false">
+            <mat-expansion-panel-header>
+                <mat-panel-title> {{ nouns.key }} ({{ nouns.value.length }}) </mat-panel-title>
+            </mat-expansion-panel-header>
+            <mat-chip-list aria-label="Fish selection">
+                <mat-chip *ngFor="let noun of nouns.value; index as i" (click)="selectNoun(nouns.key, noun[0])">
+                    {{ noun[0] }}
+                </mat-chip>
+            </mat-chip-list>
+        </mat-expansion-panel>
+    </mat-accordion>
 </div>

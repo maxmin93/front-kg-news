@@ -10,7 +10,8 @@ export class ColorProviderService {
     constructor() { }
 
     public next(){
-        return PALETTE[++this.idx];
+        let next_idx = (++this.idx) % PALETTE.length
+        return PALETTE[next_idx];
     }
 }
 

@@ -57,12 +57,12 @@ export class W2vCanvasComponent implements OnInit {
     // for doubleTap
     private tappedBefore:any;
     private tappedTimeout:any;
-    private tappedTarget:any;
-    private tappedCount:number = 0;
+    // private tappedTarget:any;
+    // private tappedCount:number = 0;
 
     // interface
     @Input() set graph(g:any) { this.graph$.next(g); }
-    @Output() readyEmitter= new EventEmitter<any>();
+    @Output() userEvent= new EventEmitter<any>();         // click, select, etc..
 
     // components
     @ViewChild("cy", {read: ElementRef, static: false}) divCy: ElementRef;
@@ -94,8 +94,13 @@ export class W2vCanvasComponent implements OnInit {
         this.g = EMPTY_GRAPH;
     }
 
-    goSource(){
-
+    sendUserEvent(_type: string, data: any){
+        // console.log(`userEvent: { ${evtKey}: ${evtData} }`)
+        let event: any = {
+            _type : _type,
+            data: data
+        }
+        this.userEvent.emit(event);
     }
 
     //////////////////////////////////////////////
@@ -142,6 +147,10 @@ export class W2vCanvasComponent implements OnInit {
         this.cyInit(config);
     }
 
+    extendGraph(g:IGraph){
+        console.log('extend graph:', g);
+    }
+
     //////////////////////////////////////////////
 
     cyInit(config:any){
@@ -180,9 +189,10 @@ export class W2vCanvasComponent implements OnInit {
                 this.tappedTimeout = setTimeout(()=>{
                     if( e.target === cy ){    // click background
 
-                    }                         // click node or edge
-                    else if( e.target.isNode() || e.target.isEdge() ){
-                        console.log('click-element:', e.target.data());
+                    }                         // click node
+                    else if( e.target.isNode() ){   // || e.target.isEdge() ){
+                        // console.log({ type: 'node-click', data: e.target.data() });
+                        this.sendUserEvent('click', e.target.data());
                     }
                     this.tappedBefore = null;
                 }, 300);
@@ -194,7 +204,8 @@ export class W2vCanvasComponent implements OnInit {
         // https://stackoverflow.com/a/44160927/6811653
         cy.on('doubleTap', debounce( (e, originalTapEvent) => {
             if( e.target !== cy && e.target.isNode() ){
-                console.log({ type: 'node-dblclick', data: e.target });
+                // console.log({ type: 'node-dblclick', data: e.target.data() });
+                this.sendUserEvent('dbl-click', e.target.data());
             }
         }), 500);
 
@@ -224,6 +235,7 @@ export class W2vCanvasComponent implements OnInit {
         cy.on('mouseover', 'node', debounce( (e)=>{
             let node = e.target;
             if( node && !node.selected() ){
+                // ...
             }
         }, 200));
     }
