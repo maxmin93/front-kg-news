@@ -33,18 +33,18 @@
 </div -->
 
 <div fxLayout="column" fxLayoutAlign="space-around center" fxLayoutGap="10px">
-    <mat-toolbar fxLayout="row" fxLayoutAlign="space-around center" color="accent" style="margin-bottom: 3px">
-        <div *ngIf="!showSearch" style="width: 100%">
+    <mat-toolbar fxLayout="row" fxLayoutAlign="space-around center" color="accent" style="margin-bottom: 3px;">
+        <div *ngIf="!showSearch" style="width: 100%; margin-left: 40px; margin-right: 40px;">
             <button mat-stroked-button (click)="openDialog()">Open dialog</button>
             <span>&nbsp;  &nbsp;  &nbsp;</span>
-            <h2 style="padding-right: 20px">search : &nbsp; "{{ pivot }}"</h2>
+            <h2 style="padding-right: 20px">search : &nbsp; &nbsp; {{ pivot }}</h2>
             <span fxFlex></span>
             <button mat-button (click)="searchToggle(true)" >
                 <mat-icon>search</mat-icon>
                 <span>Search</span>
             </button>
         </div>
-        <div *ngIf="showSearch" style="width: 100%">
+        <div *ngIf="showSearch" style="width: 100%; margin-left: 60px; margin-right: 60px;">
             <button mat-button class="md-icon-button" (click)="searchSubmit(searchStr)">
                 <mat-icon>search</mat-icon>
             </button>

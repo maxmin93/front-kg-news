@@ -6,7 +6,7 @@
       <mat-card class="dashboard-card">
         <mat-card-header>
           <mat-card-title>
-            <span>Documents by Month (total={{ docCount | number:'1.0':'en-US'}})</span>
+            <span>Documents (total={{ docCount | number:'1.0':'en-US'}})</span>
             <button mat-icon-button class="more-button" [matMenuTriggerFor]="menu" aria-label="Toggle menu">
               <mat-icon>more_vert</mat-icon>
             </button>
@@ -15,8 +15,8 @@
             </mat-menu>
           </mat-card-title>
         </mat-card-header>
-        <mat-card-content #chartContainer class="dashboard-card-content">
-            <canvas #barChart id="barChart" width="1120" height="240"></canvas>
+        <mat-card-content #barChartContainer class="dashboard-card-center">
+            <canvas #barChart id="barChart" style="width: {{gridLayout.cards[0].width}}px; height: {{gridLayout.cards[0].height}}px;"></canvas>
         </mat-card-content>
       </mat-card>
     </mat-grid-tile>
@@ -34,8 +34,8 @@
             </mat-menu>
           </mat-card-title>
         </mat-card-header>
-        <mat-card-content class="dashboard-card-content">
-            <canvas #lineChart id="lineChart" width="530" height="240"></canvas>
+        <mat-card-content #lineChartContainer class="dashboard-card-center">
+            <canvas #lineChart id="lineChart" style="width: {{gridLayout.cards[1].width}}px; height: {{gridLayout.cards[1].height}}px;"></canvas>
         </mat-card-content>
       </mat-card>
     </mat-grid-tile>
@@ -73,14 +73,14 @@
                     </ng-container>
                     <!-- Symbol Column -->
                     <ng-container matColumnDef="log10tf_idf">
-                        <th class="w-75 th-center" mat-header-cell *matHeaderCellDef> TF*IDF </th>
+                        <th class="w-75 th-center" mat-header-cell *matHeaderCellDef> log10_TF*IDF </th>
                         <td mat-cell *matCellDef="let col"> {{ col[3] | number:'.1-5' }} </td>
                     </ng-container>
                     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                     <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onClickRecord(row)"></tr>
                 </table>
                 <mat-paginator #paginator
-                    [hidePageSize]="gridLayout.table.hidePageSize" [pageSize]="gridLayout.table.pageSize"
+                    [hidePageSize]="true" [pageSize]="gridLayout.table.pageSize"
                     [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
             </div>
         </mat-card-content>
@@ -100,8 +100,8 @@
             </mat-menu>
           </mat-card-title>
         </mat-card-header>
-        <mat-card-content class="dashboard-card-content">
-            <canvas #pieChart id="pieChart" width="530" height="240"></canvas>
+        <mat-card-content #pieChartContainer class="dashboard-card-center">
+            <canvas #pieChart id="pieChart" style="width: {{gridLayout.cards[3].width}}px; height: {{gridLayout.cards[3].height}}px;"></canvas>
         </mat-card-content>
       </mat-card>
     </mat-grid-tile>

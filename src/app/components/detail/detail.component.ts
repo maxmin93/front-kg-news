@@ -139,7 +139,7 @@ export class DetailComponent implements OnInit, OnDestroy {
             if( x.length == 0 ){
                 console.log(`Empty response by docid=[${docid}]`);
             }
-            console.log('agg_terms:', x);
+            // console.log('agg_terms:', x);
             this.agg_terms = x;
         });
     }
@@ -159,7 +159,7 @@ export class DetailComponent implements OnInit, OnDestroy {
             if( x.length == 0 ){
                 console.log(`Empty response by docid=[${docid}]`);
             }
-            console.log('entity_nouns:', x);
+            // console.log('entity_nouns:', x);
             this.entity_nouns = x;
         });
     }

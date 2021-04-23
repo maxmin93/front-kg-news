@@ -76,7 +76,7 @@ export class TextrankComponent implements OnInit, OnDestroy {
             if( x.length == 0 ){
                 console.log(`Empty response by docid=[${docid}]`);
             }
-            console.log('sentences:', x);
+            // console.log('sentences:', x);
             this.sentences = x;
         });
     }

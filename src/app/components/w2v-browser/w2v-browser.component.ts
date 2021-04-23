@@ -63,6 +63,9 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         this.route.queryParams.subscribe(params => {
             this.debug = params['debug'];
         });
+
+        // get data
+        this.handler_pivots = this.getW2vPivots();
     }
 
     ngAfterViewInit(): void{
@@ -81,8 +84,6 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     load_w2v_graph(pivot: string){
-        // get data
-        this.handler_pivots = this.getW2vPivots();
         // this.handler_synonyms = this.getW2vSynonyms(pivot);
         this.handler_graph = this.getW2vGraph(pivot);
     }
@@ -233,8 +234,10 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         });
 
         dialogRef.afterClosed().subscribe(result => {
-            this.searchStr = result.noun;
-            this.searchSubmit(this.searchStr);
+            if( result ){
+                this.searchStr = result.noun;
+                this.searchSubmit(this.searchStr);
+            }
         });
     }
 }

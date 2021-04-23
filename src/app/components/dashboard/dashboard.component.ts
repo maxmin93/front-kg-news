@@ -62,17 +62,17 @@ const PIE_COLORS = [
 })
 export class DashboardComponent implements OnInit, AfterViewInit {
 
-
     gridLayout: any;
-
-    @ViewChild('chartContainer', {static: false}) gridsRef: ElementRef;
 
     private barChart: any;
     @ViewChild('barChart', {static: false}) barChartRef: ElementRef;
+    @ViewChild('barChartContainer', {static: false}) barChartContainer: ElementRef;
     private lineChart: any;
     @ViewChild('lineChart', {static: false}) lineChartRef: ElementRef;
+    @ViewChild('lineChartContainer', {static: false}) lineChartContainer: ElementRef;
     private pieChart: any;
     @ViewChild('pieChart', {static: false}) pieChartRef: ElementRef;
+    @ViewChild('pieChartContainer', {static: false}) pieChartContainer: ElementRef;
 
     docCount: number;
     labelsSize: number;
@@ -99,26 +99,26 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             if (result.matches) {
                 // grid-tile 사이즈 변경
                 this.gridLayout = {
-                    cols: 1, rowHeight: 250,
+                    cols: 1, rowHeight: 320,
                     cards: [
-                        { colspan: 1, rowspan: 1 },     // cards[0]: agg_month bar
-                        { colspan: 1, rowspan: 1 },     // cards[1]: df line
-                        { colspan: 1, rowspan: 2 },     // cards[2]: entity table
-                        { colspan: 1, rowspan: 1 },     // cards[3]: entity pie
+                        { colspan: 1, rowspan: 1, width: 290, height: 200 },     // cards[0]: agg_month bar
+                        { colspan: 1, rowspan: 1, width: 290, height: 200 },     // cards[1]: df line
+                        { colspan: 1, rowspan: 2, width: 290, height: 200 },     // cards[2]: entity table
+                        { colspan: 1, rowspan: 1, width: 290, height: 200 },     // cards[3]: entity pie
                     ],
                     table: { pageSize: 5, hidePageSize: true }
                 };
             }
             else{
                 this.gridLayout = {
-                    cols: 2, rowHeight: 350,
+                    cols: 2, rowHeight: 360,
                     cards: [
-                        { colspan: 2, rowspan: 1 },     // cards[0]: agg_month bar
-                        { colspan: 1, rowspan: 1 },     // cards[1]: df line
-                        { colspan: 1, rowspan: 2 },     // cards[2]: entity table
-                        { colspan: 1, rowspan: 1 },     // cards[3]: entity pie
+                        { colspan: 2, rowspan: 1, width: 1200, height: 244 },     // cards[0]: agg_month bar
+                        { colspan: 1, rowspan: 1, width: 560, height: 244 },     // cards[1]: df line
+                        { colspan: 1, rowspan: 2, width: 560, height: 244 },     // cards[2]: entity table
+                        { colspan: 1, rowspan: 1, width: 560, height: 244 },     // cards[3]: entity pie
                     ],
-                    table: { pageSize: 10, hidePageSize: false }
+                    table: { pageSize: 10, hidePageSize: true }
                 };
             }
         });
@@ -139,11 +139,14 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
+        // chart.js: canvas sizes
+        // 참고 https://ming9mon.tistory.com/108
 
-        // canvas sizes
-        let width = this.gridsRef.nativeElement.offsetWidth;
-        let height = this.gridsRef.nativeElement.offsetHeight;
-        console.log(`width: ${width}, height: ${height}`);
+        // this.gridLayout.cards[0].width = Math.floor(this.barChartContainer.nativeElement.offsetWidth/10)*10;
+        // if( this.gridLayout.cards[0].width > 1200 ) this.gridLayout.cards[0].width = 1200;
+        // this.gridLayout.cards[0].height = this.barChartContainer.nativeElement.offsetHeight-1;
+        // console.log(`barChart: width: ${this.gridLayout.cards[0].width}, height: ${this.gridLayout.cards[0].height}`);
+        // setTimeout(()=>{ this.barChart.resize(); }, 10);
 
         // load table
         this.loadTable(this.selectedEntity);
@@ -189,8 +192,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         this.wordsApi.getStatLabelsOfEntities().subscribe(data=>{
             let x_labels = data.map(x=>x[0]);
             let y_values = data.map(x=>x[1]);
-            this.pieChart = this.initPieChart(x_labels, y_values);
             this.labelsSize = x_labels.length;
+            this.pieChart = this.initPieChart(x_labels, y_values);
         });
     }
 
@@ -244,6 +247,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             type: 'bar',
             data: data,
             options: {
+                responsive: false,
                 legend: { display: false },
                 animation: { duration: 750, },
                 scales: {
@@ -284,6 +288,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             type: 'line',
             data: data,
             options: {
+                responsive: false,
                 legend: { display: true },
                 animation: { duration: 750, },
                 scales: {
@@ -316,6 +321,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             data: data,
             plugins: [ChartDataLabels],
             options: {
+                responsive: false,
                 legend: { display: false },
                 animation: { duration: 750, },
                 plugins: {
