@@ -1,0 +1,81 @@
+<div fxLayout="column" fxLayoutAlign="space-around center" fxLayoutGap="10px">
+
+    <mat-card *ngIf="document" class="news-card">
+    <mat-card-header fxLayout="column">
+        <!-- div mat-card-avatar [ngStyle]="{'background': 'url(../assets/images/' + article.source.id + '.png)'}"
+           class="example-header-image"></div -->
+        <mat-card-title>
+            {{ document.title }}
+        </mat-card-title>
+    </mat-card-header>
+    <!-- img mat-card-image class="img-article" src="{{ article.urlToImage }}" alt="" -->
+    <div class="news-subtitle">
+        <span class="news-provider">{{ document.provider }}</span>
+        <span class="news-cate">{{ document.category }}</span>
+        <span class="subtitle-spacer"></span>
+        <span class="news-wdate">{{ document.wdate | date:'mediumDate' }}</span>
+    </div>
+    <mat-card-content>
+      <p #content [innerHTML]="document.content"></p>
+    </mat-card-content>
+    <!-- mat-card-actions class="action-buttons">
+      <button mat-button><mat-icon>thumb_up_alt</mat-icon> NLP/NER(개체명)</button>
+      <button mat-button><mat-icon>comment</mat-icon> 연관어(Node2Vec)</button>
+      <button mat-button><mat-icon>share</mat-icon> 키워드트렌드</button>
+    </mat-card-actions -->
+    </mat-card>
+
+    <mat-card *ngIf="clusters" class="news-card">
+    <mat-card-header>
+        <mat-card-title>유사문서 (Doc2Vec)</mat-card-title>
+        <mat-card-subtitle>
+            <img src="{{ figure_path }}" />
+        </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+        <!-- mat-selection-list #sentenceList [multiple]="false">
+            <mat-list-option *ngFor="let c of clusters; index as i | keyvalue" [value]="c.key">
+                <p><span class="news-provider">[{{ c.key }}]</span> &nbsp; {{ c.value }}</p>
+            </mat-list-option>
+        </mat-selection-list -->
+
+        <mat-accordion style="padding-top: 5px; padding-bottom: 5px;">
+            <mat-expansion-panel *ngFor="let grp of clusters | keyvalue"
+                    style="margin-bottom: 5px"
+                    (opened)="panelOpenState = true" (closed)="panelOpenState = false">
+                <mat-expansion-panel-header>
+                    <mat-panel-title> Cluster&#9839;{{ grp.key }} (size={{ grp.value.length }}) </mat-panel-title>
+                </mat-expansion-panel-header>
+                <!-- mat-chip-list aria-label="Fish selection">
+                    <mat-chip *ngFor="let doc of grp.value; index as i">
+                        {{ doc[0] }}/{{ doc[1] | number:'.1-5' }}/{{ doc[2] }}
+                    </mat-chip>
+                </mat-chip-list -->
+
+                <mat-card style="margin-top: 5px;"
+                        [ngStyle]="{'background-color': (doc[0]==docid) ? 'rgba(128, 255, 255, .5)' : 'rgba(255, 255, 128, .5)'}"
+                        *ngFor="let doc of grp.value; index as i">
+                <mat-card-header fxLayout="column">
+                    <mat-card-title>
+                        <p>{{ (doc[2] | async)?.title }}</p>
+                    </mat-card-title>
+                </mat-card-header>
+                <div class="news-subtitle">
+                    <!-- span class="news-provider">{{ doc[0] }}</span -->
+                    <a mat-button [routerLink]="['/doc2vec', doc[0]]" class="news-provider">{{ doc[0] }}</a>
+                    <span class="news-cate">{{ doc[1] | number:'.1-5' }}</span>
+                    <span class="subtitle-spacer"></span>
+                    <span class="news-wdate">{{ (doc[2] | async)?.wdate | date:'mediumDate' }}</span>
+                </div>
+                <mat-card-content>
+                    <p>{{ (doc[2] | async)?.content | slice:0:250 }}..</p>
+                </mat-card-content>
+                </mat-card>
+
+            </mat-expansion-panel>
+        </mat-accordion>
+
+    </mat-card-content>
+    </mat-card>
+
+</div>

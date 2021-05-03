@@ -4,6 +4,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, forkJoin } from 'rxjs';
 import { map, mergeMap, take } from 'rxjs/operators';
 
+import { NewsConfig } from '../app.config';
+
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +13,7 @@ import { map, mergeMap, take } from 'rxjs/operators';
 export class WordsApiService {
 
     // URL to web api
-    private api_url = 'http://127.0.0.1:8888/words';
+    private api_url = NewsConfig + '/words';
 
     constructor(private http: HttpClient) { }
 

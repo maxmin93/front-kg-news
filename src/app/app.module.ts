@@ -61,6 +61,7 @@ import { CanvasComponent } from './components/browser/canvas/canvas.component';
 import { W2vBrowserComponent } from './components/w2v-browser/w2v-browser.component';
 import { W2vCanvasComponent } from './components/w2v-browser/w2v-canvas/w2v-canvas.component';
 import { W2vDialogComponent } from './components/w2v-browser/w2v-dialog/w2v-dialog.component';
+import { Doc2vecComponent } from './components/doc2vec/doc2vec.component';
 
 
 // ** if you miss "--routing" option:
@@ -96,6 +97,7 @@ import { W2vDialogComponent } from './components/w2v-browser/w2v-dialog/w2v-dial
         W2vBrowserComponent,
         W2vCanvasComponent,
         W2vDialogComponent,
+        Doc2vecComponent,
     ],
     imports: [
         BrowserModule,

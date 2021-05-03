@@ -1,0 +1,15 @@
+
+.mat-list-item {
+    height: 4rem !important; /** experiment with height **/
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+::ng-deep .mat-list .mat-list-item .mat-line{
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+::ng-deep .mat-list .mat-list-item{
+    height:initial!important;
+}

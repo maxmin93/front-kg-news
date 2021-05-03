@@ -19,7 +19,7 @@ export class NewsApiService {
     private country = "kr";
 
     // URL to web api
-    private api_url = 'http://127.0.0.1:8888/news';   // 'http://newsapi.org/v2/top-headlines?country=kr&apiKey=';
+    private api_url = NewsConfig.URL + '/news';
 
     constructor(private http: HttpClient) { }
 

@@ -13,8 +13,6 @@ import { Subscription } from 'rxjs';
 })
 export class TextrankComponent implements OnInit, OnDestroy {
 
-    typesOfShoes: string[] = ['Boots', 'Clogs', 'Loafers', 'Moccasins', 'Sneakers'];
-
     docid: string;
     debug: boolean = false;
 
