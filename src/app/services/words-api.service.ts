@@ -13,7 +13,7 @@ import { NewsConfig } from '../app.config';
 export class WordsApiService {
 
     // URL to web api
-    private api_url = NewsConfig + '/words';
+    private api_url = NewsConfig.URL + '/words';
 
     constructor(private http: HttpClient) { }
 

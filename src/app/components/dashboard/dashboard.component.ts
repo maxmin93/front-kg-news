@@ -113,7 +113,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
                 this.gridLayout = {
                     cols: 2, rowHeight: 360,
                     cards: [
-                        { colspan: 2, rowspan: 1, width: 1200, height: 244 },     // cards[0]: agg_month bar
+                        { colspan: 2, rowspan: 1, width: 1200, height: 244 },    // cards[0]: agg_month bar
                         { colspan: 1, rowspan: 1, width: 560, height: 244 },     // cards[1]: df line
                         { colspan: 1, rowspan: 2, width: 560, height: 244 },     // cards[2]: entity table
                         { colspan: 1, rowspan: 1, width: 560, height: 244 },     // cards[3]: entity pie
