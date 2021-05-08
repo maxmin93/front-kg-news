@@ -16,6 +16,7 @@ import { CanvasComponent } from './components/browser/canvas/canvas.component';
 import { W2vBrowserComponent } from './components/w2v-browser/w2v-browser.component';
 import { W2vCanvasComponent } from './components/w2v-browser/w2v-canvas/w2v-canvas.component';
 import { Doc2vecComponent } from './components/doc2vec/doc2vec.component';
+import { DgraphComponent } from './components/dgraph/dgraph.component';
 
 
 const routes: Routes = [
@@ -38,6 +39,10 @@ const routes: Routes = [
   {
     path: 'doc2vec/:id', data :{ title: "Similar Documents and Clustering" },
     component: Doc2vecComponent
+  },
+  {
+    path: 'dgraph/:id', data :{ title: "Dependency Graph of Document" },
+    component: DgraphComponent
   },
   {
     path: 'detail/:id', data :{ title: "Detail of Document" },
