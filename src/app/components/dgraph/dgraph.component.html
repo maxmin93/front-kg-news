@@ -52,7 +52,8 @@
         </mat-accordion>
 
         <mat-accordion *ngIf="subgraphs_origin" #accordOrigin="matAccordion" class="example-headers-align news-card">
-            <mat-expansion-panel *ngIf="subgraphs_origin[i]"
+            <!-- mat-expansion-panel *ngIf="subgraphs_origin[i]" -->
+            <mat-expansion-panel
                     (opened)="figurePanelState(i, 'origin', true)" (closed)="figurePanelState(i, 'origin', false)">
                 <mat-expansion-panel-header>
                     <mat-panel-title>의존그래프 (원본)</mat-panel-title>

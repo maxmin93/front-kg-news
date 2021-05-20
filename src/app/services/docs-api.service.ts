@@ -35,7 +35,7 @@ export class DocsApiService {
 
     // http://localhost:8888/api/docs/dgraph/D67113626
     getDgraphDoc(docid:string): Observable<any>{
-        let url = `${this.api_url}/dgraph/${docid}`;
+        let url = `${this.api_url}/dgraph/${docid}/full`;
         return this.http.get<any>(url);
     }
 

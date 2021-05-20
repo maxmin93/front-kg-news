@@ -122,6 +122,7 @@ export class DgraphComponent implements OnInit {
             for( let idx of Object.keys(x['roots']) ){
                 this.subgraphs_pruned.push( this.docsService.getDgraphDocSub(docid, idx, true) );
                 this.subgraphs_origin.push( this.docsService.getDgraphDocSub(docid, idx, false) );
+                // this.subgraphs_origin.push( undefined );
 
                 this.panelstate_pruned.push(false);
                 this.panelstate_origin.push(false);
@@ -144,11 +145,12 @@ export class DgraphComponent implements OnInit {
     // }
 
     figurePanelState(idx:number, ftype:string, opened:boolean){
-        if(opened) console.log(idx, ftype, opened);
+        // if(opened) console.log(idx, ftype, opened);
         if(ftype == 'pruned'){
             this.panelstate_pruned[idx] = opened;
         }
         else{
+            // this.subgraphs_origin[idx] = this.docsService.getDgraphDocSub(this.docid, idx.toString(), false);
             this.panelstate_origin[idx] = opened;
         }
     }
