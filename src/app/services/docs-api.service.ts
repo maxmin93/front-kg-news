@@ -39,6 +39,11 @@ export class DocsApiService {
         return this.http.get<any>(url);
     }
 
+    getDgraphDocSimplified(docid:string): Observable<any>{
+        let url = `${this.api_url}/dgraph/${docid}/simple?labeled=True`;
+        return this.http.get<any>(url);
+    }
+
     // http://localhost:8888/api/docs/dgraph/D67113626/subgraph/28
     getDgraphDocSub(docid:string, idx:string, pruned:boolean): Observable<any>{
         let url = `${this.api_url}/dgraph/${docid}/subgraph/${idx}?pruned=${pruned}`;

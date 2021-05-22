@@ -1,7 +1,7 @@
 import { Component, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
 import { MatAccordion } from '@angular/material/expansion';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, of } from 'rxjs';
 
 import { NewsConfig } from 'src/app/app.config';
 import { NewsApiService } from '../../services/news-api.service';
@@ -25,6 +25,8 @@ export class DgraphComponent implements OnInit {
     sentences: Sentence[] = [];
 
     dgraph: any;
+    dgraph_origin: Observable<any>;
+    dgraph_simplified: Observable<any>;
     subgraphs_pruned: Observable<any>[];
     subgraphs_origin: Observable<any>[];
 
@@ -115,6 +117,8 @@ export class DgraphComponent implements OnInit {
             }
             console.log('Dgraph:', x);
             this.dgraph = x;
+            this.dgraph_origin = of(x);
+            this.dgraph_simplified = this.docsService.getDgraphDocSimplified(docid);
 
             // subgaphs
             this.subgraphs_pruned = Array<Observable<any>>();
