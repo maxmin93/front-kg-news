@@ -63,6 +63,7 @@ import { W2vCanvasComponent } from './components/w2v-browser/w2v-canvas/w2v-canv
 import { W2vDialogComponent } from './components/w2v-browser/w2v-dialog/w2v-dialog.component';
 import { Doc2vecComponent } from './components/doc2vec/doc2vec.component';
 import { DgraphComponent } from './components/dgraph/dgraph.component';
+import { N2vBrowserComponent } from './components/n2v-browser/n2v-browser.component';
 
 
 // ** if you miss "--routing" option:
@@ -100,6 +101,7 @@ import { DgraphComponent } from './components/dgraph/dgraph.component';
         W2vDialogComponent,
         Doc2vecComponent,
         DgraphComponent,
+        N2vBrowserComponent,
     ],
     imports: [
         BrowserModule,

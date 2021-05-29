@@ -6,28 +6,39 @@ import { WordsApiService } from 'src/app/services/words-api.service';
 import { UiApiService } from '../../services/ui-api.service';
 import { ColorProviderService } from '../../services/color-provider.service';
 
-import tippy from 'tippy.js';
-// declare const tippy:any;
+declare const vis:any;
 
 import { ILabel, IElement, IGraph } from '../../services/graph-models';
 
 import { MatDialog } from '@angular/material/dialog';
-import { W2vDialogComponent } from './w2v-dialog/w2v-dialog.component';
-import { W2vCanvasComponent } from './w2v-canvas/w2v-canvas.component';
+import { W2vDialogComponent } from '../w2v-browser/w2v-dialog/w2v-dialog.component';
 
 
 @Component({
-    selector: 'app-w2v-browser',
-    templateUrl: './w2v-browser.component.html',
-    styleUrls: ['./w2v-browser.component.scss']
+  selector: 'app-n2v-browser',
+  templateUrl: './n2v-browser.component.html',
+  styleUrls: ['./n2v-browser.component.scss']
 })
-export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
+export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
+
+    positives: string[] = ['이명박','박근혜'];
+    negatives: string[] = ['북한'];
+    topN: number = 50;
+    threshold: number = 0.65;
+
+    subgraphs = [
+        {name: 'subg1'},
+        {name: 'subg2'},
+        {name: 'subg3'},
+        {name: 'subg4'},
+        {name: 'subg5'},
+    ];
 
     showSearch: boolean = false;
     searchStr: string;
 
     pivot: string;
-    pivots: any;            // W2vDialog { label: [[noun, tf, df, tfidf], ..], }
+    pivots: any;            // N2vDialog { label: [[noun, tf, df, tfidf], ..], }
     words: Set<string>;     // unique synonyms 유지 (확장시 체크)
     graph: IGraph;
 
@@ -37,7 +48,6 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     handler_graph:Subscription;
 
     @ViewChild('tippy_test', {static: false}) private tippy_test: ElementRef;
-    @ViewChild('canvas', {static: false}) private graphCanvas: W2vCanvasComponent;
 
     constructor(
         private route: ActivatedRoute,
@@ -57,7 +67,11 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             if( params.has('pivot') ){
                 this.pivot = params.get('pivot');
                 console.log('pivot:', this.pivot);
-                if( this.pivot ) this.load_w2v_graph(this.pivot);
+                if( this.pivot ){
+                    this.positives = [ this.pivot ];
+                    this.negatives = [];
+                    this.load_words_graph();
+                }
             }
         });
         this.route.queryParams.subscribe(params => {
@@ -65,16 +79,12 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         });
 
         // get data
-        this.handler_pivots = this.getW2vPivots();
+        this.handler_pivots = this.getN2vPivots();
     }
 
     ngAfterViewInit(): void{
-        // tippy( this.tippy_test.nativeElement, {
-        //     content: 'My tooltip!',
-        //     theme: 'light',
-        //     placement: 'top-start',
-        //     arrow: true,
-        // });
+        this.load_words_graph();
+        this.vis_graph_exam();
     }
 
     ngOnDestroy(): void{
@@ -83,10 +93,10 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         if(this.handler_graph) this.handler_graph.unsubscribe();
     }
 
-    load_w2v_graph(pivot: string){
-        // this.handler_synonyms = this.getW2vSynonyms(pivot);
-        this.handler_graph = this.getW2vGraph(pivot);
+    load_words_graph(){
+        this.handler_graph = this.getN2vWordsGraph(this.positives, this.negatives, this.topN, this.threshold);
     }
+
 
     //////////////////////////////////////////////
     //  APIs
@@ -94,35 +104,37 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Dialog 에서 사용
     // return: { entity: [[noun, tf, df, tfidf], ..], }
-    getW2vPivots(): Subscription{
+    getN2vPivots(): Subscription{
         return this.wordsService.getStatTfidfOfEntities().subscribe(x=>{
             this.pivots = x;
         });
     }
 
+    // return: { pivot, nodes[], edges_syn[], edges_fof[] }
+    getN2vWordsGraph(positives: string[], negatives: string[]=[], topN: number=20, threshold: number=0.65): Subscription{
+        return this.wordsService.getN2vWordsGraph(positives, negatives, topN, threshold).subscribe(x=>{
+            console.log('graph data:', x);
+            this.vis_graph(x);
+
+            // this.positives = x['positives'];
+            // this.negatives = x['negatives'];
+            // this.graph = this.makeGraph(x);
+        });
+    }
+
     // 사용 안함
     // return: [ [noun, score], .. ]
-    // getW2vSynonyms(pivot: string): Subscription{
-    //     return this.wordsService.getW2vSynonyms(pivot).subscribe(x=>{
+    // getN2vSynonyms(pivot: string): Subscription{
+    //     return this.wordsService.getN2vSynonyms(pivot).subscribe(x=>{
     //         console.log('synonyms:', x);
     //         this.synonyms = x;
     //     });
     // }
+/*
 
     // return: { pivot, nodes[], edges_syn[], edges_fof[] }
-    getW2vGraph(pivot: string): Subscription{
-        let positives: string[] = [ pivot ];
-        return this.wordsService.getW2vWordsGraph(positives).subscribe(x=>{
-            this.words = new Set([pivot, ...x['nodes']]);
-            this.graph = this.makeGraph(x);
-            console.log('graph:', this.graph);
-        });
-    }
-
-    // return: { pivot, nodes[], edges_syn[], edges_fof[] }
-    getW2vGraphExtend(pivot: string): Subscription{
-        let positives: string[] = [ pivot ];
-        return this.wordsService.getW2vWordsGraph(positives).subscribe(x=>{
+    getN2vGraphExtend(pivot: string): Subscription{
+        return this.wordsService.getN2vGraph(pivot).subscribe(x=>{
             let new_nodes: Set<string> = new Set(x['nodes']);
             let diff_nodes = new Set([...new_nodes].filter(n => !this.words.has(n)));
             let diff_edges = x['edges_syn'].filter(e => diff_nodes.has(e[1]));
@@ -139,7 +151,7 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             console.log('words.extend:', diff_nodes);
         });
     }
-
+*/
     makeGraph(data: any, nodes: Map<string,IElement> = undefined): IGraph{
         let idx = -1;
         if( !nodes ){
@@ -214,7 +226,6 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         this.searchToggle(false);
 
         this.pivot = searchStr.trim();
-        this.load_w2v_graph(this.pivot);
     }
 
     receiveUserEvent(event){
@@ -223,8 +234,7 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             this.searchSubmit(event.data['name']);
         }
         else if( event._type == 'click' ){
-            this.getW2vGraphExtend(event.data['name']);
-            this.graphCanvas.extendGraph(undefined);
+            // this.getN2vGraphExtend(event.data['name']);
         }
     }
 
@@ -242,4 +252,121 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             }
         });
     }
+
+    ////////////////////////////////////////////////////
+
+    vis_graph(x: any){
+        if(!x) return;
+
+        let pivot = `${this.positives.join("+")}`;
+        if( this.negatives.length > 0 ) pivot += `\n-(${this.negatives.join(",")})`;
+
+        // id: number or string
+        let nodes_data = new vis.DataSet([{ id: 0, label: pivot, group: 0 }], {});
+        let edges_data = new vis.DataSet([], {});
+        // console.log(nodes_data.get(0));
+
+        let idMap: Map<string,number> = new Map();
+        let order = 1;
+
+        // neighbors
+        for(let nbr of x['neighbors']){
+            idMap.set(nbr[0], order);
+            nodes_data.add({ id: order, label: nbr[0], group: 1 });
+            edges_data.add({ from: 0, to: order, weight: nbr[1] });
+            order += 1;
+        }
+
+        // nbr_edges : 너무 어지럽다 (1132개)
+        // let limit = 50;
+        // for(let nbrs of x['nbr_edges']){
+        //     edges_data.add({ from: idMap.get(nbrs[0]), to: idMap.get(nbrs[1]), weight: nbrs[2] });
+        //     if((--limit) == 0) break;
+        // }
+
+        // create a network
+        let container = document.getElementById('vis-network');
+        // provide the data in the vis format
+        let data = {
+            nodes: nodes_data,
+            edges: edges_data
+        };
+        // styles
+        let options = {
+            nodes: {
+                borderWidth:1,
+                size:45,
+                font:{
+                    color:'black',
+                    size: 11,
+                    face :'arial',
+                },
+            },
+            edges: {
+                arrows: {
+                    to:     {enabled: false, scaleFactor:1},
+                    middle: {enabled: false, scaleFactor:1},
+                    from:   {enabled: false, scaleFactor:1}
+                },
+                font: {
+                    color: '#343434',
+                    size: 11, // px
+                    face: 'arial',
+                    background: 'none',
+                    strokeWidth: 5, // px
+                    strokeColor: '#ffffff',
+                    align: 'top'
+                },
+                smooth: {
+                    enabled: false,     //setting to true enables curved lines
+                    // type: "dynamic",
+                    // roundness: 0.5
+                },
+            },
+        };
+
+        // initialize your network!
+        let network = new vis.Network(container, data, options);
+        network.setOptions({
+            // physics: { enabled: false },
+            // layout: {
+            //     hierarchical: {
+            //       direction: "UD",
+            //     },
+            // },
+        });
+    }
+
+    vis_graph_exam(){
+        // create an array with nodes
+        let nodes = new vis.DataSet([
+            {id: "a1", label: 'Node 1'},
+            {id: 2, label: 'Node 2'},
+            {id: 3, label: 'Node 3'},
+            {id: 4, label: 'Node 4'},
+            {id: 0, label: 'Node 5'}
+        ]);
+
+        // create an array with edges
+        let edges = new vis.DataSet([
+            {from: "a1", to: 3},
+            {from: "a1", to: 2},
+            {from: 2, to: 4},
+            {from: 2, to: 0}
+        ]);
+
+        // create a network
+        let container = document.getElementById('vis-subg00');
+
+        // provide the data in the vis format
+        let data = {
+            nodes: nodes,
+            edges: edges
+        };
+        let options = {};
+
+        // initialize your network!
+        let network = new vis.Network(container, data, options);
+    }
+
 }

@@ -189,7 +189,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     }
 
     loadPieChart(){
-        this.wordsApi.getStatLabelsOfEntities().subscribe(data=>{
+        this.wordsApi.getStatDfOfEntityLabels().subscribe(data=>{
             let x_labels = data.map(x=>x[0]);
             let y_values = data.map(x=>x[1]);
             this.labelsSize = x_labels.length;
@@ -198,7 +198,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     }
 
     loadTable(label: string){
-        this.wordsApi.getW2vPivotsOfLabel(label).subscribe(data=>{
+        this.wordsApi.getStatTfidfOfEntity(label).subscribe(data=>{
             // console.log(data);
             this.dataSource.data = data;
             this.dataSource.paginator = this.paginator;

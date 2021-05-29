@@ -12,9 +12,10 @@ import { RegisterComponent } from './components/register/register.component';
 import { TextrankComponent } from './components/textrank/textrank.component';
 
 import { BrowserComponent } from './components/browser/browser.component';
-import { CanvasComponent } from './components/browser/canvas/canvas.component';
+// import { CanvasComponent } from './components/browser/canvas/canvas.component';
 import { W2vBrowserComponent } from './components/w2v-browser/w2v-browser.component';
-import { W2vCanvasComponent } from './components/w2v-browser/w2v-canvas/w2v-canvas.component';
+import { N2vBrowserComponent } from './components/n2v-browser/n2v-browser.component';
+// import { W2vCanvasComponent } from './components/w2v-browser/w2v-canvas/w2v-canvas.component';
 import { Doc2vecComponent } from './components/doc2vec/doc2vec.component';
 import { DgraphComponent } from './components/dgraph/dgraph.component';
 
@@ -59,6 +60,14 @@ const routes: Routes = [
   {
     path: 'w2v-browser', data :{ title: "Word Graph (word2vec)" },
     component: W2vBrowserComponent
+  },
+  {
+    path: 'n2v-browser/:pivot', data :{ title: "Word Graph (node2vec)" },
+    component: N2vBrowserComponent
+  },
+  {
+    path: 'n2v-browser', data :{ title: "Word Graph (node2vec)" },
+    component: N2vBrowserComponent
   },
   {
     path: 'docs', data :{ title: "Document List" },

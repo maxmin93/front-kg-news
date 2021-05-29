@@ -23,9 +23,13 @@
                 <mat-icon>extension</mat-icon>
                 Words
             </a>
+            <a mat-button [routerLink]="'/n2v-browser'">
+                <mat-icon>extension</mat-icon>
+                Nodes
+            </a>
         </div>
     </mat-toolbar-row>
-    <mat-toolbar-row class="candy-carousel">
+    <mat-toolbar-row class="candy-carousel" style="height: 5vh;">
         <h2 class="toolbar-title">{{ current_title }}</h2>
     </mat-toolbar-row>
 </mat-toolbar>

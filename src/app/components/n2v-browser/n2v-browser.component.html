@@ -1,0 +1,55 @@
+<!-- div id="mynetwork" class="canvas-container"></div -->
+<!-- div fxLayout="row" fxLayoutAlign="space-around center" fxLayoutGap="10px"
+        [style.margin-right]="'12px'" [style.margin-left]="'10px'">
+
+    <div id="newMain" fxFill="60">
+        <div id="mainContent">
+            <h1>Main Content</h1>
+            <button class="toggler" ng-click="sidebarOut=!sidebarOut">Toggle sidebar</button>
+        </div>
+    </div>
+    <div fxFill="40" class="sidebar md-padding">
+        <h2>Sidebar</h2>
+    </div>
+
+</div -->
+
+<mat-card class="card-demo" style="margin-bottom: 10px;">
+    <mat-card-title><a href="" target="_blank">Word Graph</a></mat-card-title>
+    <mat-card-subtitle>Using 'fxFill' to fill available width and height of parent container.</mat-card-subtitle>
+    <mat-card-content class="large" style="height: 65vh; margin: 10px; border: 2px solid black;">
+
+        <div id="vis-network" fxLayout="column" fxFill>
+        </div>
+
+    </mat-card-content>
+    <mat-card-footer class="bottomPad">
+        <div class="hint"></div>
+    </mat-card-footer>
+</mat-card>
+
+<mat-card class="card-demo">
+    <mat-card-title><a href="" target="_blank">Subgraphs</a></mat-card-title>
+    <mat-card-subtitle>Using 'fxFill' to fill available width and height of parent container.</mat-card-subtitle>
+    <mat-card-content class="large" style="height: 15vh; margin: 10px; border: 2px solid black;">
+
+        <div fxLayout="column" fxFill>
+            <div fxLayout fxFlex fxLayoutGap="2px">
+                <div id="vis-subg00" fxFlex="15" fxLayoutAlign="center center"
+                    style="border: 1px solid black; height: 96%; margin-top: 2px; margin-bottom: 2px;">
+                </div>
+
+                <div fxFlex="85" fxLayoutAlign="center center" fxLayoutGap="2px" style="padding-right: 2px;">
+                    <div *ngFor="let subg of subgraphs" fxLayout="row" fxFlex="20%" fxLayoutAlign="center center"
+                            style="border: 1px solid black; height: 96%; margin-top: 2px; margin-bottom: 2px;">
+                        Subgraph: {{ subg.name }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </mat-card-content>
+    <mat-card-footer class="bottomPad">
+        <div class="hint"></div>
+    </mat-card-footer>
+</mat-card>
