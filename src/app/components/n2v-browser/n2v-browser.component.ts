@@ -21,7 +21,7 @@ import { W2vDialogComponent } from '../w2v-browser/w2v-dialog/w2v-dialog.compone
 })
 export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
 
-    positives: string[] = ['여름','휴가'];   //,'박근혜'];
+    positives: string[] = ['박근혜'];
     negatives: string[] = [];
     topN: number = 50;
     threshold: number = 0.60;
@@ -347,46 +347,31 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
 
         // neighbors
         for(let nbr of x['neighbors']){
-            nodes_data.add({ id: order, label: nbr[0], group: 1 });     // , borderWidth: 10*nbr[1]
+            nodes_data.add({ id: order, label: nbr[0], group: 1 });     // label 있으면 size 조정 안됨
             let sg_size = this.segments.get(nbr[0]).length;
             edges_data.add({
                 from: 0, to: order, arrows: {to: {enabled: true}},
-                width: 1+2*Math.log10(sg_size),
+                width: 1+2*Math.log10(sg_size+1),       // sg 개수만큼 line 굵게 그리기
+                dashes: (sg_size>0) ? false : true,     // sg 가 하나도 없으면 dash-line
                 label: `${nbr[1].toFixed(4)}`, font: { align: "middle" }
             });
+            // console.log(`** edge[${order}]:`, nbr[0], sg_size, '==>', 1+2*Math.log10(sg_size+1));
             order += 1;
         }
 
-
-        // nbr_edges : 정보성 낮고, 너무 어지럽다 (1132개)
-        // let limit = 50;
-        // for(let nbrs of x['nbr_edges']){
-        //     edges_data.add({ from: idMap.get(nbrs[0]), to: idMap.get(nbrs[1]), weight: nbrs[2] });
-        //     if((--limit) == 0) break;
-        // }
-
         // create a network
-        let container = this.mainVisContainer.nativeElement;    // document.getElementById('vis-network');
-        // provide the data in the vis format
-        let data = {
-            nodes: nodes_data,
-            edges: edges_data
-        };
+        let container = this.mainVisContainer.nativeElement;
+        let data = { nodes: nodes_data, edges: edges_data };
         // styles
         let options = {
             nodes: {
-                font: {
-                    size: 11,
-                    face: 'arial',    // 'Monospace',
-                },
+                font: { size: 11, face: 'arial', },
             },
             edges: {
-                // width: 1,
-                // widthConstraint: { maximum: 10 },
+                // width 관련 설정하면 edge label 이 wrap 처리됨 (오류)
+                // width: 1, widthConstraint: { maximum: 10 },
                 font: { size: 11, align: "middle" },
-                arrows: {
-                    to: { type: 'arrow', scaleFactor:0.5 },
-                },
+                arrows: { to: { type: 'arrow', scaleFactor:0.5 }, },
             },
             physics: {
                 enabled: true      // true
@@ -403,13 +388,14 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         network.on("select", (params)=>{
             // target: nodes
             if(params.nodes.length > 0){
-                console.log("Selection Node:", params.nodes);
+                console.log("Selection Node:", nodes_data.get(params.nodes[0]));
                 if( params.nodes.length == 1 ){
                     if( nodes_data.get(params.nodes[0]).group == 1 ){
                         let sg_pivots: string[] = [...x['positives']];
                         sg_pivots.push(nodes_data.get(params.nodes[0]).label);
                         let sg_list = this.segments.get( nodes_data.get(params.nodes[0]).label );
                         console.log(`${sg_pivots}: sg_list=${sg_list.length}`);
+                        // subgraphs 그리기
                         this.vis_subgraphs(sg_pivots, sg_list);
                     }
                 }
@@ -427,48 +413,60 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         // clear
         this.vis_destroy_subgraphs();
 
+        // sg_list 안에 variant 들이 있고, 그것까지 모두 그린다
         let sg_idx = 0;
         for(let sg of sg_list){
-            let nodes = new vis.DataSet();
-            let edges = new vis.DataSet();
-            if(sg['sg_type'][0] == 'single'){
-                for( let i=0; i<sg['sg_nodes'][0].length; i+=1 ){
-                    nodes.add({
-                        id: i, label: sg['sg_nodes'][0][i],
-                        color: { background: (sg_pivots.includes(sg['sg_nodes'][0][i]) ? '#D2E5FF' : 'orange') }
-                    });
-                    if(i > 0){
-                        edges.add({ from: i-1, to: i });
+            for(let i=0; i<sg['sg_nodes'].length; i+=1){
+                let t_nodes = sg['sg_nodes'][i];
+                let t_edges = sg['sg_edges'][i];
+                let t_counter: Map<string,number> = new Map();
+                let nodes = new vis.DataSet();
+                for(let t of t_nodes){
+                    if( !t_counter.has(t) ){
+                        t_counter.set(t, 0);
+                        nodes.add({
+                            id: t, label: t, color: { background: (sg_pivots.includes(t) ? '#D2E5FF' : 'orange') }
+                        });
                     }
                 }
-            }
-            else{       // == joint
-                for( let i=0; i<sg['sg_nodes'][0].length; i+=1 ){
-                    nodes.add({
-                        id: i, label: sg['sg_nodes'][0][i],
-                        color: { background: (sg_pivots.includes(sg['sg_nodes'][0][i]) ? '#D2E5FF' : 'orange') }
-                    });
-                    if(i < sg['sg_nodes'][0].length-1){
-                        edges.add({ from: i, to: sg['sg_nodes'][0].length-1 });
+                let edges = new vis.DataSet();
+                for(let t of t_edges){
+                    let t_splited = t.split(',')
+                    if( t_splited.length == 2 ){
+                        // t_counter.set(t_splited[0],  t_counter.get(t_splited[0])+1);
+                        t_counter.set(t_splited[1],  t_counter.get(t_splited[1])+1);
+                        edges.add({ from: t_splited[0], to: t_splited[1] });
                     }
                 }
-            }
-            // create a network
-            let container = this.subVisContainers.nativeElement.children[sg_idx];
-            let options = {
-                edges: {
-                    arrows: { to: {enabled: true, type: 'arrow', scaleFactor: 0.5} },
-                },
-                // layout: {
-                //     hierarchical: { direction: "UD", },
-                // },
-            };
-            this.subGraphs[sg_idx] = new vis.Network(container, {nodes: nodes, edges: edges}, options);
-            // this.subGraphs[sg_idx].redraw();
+                let max_count = Math.max(...t_counter.values());
+                let root = [...t_counter.keys()][t_counter.size-1];     // sg_type='single'
+                if( max_count > 1 ){                                    // sg_type='joint'
+                    t_counter.forEach((value, key) => {
+                        if (value === max_count) root = key;
+                    });
+                }
+                // console.log('** root:', root, '<== nodes=', t_nodes, ', edges=', t_edges);
+                nodes.get(root)['borderWidth'] = 2;     // root 노드 강조!
 
-            // next
-            sg_idx += 1;
-            if( sg_idx > this.sizeOfSubGraphs ) break;
+                //////////////////////////////
+
+                // create a network
+                let container = this.subVisContainers.nativeElement.children[sg_idx];
+                let options = {
+                    edges: {
+                        arrows: { to: {enabled: true, type: 'arrow', scaleFactor: 0.5} },
+                    },
+                    layout: {
+                        randomSeed: root,
+                    }
+                };
+                this.subGraphs[sg_idx] = new vis.Network(container, {nodes: nodes, edges: edges}, options);
+
+                // next
+                sg_idx += 1;
+                if( sg_idx >= this.sizeOfSubGraphs ) break;
+            }
+            if( sg_idx >= this.sizeOfSubGraphs ) break;
         }
     }
 

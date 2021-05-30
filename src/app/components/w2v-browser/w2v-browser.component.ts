@@ -6,44 +6,47 @@ import { WordsApiService } from 'src/app/services/words-api.service';
 import { UiApiService } from '../../services/ui-api.service';
 import { ColorProviderService } from '../../services/color-provider.service';
 
-import tippy from 'tippy.js';
-// declare const tippy:any;
+declare const vis:any;
 
 import { ILabel, IElement, IGraph } from '../../services/graph-models';
 
 import { MatDialog } from '@angular/material/dialog';
-import { W2vDialogComponent } from './w2v-dialog/w2v-dialog.component';
-import { W2vCanvasComponent } from './w2v-canvas/w2v-canvas.component';
+import { W2vDialogComponent } from '../w2v-browser/w2v-dialog/w2v-dialog.component';
 
 
 @Component({
-    selector: 'app-w2v-browser',
-    templateUrl: './w2v-browser.component.html',
-    styleUrls: ['./w2v-browser.component.scss']
+  selector: 'app-w2v-browser',
+  templateUrl: './w2v-browser.component.html',
+  styleUrls: ['./w2v-browser.component.scss']
 })
 export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
 
-    showSearch: boolean = false;
-    searchStr: string;
+    positives: string[] = ['박근혜'];
+    negatives: string[] = [];
+    topN: number = 50;
+    threshold: number = 0.60;
+    sizeOfSubGraphs: number = 5;
+
+    mainGraph: any;
+    subGraphs: any[] = new Array(this.sizeOfSubGraphs);
+    segments: Map<string,any>;
+
+    @ViewChild('mainVisContainer', {static: false}) private mainVisContainer: ElementRef;
+    @ViewChild('subVisContainers', {static: false}) private subVisContainers: ElementRef;
 
     pivot: string;
-    pivots: any;            // W2vDialog { label: [[noun, tf, df, tfidf], ..], }
-    words: Set<string>;     // unique synonyms 유지 (확장시 체크)
-    graph: IGraph;
+    pivots: any;            // N2vDialog { label: [[noun, tf, df, tfidf], ..], }
 
     debug: boolean = false;
     handler_pivots:Subscription;
-    // handler_synonyms:Subscription;   // 사용 안함
     handler_graph:Subscription;
 
     @ViewChild('tippy_test', {static: false}) private tippy_test: ElementRef;
-    @ViewChild('canvas', {static: false}) private graphCanvas: W2vCanvasComponent;
 
     constructor(
         private route: ActivatedRoute,
         private uiService: UiApiService,
         private wordsService: WordsApiService,
-        private colorService: ColorProviderService,
         public pivotsDialog: MatDialog
     ) { }
 
@@ -57,7 +60,11 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             if( params.has('pivot') ){
                 this.pivot = params.get('pivot');
                 console.log('pivot:', this.pivot);
-                if( this.pivot ) this.load_w2v_graph(this.pivot);
+                if( this.pivot ){
+                    this.positives = [ this.pivot ];
+                    this.negatives = [];
+                    this.load_words_graph();
+                }
             }
         });
         this.route.queryParams.subscribe(params => {
@@ -65,28 +72,38 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         });
 
         // get data
-        this.handler_pivots = this.getW2vPivots();
+        this.handler_pivots = this.getN2vPivots();
     }
 
     ngAfterViewInit(): void{
-        // tippy( this.tippy_test.nativeElement, {
-        //     content: 'My tooltip!',
-        //     theme: 'light',
-        //     placement: 'top-start',
-        //     arrow: true,
-        // });
+        this.load_words_graph();
     }
 
     ngOnDestroy(): void{
         if(this.handler_pivots) this.handler_pivots.unsubscribe();
-        // if(this.handler_synonyms) this.handler_synonyms.unsubscribe();
         if(this.handler_graph) this.handler_graph.unsubscribe();
+
+        // destory VisNetwork objects
+        if( this.mainGraph !== null ){
+            this.mainGraph.destroy();
+            this.mainGraph = null;
+        }
+        this.vis_destroy_subgraphs();
     }
 
-    load_w2v_graph(pivot: string){
-        // this.handler_synonyms = this.getW2vSynonyms(pivot);
-        this.handler_graph = this.getW2vGraph(pivot);
+    vis_destroy_subgraphs(){
+        for(let sg_idx=0; sg_idx<this.sizeOfSubGraphs; sg_idx+=1){
+            if( this.subGraphs[sg_idx] ){
+                this.subGraphs[sg_idx].destroy();
+                this.subGraphs[sg_idx] = undefined;
+            }
+        }
     }
+
+    load_words_graph(){
+        this.handler_graph = this.getW2vWordsGraph(this.positives, this.negatives, this.topN, this.threshold);
+    }
+
 
     //////////////////////////////////////////////
     //  APIs
@@ -94,139 +111,29 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Dialog 에서 사용
     // return: { entity: [[noun, tf, df, tfidf], ..], }
-    getW2vPivots(): Subscription{
+    getN2vPivots(): Subscription{
         return this.wordsService.getStatTfidfOfEntities().subscribe(x=>{
             this.pivots = x;
         });
     }
 
-    // 사용 안함
-    // return: [ [noun, score], .. ]
-    // getW2vSynonyms(pivot: string): Subscription{
-    //     return this.wordsService.getW2vSynonyms(pivot).subscribe(x=>{
-    //         console.log('synonyms:', x);
-    //         this.synonyms = x;
-    //     });
-    // }
-
     // return: { pivot, nodes[], edges_syn[], edges_fof[] }
-    getW2vGraph(pivot: string): Subscription{
-        let positives: string[] = [ pivot ];
-        return this.wordsService.getW2vWordsGraph(positives).subscribe(x=>{
-            this.words = new Set([pivot, ...x['nodes']]);
-            this.graph = this.makeGraph(x);
-            console.log('graph:', this.graph);
+    getW2vWordsGraph(positives: string[], negatives: string[]=[], topN: number=20, threshold: number=0.65): Subscription{
+        return this.wordsService.getW2vWordsGraph(positives, negatives, topN, threshold).subscribe(x=>{
+            console.log('graph data:', x);
+            this.mainGraph = this.vis_graph(x);
+
+            // this.positives = x['positives'];
+            // this.negatives = x['negatives'];
+            // this.graph = this.makeGraph(x);
         });
     }
 
-    // return: { pivot, nodes[], edges_syn[], edges_fof[] }
-    getW2vGraphExtend(pivot: string): Subscription{
-        let positives: string[] = [ pivot ];
-        return this.wordsService.getW2vWordsGraph(positives).subscribe(x=>{
-            let new_nodes: Set<string> = new Set(x['nodes']);
-            let diff_nodes = new Set([...new_nodes].filter(n => !this.words.has(n)));
-            let diff_edges = x['edges_syn'].filter(e => diff_nodes.has(e[1]));
-            let diff_graph = {
-                pivot: pivot,
-                nodes: [...diff_nodes],
-                edges_syn: diff_edges
-            }
-
-            let ext_graph: IGraph = this.makeGraph(diff_graph);
-            console.log('graph.extend:', ext_graph);
-            // let pivots = new Set([pivot]);
-            this.words = new Set([...this.words, ...diff_nodes]);     // union
-            console.log('words.extend:', diff_nodes);
-        });
-    }
-
-    makeGraph(data: any, nodes: Map<string,IElement> = undefined): IGraph{
-        let idx = -1;
-        if( !nodes ){
-            nodes = new Map();
-            nodes.set( data.pivot, this.createElement('nodes', ++idx, data.pivot) );
-        }
-        else{
-
-        }
-
-        for(let e of data.nodes){
-            nodes.set( e, this.createElement('nodes', ++idx, e) );
-        }
-        // console.log('nodes =', nodes.values());
-
-        let edges: IElement[] = [];
-        let rnk = -1;
-        for(let e of data.edges_syn){
-            edges.push(
-                this.createElement('edges', ++rnk, e[0]+'_'+e[1], {score: e[2], rank: rnk, relation: 'syn'},
-                    nodes.get(e[0]), nodes.get(e[1]))
-            );
-        }
-        // ** FOF 의 edge 가 중복되어 일단 주석처리
-        //    그리고, 당장은 의미 없는 관계
-        // for(let e of data.edges_fof){
-        //     edges.push(
-        //         this.createElement('edges', ++rnk, e[0]+'_'+e[1], {score: e[2], rank: rnk, relation: 'fof'},
-        //             nodes.get(e[0]), nodes.get(e[1]))
-        //     );
-        // }
-        // console.log('edges =', edges);
-
-        return <IGraph>{
-            datasource: data.pivot,
-            nodes: [...nodes.values()],     // convert iterable to array
-            edges: edges
-        };
-    }
-
-    createElement(group: string, index: number, name: string, properties: any = {}
-        , source: IElement = undefined, target: IElement = undefined
-    ): IElement{
-        return <IElement> {
-            group: group,
-            data: {
-                id: (group == 'nodes' ? 'n' : 'e')+index,
-                name: name,
-                properties: properties,
-                source: group == 'nodes' ? undefined : source.data.id,
-                target: group == 'nodes' ? undefined : target.data.id
-            },
-            scratch: {
-                _index: index,
-                _color: group == 'nodes' ?
-                        [this.colorService.next(), undefined] :
-                        [source.scratch._color[0], target.scratch._color[0]],
-                _source: group == 'nodes' ? undefined : source,
-                _target: group == 'nodes' ? undefined : target
-            }
-        };
-    }
 
     //////////////////////////////////////////////
+    //  TFIDF Dialog
+    //
 
-    searchToggle(value:boolean){
-        this.showSearch = value;
-    }
-
-    searchSubmit(searchStr: string){
-        console.log('searchStr:', searchStr);
-        this.searchToggle(false);
-
-        this.pivot = searchStr.trim();
-        this.load_w2v_graph(this.pivot);
-    }
-
-    receiveUserEvent(event){
-        console.log('userEvent:', event);
-        if( event._type == 'dbl-click' ){
-            this.searchSubmit(event.data['name']);
-        }
-        else if( event._type == 'click' ){
-            this.getW2vGraphExtend(event.data['name']);
-            this.graphCanvas.extendGraph(undefined);
-        }
-    }
 
     openDialog() {
         const dialogRef = this.pivotsDialog.open(W2vDialogComponent, {
@@ -237,9 +144,154 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
 
         dialogRef.afterClosed().subscribe(result => {
             if( result ){
-                this.searchStr = result.noun;
-                this.searchSubmit(this.searchStr);
+                // this.searchStr = result.noun;
+                // this.searchSubmit(this.searchStr);
             }
         });
     }
+
+
+    ////////////////////////////////////////////////////
+    //  Vis-Network
+    //
+
+    vis_graph(x: any){
+        if(!x) return;
+
+        let pivot = `${this.positives.join("+")}`;
+        if( this.negatives.length > 0 ) pivot += `\n-(${this.negatives.join(",")})`;
+
+        // id: number or string
+        let nodes_data = new vis.DataSet([{ id: 0, label: pivot, group: 0, shape: "box" }], {});
+        let edges_data = new vis.DataSet([], {});
+        // console.log(nodes_data.get(0));
+
+        this.segments = new Map(Object.entries(x['segments']));
+        let order = 1;
+
+        // neighbors
+        for(let nbr of x['neighbors']){
+            nodes_data.add({ id: order, label: nbr[0], group: 1 });     // label 있으면 size 조정 안됨
+            let sg_size = this.segments.get(nbr[0]).length;
+            edges_data.add({
+                from: 0, to: order, arrows: {to: {enabled: true}},
+                width: 1+2*Math.log10(sg_size+1),       // sg 개수만큼 line 굵게 그리기
+                dashes: (sg_size>0) ? false : true,     // sg 가 하나도 없으면 dash-line
+                label: `${nbr[1].toFixed(4)}`, font: { align: "middle" }
+            });
+            // console.log(`** edge[${order}]:`, nbr[0], sg_size, '==>', 1+2*Math.log10(sg_size+1));
+            order += 1;
+        }
+
+        // create a network
+        let container = this.mainVisContainer.nativeElement;
+        let data = { nodes: nodes_data, edges: edges_data };
+        // styles
+        let options = {
+            nodes: {
+                font: { size: 11, face: 'arial', },
+            },
+            edges: {
+                // width 관련 설정하면 edge label 이 wrap 처리됨 (오류)
+                // width: 1, widthConstraint: { maximum: 10 },
+                font: { size: 11, align: "middle" },
+                arrows: { to: { type: 'arrow', scaleFactor:0.5 }, },
+            },
+            physics: {
+                enabled: true      // true
+            },
+            layout: {
+                randomSeed: 0,
+            }
+        };
+
+        // initialize your network!
+        let network = new vis.Network(container, data, options);
+
+        // add event listeners
+        network.on("select", (params)=>{
+            // target: nodes
+            if(params.nodes.length > 0){
+                console.log("Selection Node:", nodes_data.get(params.nodes[0]));
+                if( params.nodes.length == 1 ){
+                    if( nodes_data.get(params.nodes[0]).group == 1 ){
+                        let sg_pivots: string[] = [...x['positives']];
+                        sg_pivots.push(nodes_data.get(params.nodes[0]).label);
+                        let sg_list = this.segments.get( nodes_data.get(params.nodes[0]).label );
+                        console.log(`${sg_pivots}: sg_list=${sg_list.length}`);
+                        // subgraphs 그리기
+                        this.vis_subgraphs(sg_pivots, sg_list);
+                    }
+                }
+            }
+            // target: edges
+            else if(params.edges.length == 1){
+                console.log("Selection Edge:", params.edges[0], edges_data.get(params.edges[0]));
+            }
+        });
+
+        return network;
+    }
+
+    vis_subgraphs(sg_pivots: string[], sg_list:any[]){
+        // clear
+        this.vis_destroy_subgraphs();
+
+        // sg_list 안에 variant 들이 있고, 그것까지 모두 그린다
+        let sg_idx = 0;
+        for(let sg of sg_list){
+            for(let i=0; i<sg['sg_nodes'].length; i+=1){
+                let t_nodes = sg['sg_nodes'][i];
+                let t_edges = sg['sg_edges'][i];
+                let t_counter: Map<string,number> = new Map();
+                let nodes = new vis.DataSet();
+                for(let t of t_nodes){
+                    if( !t_counter.has(t) ){
+                        t_counter.set(t, 0);
+                        nodes.add({
+                            id: t, label: t, color: { background: (sg_pivots.includes(t) ? '#D2E5FF' : 'orange') }
+                        });
+                    }
+                }
+                let edges = new vis.DataSet();
+                for(let t of t_edges){
+                    let t_splited = t.split(',')
+                    if( t_splited.length == 2 ){
+                        // t_counter.set(t_splited[0],  t_counter.get(t_splited[0])+1);
+                        t_counter.set(t_splited[1],  t_counter.get(t_splited[1])+1);
+                        edges.add({ from: t_splited[0], to: t_splited[1] });
+                    }
+                }
+                let max_count = Math.max(...t_counter.values());
+                let root = [...t_counter.keys()][t_counter.size-1];     // sg_type='single'
+                if( max_count > 1 ){                                    // sg_type='joint'
+                    t_counter.forEach((value, key) => {
+                        if (value === max_count) root = key;
+                    });
+                }
+                // console.log('** root:', root, '<== nodes=', t_nodes, ', edges=', t_edges);
+                nodes.get(root)['borderWidth'] = 2;     // root 노드 강조!
+
+                //////////////////////////////
+
+                // create a network
+                let container = this.subVisContainers.nativeElement.children[sg_idx];
+                let options = {
+                    edges: {
+                        arrows: { to: {enabled: true, type: 'arrow', scaleFactor: 0.5} },
+                    },
+                    layout: {
+                        randomSeed: root,
+                    }
+                };
+                this.subGraphs[sg_idx] = new vis.Network(container, {nodes: nodes, edges: edges}, options);
+
+                // next
+                sg_idx += 1;
+                if( sg_idx >= this.sizeOfSubGraphs ) break;
+            }
+            if( sg_idx >= this.sizeOfSubGraphs ) break;
+        }
+    }
+
 }

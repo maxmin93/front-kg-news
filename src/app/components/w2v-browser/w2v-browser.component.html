@@ -1,63 +1,47 @@
-<!-- div ng-app="searchBarApp">
-  <div ng-controller="searchCtrl as ctrl">
-    <mat-toolbar>
-      <div id="search-bar" ng-show="ctrl.showPreSearchBar()" class="md-toolbar-tools">
+<mat-card class="card-demo" style="margin-bottom: 10px;">
+    <mat-card-title><a href="" target="_blank">Word Graph</a></mat-card-title>
+    <mat-card-subtitle>Using 'fxFill' to fill available width and height of parent container.</mat-card-subtitle>
+    <mat-card-content class="large" style="height: 65vh; margin: 10px; border: 2px solid black;">
 
-        <h2>Search Bar App</h2>
-        <span flex></span>
-
-        <mat-button ng-click="ctrl.initiateSearch()">
-          <mat-icon>search</md-icon>
-          <span>Search</span>
-        </mat-button>
-
-      </div>
-
-      <div ng-show="ctrl.showSearchBar()" class="md-toolbar-tools search-bar">
-
-        <md-button class="md-icon-button" ng-click="ctrl.submit()">
-          <md-icon>search</md-icon>
-        </md-button>
-
-        <md-input-container flex>
-          <input id="search-input" type="text" ng-model="search" />
-        </md-input-container>
-
-        <md-button class="md-icon-button" ng-click="ctrl.endSearch()">
-          <md-icon>close</md-icon>
-        </md-button>
-      </div>
-
-    </md-toolbar>
-  </div>
-</div -->
-
-<div fxLayout="column" fxLayoutAlign="space-around center" fxLayoutGap="10px">
-    <mat-toolbar fxLayout="row" fxLayoutAlign="space-around center" color="accent" style="margin-bottom: 3px;">
-        <div *ngIf="!showSearch" style="width: 100%; margin-left: 40px; margin-right: 40px;">
-            <button mat-stroked-button (click)="openDialog()">Open dialog</button>
-            <span>&nbsp;  &nbsp;  &nbsp;</span>
-            <h2 style="padding-right: 20px">search : &nbsp; &nbsp; {{ pivot }}</h2>
-            <span fxFlex></span>
-            <button mat-button (click)="searchToggle(true)" >
-                <mat-icon>search</mat-icon>
-                <span>Search</span>
-            </button>
+        <div #mainVisContainer fxLayout="column" fxFill>
         </div>
-        <div *ngIf="showSearch" style="width: 100%; margin-left: 60px; margin-right: 60px;">
-            <button mat-button class="md-icon-button" (click)="searchSubmit(searchStr)">
-                <mat-icon>search</mat-icon>
-            </button>
-            <mat-form-field fxFlex>
-                <input matInput id="search-input" type="text" [(ngModel)]="searchStr" />
-            </mat-form-field>
-            <button mat-icon-button (click)="searchToggle(false)" style="top: 20px">
-                <mat-icon>close</mat-icon>
-            </button>
-        </div>
-    </mat-toolbar>
 
-    <app-w2v-canvas #canvas class="canvas-container"
-        *ngIf="graph" [graph]="graph" (userEvent)="receiveUserEvent($event)"
-    ></app-w2v-canvas>
-</div>
+    </mat-card-content>
+    <mat-card-footer class="bottomPad">
+        <div class="hint"></div>
+    </mat-card-footer>
+</mat-card>
+
+<mat-card class="card-demo">
+    <mat-card-title><a href="" target="_blank">Subgraphs</a></mat-card-title>
+    <mat-card-subtitle>Using 'fxFill' to fill available width and height of parent container.</mat-card-subtitle>
+    <mat-card-content class="large" style="height: 20vh; margin: 10px; border: 2px solid black;">
+
+        <div fxLayout="column" fxFill>
+            <div #subVisContainers fxFlex fxLayoutGap="2px" fxFlex="100" fxLayoutAlign="center center">
+                <!-- div *ngFor="let subg of subGraphs" fxLayout="row" fxFlex="20%" fxLayoutAlign="center center"
+                        style="border: 1px solid black; height: 96%; margin-top: 2px; margin-bottom: 2px;">
+                </div -->
+                <div id="subVisContainer0" fxLayout="row" fxFlex="20%" fxLayoutAlign="center center"
+                        style="border: 1px solid black; height: 96%; margin-top: 2px; margin-bottom: 2px;">
+                </div>
+                <div id="subVisContainer1" fxLayout="row" fxFlex="20%" fxLayoutAlign="center center"
+                        style="border: 1px solid black; height: 96%; margin-top: 2px; margin-bottom: 2px;">
+                </div>
+                <div id="subVisContainer2" fxLayout="row" fxFlex="20%" fxLayoutAlign="center center"
+                        style="border: 1px solid black; height: 96%; margin-top: 2px; margin-bottom: 2px;">
+                </div>
+                <div id="subVisContainer3" fxLayout="row" fxFlex="20%" fxLayoutAlign="center center"
+                        style="border: 1px solid black; height: 96%; margin-top: 2px; margin-bottom: 2px;">
+                </div>
+                <div id="subVisContainer4" fxLayout="row" fxFlex="20%" fxLayoutAlign="center center"
+                        style="border: 1px solid black; height: 96%; margin-top: 2px; margin-bottom: 2px;">
+                </div>
+            </div>
+        </div>
+
+    </mat-card-content>
+    <mat-card-footer class="bottomPad">
+        <div class="hint"></div>
+    </mat-card-footer>
+</mat-card>

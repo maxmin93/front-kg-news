@@ -1,8 +1,3 @@
-.search-bar { background-color: #222; }
-.search-bar * { color: white !important; }
-.search-bar input { border-bottom-color: white; }
-.md-errors-spacer { display:none; }
-
 .canvas-container {
     width: 98vw;
     height: 76vh;
@@ -19,3 +14,59 @@
 .menu-spacer {
     flex: 1 1 auto;
 }
+
+//////////////////////////////////////
+
+.cardList {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Row Gap */
+.cardList > *:not(:last-child) {
+margin-bottom: 32px;
+}
+
+.card-subgraph {
+    display: block;
+    margin: 2px;
+    border: 1px solid red;
+    border-radius: 8px;
+}
+
+//////////////////////////////////////
+
+.wrapper {
+    background: pink;
+    overflow: hidden;
+}
+#newMain {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+#mainContent {
+  position: absolute;
+  z-index: 1;
+}
+.sidebar,
+.main {
+    height: 100vh;
+}
+.main {
+    background: #fff;
+    transition: all .5s;
+    transform-origin: 0 0;
+}
+.sidebar-out .main {
+    transform: scaleX(1.7)
+}
+
+.sidebar {
+    background: #ddd;
+    transition: all .5s;
+}
+.sidebar-out .sidebar {
+    transform: translateX(40vw)
+}
+
