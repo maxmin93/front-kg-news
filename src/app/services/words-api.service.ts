@@ -101,7 +101,7 @@ export class WordsApiService {
         return this.http.get<any[]>(url);
     }
 
-    getN2vWordsGraph(positives: string[], negatives: string[]=[], topN: number=20, threshold: number=0.65): Observable<any[]>{
+    getN2vWordsGraph(positives: string[], negatives: string[]=[], topN: number=20, threshold: number=0.60): Observable<any[]>{
         if( positives.length == 0 ) return EMPTY;
         let params = 'p=' + positives.map(x=>encodeURIComponent(x)).join('&p=')
         if( negatives.length > 0 ){
