@@ -76,7 +76,7 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit(): void{
-        this.load_words_graph();
+        // this.load_words_graph();
     }
 
     ngOnDestroy(): void{
@@ -101,6 +101,13 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     load_words_graph(){
+        // destory VisNetwork objects
+        if( this.mainGraph !== undefined ){
+            this.mainGraph.destroy();
+            this.mainGraph = undefined;
+            this.vis_destroy_subgraphs();
+        }
+
         this.handler_graph = this.getW2vWordsGraph(this.positives, this.negatives, this.topN, this.threshold);
     }
 
@@ -229,10 +236,72 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
                 console.log("Selection Edge:", params.edges[0], edges_data.get(params.edges[0]));
             }
         });
+        // event: doubleClick
+        network.on("doubleClick", (params)=>{
+            if( params.nodes.length > 0 ){
+                console.log("doubleClick:", nodes_data.get(params.nodes[0]));
+                this.pivot = nodes_data.get(params.nodes[0]).label;
+                this.positives = [ this.pivot ];
+                this.negatives = [];
+                this.load_words_graph();
+            }
+        });
 
         return network;
     }
 
+    vis_subgraphs(sg_pivots: string[], sg_list:any[]){
+        // clear
+        this.vis_destroy_subgraphs();
+
+        let sg_idx = 0;
+        for(let sg of sg_list){
+            let nodes = new vis.DataSet();
+            let edges = new vis.DataSet();
+
+            for( let i=0; i<sg['sg_nodes'].length; i+=1 ){
+                let token = sg['sg_nodes'][i];
+                nodes.add({
+                    id: i,
+                    label: token + (sg['sg_entities'][i] ? `\n<${sg['sg_entities'][i].toLowerCase()}>` : ''),
+                    color: { background: (sg_pivots.includes(token) ? '#D2E5FF' : 'orange') }
+                });
+                if(sg['sg_type'] == 'chain'){
+                    if(i > 0){
+                        edges.add({ from: i-1, to: i });
+                    }
+                }
+                else{
+                    if(i < sg['sg_nodes'].length-1){
+                        edges.add({ from: i, to: sg['sg_nodes'].length-1 });
+                    }
+                }
+            }
+            let root = sg['sg_nodes'].length - 1;
+            nodes.get(root)['borderWidth'] = 2;     // root 노드 강조!
+
+            // create a network
+            let container = this.subVisContainers.nativeElement.children[sg_idx];
+            let options = {
+                edges: {
+                    arrows: { to: {enabled: true, type: 'arrow', scaleFactor: 0.5} },
+                },
+                layout: {
+                    randomSeed: root,
+                }
+            };
+            this.subGraphs[sg_idx] = new vis.Network(container, {nodes: nodes, edges: edges}, options);
+            // this.subGraphs[sg_idx].redraw();
+
+            // next
+            sg_idx += 1;
+            if( sg_idx > this.sizeOfSubGraphs ) break;
+        }
+    }
+
+}
+
+/*
     vis_subgraphs(sg_pivots: string[], sg_list:any[]){
         // clear
         this.vis_destroy_subgraphs();
@@ -243,16 +312,25 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             for(let i=0; i<sg['sg_nodes'].length; i+=1){
                 let t_nodes = sg['sg_nodes'][i];
                 let t_edges = sg['sg_edges'][i];
+                let t_labels = sg['entities'][i];
                 let t_counter: Map<string,number> = new Map();
+
+                // nodes data
                 let nodes = new vis.DataSet();
+                let e_idx = 0;
                 for(let t of t_nodes){
                     if( !t_counter.has(t) ){
                         t_counter.set(t, 0);
                         nodes.add({
-                            id: t, label: t, color: { background: (sg_pivots.includes(t) ? '#D2E5FF' : 'orange') }
+                            id: t,
+                            label: t + (t_labels[e_idx] ? `\n<${t_labels[e_idx].toLowerCase()}>` : ''),
+                            color: { background: (sg_pivots.includes(t) ? '#D2E5FF' : 'orange') }
                         });
                     }
+                    e_idx += 1;
                 }
+
+                // edges data
                 let edges = new vis.DataSet();
                 for(let t of t_edges){
                     let t_splited = t.split(',')
@@ -293,5 +371,5 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             if( sg_idx >= this.sizeOfSubGraphs ) break;
         }
     }
+*/
 
-}

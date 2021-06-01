@@ -1,4 +1,5 @@
 import { Component, ViewChild, ElementRef, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 
@@ -34,25 +35,17 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('mainVisContainer', {static: false}) private mainVisContainer: ElementRef;
     @ViewChild('subVisContainers', {static: false}) private subVisContainers: ElementRef;
 
-    subgraphs = [
-        {name: 'subg1'},
-        {name: 'subg2'},
-        {name: 'subg3'},
-        {name: 'subg4'},
-        {name: 'subg5'},
-    ];
-
-    showSearch: boolean = false;
-    searchStr: string;
+    formWords = new FormGroup({
+        positives: new FormControl('', Validators.pattern('([^,\s]+)')),
+        negatives: new FormControl('', Validators.pattern('([^,\s]+)')),
+    });
 
     pivot: string;
     pivots: any;            // N2vDialog { label: [[noun, tf, df, tfidf], ..], }
     words: Set<string>;     // unique synonyms 유지 (확장시 체크)
-    graph: IGraph;
 
     debug: boolean = false;
     handler_pivots:Subscription;
-    // handler_synonyms:Subscription;   // 사용 안함
     handler_graph:Subscription;
 
     @ViewChild('tippy_test', {static: false}) private tippy_test: ElementRef;
@@ -61,7 +54,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         private route: ActivatedRoute,
         private uiService: UiApiService,
         private wordsService: WordsApiService,
-        private colorService: ColorProviderService,
+        // private colorService: ColorProviderService,
         public pivotsDialog: MatDialog
     ) { }
 
@@ -91,7 +84,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit(): void{
-        this.load_words_graph();
+        // this.load_words_graph();
     }
 
     ngOnDestroy(): void{
@@ -117,7 +110,24 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     load_words_graph(){
-        this.handler_graph = this.getN2vWordsGraph(this.positives, this.negatives, this.topN, this.threshold);
+        // destory VisNetwork objects
+        if( this.mainGraph !== undefined ){
+            this.mainGraph.destroy();
+            this.mainGraph = undefined;
+            this.vis_destroy_subgraphs();
+        }
+        if( this.positives.length > 0 ){
+            this.handler_graph = this.getN2vWordsGraph(this.positives, this.negatives, this.topN, this.threshold);
+        }
+    }
+
+    onSubmit(){
+        console.log(`submit: positives="${this.formWords.get('positives').value}", negatives="${this.formWords.get('negatives').value}"`);
+        if( this.formWords.get('positives').value.length > 0 ){
+            this.positives = this.formWords.get('positives').value.split(' ');
+            this.negatives = this.formWords.get('negatives').value.split(' ');
+            this.load_words_graph();
+        }
     }
 
 
@@ -150,27 +160,6 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     //  TFIDF Dialog
     //
 
-    searchToggle(value:boolean){
-        this.showSearch = value;
-    }
-
-    searchSubmit(searchStr: string){
-        console.log('searchStr:', searchStr);
-        this.searchToggle(false);
-
-        this.pivot = searchStr.trim();
-    }
-
-    receiveUserEvent(event){
-        console.log('userEvent:', event);
-        if( event._type == 'dbl-click' ){
-            this.searchSubmit(event.data['name']);
-        }
-        else if( event._type == 'click' ){
-            // this.getN2vGraphExtend(event.data['name']);
-        }
-    }
-
     openDialog() {
         const dialogRef = this.pivotsDialog.open(W2vDialogComponent, {
             width : '800px',
@@ -180,156 +169,14 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
 
         dialogRef.afterClosed().subscribe(result => {
             if( result ){
-                this.searchStr = result.noun;
-                this.searchSubmit(this.searchStr);
+                // this.searchStr = result.noun;
+                // this.searchSubmit(this.searchStr);
             }
         });
     }
+
 
     ////////////////////////////////////////////////////
-
-/*
-    vis_graph(x: any){
-        if(!x) return;
-
-        let pivot = `${this.positives.join("+")}`;
-        if( this.negatives.length > 0 ) pivot += `\n-(${this.negatives.join(",")})`;
-
-        // id: number or string
-        let nodes_data = new vis.DataSet([{ id: 0, label: pivot, group: 0, shape: "box" }], {});
-        let edges_data = new vis.DataSet([], {});
-        // console.log(nodes_data.get(0));
-
-        let segments = x['segments'];
-        let sgMap: Map<string,any> = new Map();
-        let order = 1;
-
-        // neighbors
-        for(let nbr of x['neighbors']){
-            nodes_data.add({ id: order, label: nbr[0], group: 1, borderWidth: nbr[1] });
-            if( segments.hasOwnProperty(nbr[0]) ){
-                for(let sg of segments[ nbr[0] ]){
-                    let _id = nbr[0]+'_'+sg['id'];      // can be duplicated!
-                    sgMap.set(_id, sg);
-                    nodes_data.add({ id: _id, label: sg['name'], group: 2 });
-                    edges_data.add({ from: order, to: _id, weight: sg['size'] });
-                }
-            }
-            edges_data.add({ from: 0, to: order, arrows: {to: {enabled: true}} });
-            order += 1;
-        }
-
-
-        // nbr_edges : 정보성 낮고, 너무 어지럽다 (1132개)
-        // let limit = 50;
-        // for(let nbrs of x['nbr_edges']){
-        //     edges_data.add({ from: idMap.get(nbrs[0]), to: idMap.get(nbrs[1]), weight: nbrs[2] });
-        //     if((--limit) == 0) break;
-        // }
-
-        // create a network
-        let container = this.mainVisContainer.nativeElement;    // document.getElementById('vis-network');
-        // provide the data in the vis format
-        let data = {
-            nodes: nodes_data,
-            edges: edges_data
-        };
-        // styles
-        let options = {
-            nodes: {
-                borderWidth:1,
-                size:45,
-                font:{
-                    color:'black',
-                    size: 11,
-                    face :'arial',
-                },
-            },
-            edges: {
-                arrows: {
-                    to:     {enabled: false, type: 'arrow', scaleFactor:0.5},
-                    from:   {enabled: false, scaleFactor:1}
-                },
-                font: {
-                    color: '#343434',
-                    size: 11, // px
-                    face: 'arial',
-                    background: 'none',
-                    strokeWidth: 5, // px
-                    strokeColor: '#ffffff',
-                    align: 'top'
-                },
-                smooth: {
-                    enabled: false,     //setting to true enables curved lines
-                    // type: "dynamic",
-                    // roundness: 0.5
-                },
-            },
-        };
-
-        // initialize your network!
-        let network = new vis.Network(container, data, options);
-        network.setOptions({
-            physics: { enabled: true },
-            layout: {
-                randomSeed: 0,
-            }
-        });
-
-        // add event listeners
-        network.on("select", (params)=>{
-            if(params.nodes.length > 0) console.log("Selection:", params.nodes);
-            if( params.nodes.length == 1 ){
-                if( nodes_data.get(params.nodes[0]).group == 2 ){
-                    let sg = sgMap.get(params.nodes[0]);
-                    console.log('sg:', sg['name'], sg['sg_type'], sg['sg_nodes']);
-                    this.vis_subgraphs(sg['sg_type'], sg['sg_nodes']);
-                }
-            }
-        });
-
-        return network;
-    }
-
-    vis_subgraphs(sg_type:string[], sg_nodes: string[][]){
-        // clear
-        this.vis_destroy_subgraphs();
-
-        let sg_idx = 0;
-        for(let sg of sg_nodes){
-            let nodes = new vis.DataSet();
-            let edges = new vis.DataSet();
-            if(sg_type[0] == 'single'){
-                for( let i=0; i<sg.length; i+=1 ){
-                    nodes.add({ id: i, label: sg[i] }); //, color: { background: 'lightcyan'} });
-                    if(i > 0) edges.add({ from: i-1, to: i });
-                }
-            }
-            else{       // == joint
-                for( let i=0; i<sg.length; i+=1 ){
-                    nodes.add({ id: i, label: sg[i] }); //, color: { background: 'lightcyan'} });
-                    if(i < sg.length-1) edges.add({ from: i, to: sg.length-1 });
-                }
-            }
-            // create a network
-            let container = this.subVisContainers.nativeElement.children[sg_idx];
-            let options = {
-                edges: {
-                    arrows: { to: {enabled: true, type: 'arrow', scaleFactor: 0.5} },
-                },
-                // layout: {
-                //     hierarchical: { direction: "UD", },
-                // },
-            };
-            this.subGraphs[sg_idx] = new vis.Network(container, {nodes: nodes, edges: edges}, options);
-            // this.subGraphs[sg_idx].redraw();
-
-            // next
-            sg_idx += 1;
-            if( sg_idx > this.sizeOfSubGraphs ) break;
-        }
-    }
-*/
 
     vis_graph(x: any){
         if(!x) return;
@@ -384,11 +231,11 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         // initialize your network!
         let network = new vis.Network(container, data, options);
 
-        // add event listeners
+        // event: selectNode 를 설정해도 selectEdge 가 같이 fire 됨 (오류!)
         network.on("select", (params)=>{
-            // target: nodes
-            if(params.nodes.length > 0){
-                console.log("Selection Node:", nodes_data.get(params.nodes[0]));
+            if( params.nodes.length > 0 ){
+                // target: nodes
+                // console.log("Selection Node:", nodes_data.get(params.nodes[0]));
                 if( params.nodes.length == 1 ){
                     if( nodes_data.get(params.nodes[0]).group == 1 ){
                         let sg_pivots: string[] = [...x['positives']];
@@ -400,9 +247,19 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
                     }
                 }
             }
-            // target: edges
-            else if(params.edges.length == 1){
-                console.log("Selection Edge:", params.edges[0], edges_data.get(params.edges[0]));
+            // select 가 nodes 에 반응하지 않은 경우만 edges 처리
+            else if( params.edges.length > 0 ){
+                console.log("Selected Edges:", params.edges);
+            }
+        });
+        // event: doubleClick
+        network.on("doubleClick", (params)=>{
+            if( params.nodes.length > 0 ){
+                console.log("doubleClick:", nodes_data.get(params.nodes[0]));
+                this.pivot = nodes_data.get(params.nodes[0]).label;
+                this.positives = [ this.pivot ];
+                this.negatives = [];
+                this.load_words_graph();
             }
         });
 
@@ -413,22 +270,83 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         // clear
         this.vis_destroy_subgraphs();
 
+        let sg_idx = 0;
+        for(let sg of sg_list){
+            let nodes = new vis.DataSet();
+            let edges = new vis.DataSet();
+
+            for( let i=0; i<sg['sg_nodes'].length; i+=1 ){
+                let token = sg['sg_nodes'][i];
+                nodes.add({
+                    id: i,
+                    label: token + (sg['sg_entities'][i] ? `\n<${sg['sg_entities'][i].toLowerCase()}>` : ''),
+                    color: { background: (sg_pivots.includes(token) ? '#D2E5FF' : 'orange') }
+                });
+                if(sg['sg_type'] == 'chain'){
+                    if(i > 0){
+                        edges.add({ from: i-1, to: i });
+                    }
+                }
+                else{
+                    if(i < sg['sg_nodes'].length-1){
+                        edges.add({ from: i, to: sg['sg_nodes'].length-1 });
+                    }
+                }
+            }
+            let root = sg['sg_nodes'].length - 1;
+            nodes.get(root)['borderWidth'] = 2;     // root 노드 강조!
+
+            // create a network
+            let container = this.subVisContainers.nativeElement.children[sg_idx];
+            let options = {
+                edges: {
+                    arrows: { to: {enabled: true, type: 'arrow', scaleFactor: 0.5} },
+                },
+                layout: {
+                    randomSeed: root,
+                }
+            };
+            this.subGraphs[sg_idx] = new vis.Network(container, {nodes: nodes, edges: edges}, options);
+            // this.subGraphs[sg_idx].redraw();
+
+            // next
+            sg_idx += 1;
+            if( sg_idx > this.sizeOfSubGraphs ) break;
+        }
+    }
+
+}
+
+/*
+    vis_subgraphs(sg_pivots: string[], sg_list:any[]){
+        // clear
+        this.vis_destroy_subgraphs();
+
         // sg_list 안에 variant 들이 있고, 그것까지 모두 그린다
         let sg_idx = 0;
         for(let sg of sg_list){
             for(let i=0; i<sg['sg_nodes'].length; i+=1){
                 let t_nodes = sg['sg_nodes'][i];
                 let t_edges = sg['sg_edges'][i];
+                let t_labels = sg['entities'][i];
                 let t_counter: Map<string,number> = new Map();
+
+                // nodes data
                 let nodes = new vis.DataSet();
+                let e_idx = 0;
                 for(let t of t_nodes){
                     if( !t_counter.has(t) ){
                         t_counter.set(t, 0);
                         nodes.add({
-                            id: t, label: t, color: { background: (sg_pivots.includes(t) ? '#D2E5FF' : 'orange') }
+                            id: t,
+                            label: t + (t_labels[e_idx] ? `\n<${t_labels[e_idx].toLowerCase()}>` : ''),
+                            color: { background: (sg_pivots.includes(t) ? '#D2E5FF' : 'orange') }
                         });
                     }
+                    e_idx += 1;
                 }
+
+                // edges data
                 let edges = new vis.DataSet();
                 for(let t of t_edges){
                     let t_splited = t.split(',')
@@ -469,5 +387,4 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             if( sg_idx >= this.sizeOfSubGraphs ) break;
         }
     }
-
-}
+*/

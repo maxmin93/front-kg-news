@@ -16,7 +16,19 @@
 
 <mat-card class="card-demo" style="margin-bottom: 10px;">
     <mat-card-title><a href="" target="_blank">Word Graph</a></mat-card-title>
-    <mat-card-subtitle>Using 'fxFill' to fill available width and height of parent container.</mat-card-subtitle>
+    <mat-card-subtitle>
+        <form [formGroup]="formWords" (ngSubmit)="onSubmit()" class="example-form">
+            <div fxLayout="row" fxFlexFill fxLayout.lt-sm="column" fxLayoutGap="20px" style="padding-left: 10vw; padding-right: 10vw;">
+                <button mat-stroked-button type="submit" fxFlex="20%" color="primary" style="height: 50px;">Search</button>
+                <mat-form-field fxFlex="30%" color="accent">
+                    <input matInput type="text" placeholder="positive words" formControlName="positives">
+                </mat-form-field>
+                <mat-form-field fxFlex="30%" color="accent">
+                    <input matInput type="text" placeholder="negative words" formControlName="negatives">
+                </mat-form-field>
+            </div>
+        </form>
+    </mat-card-subtitle>
     <mat-card-content class="large" style="height: 65vh; margin: 10px; border: 2px solid black;">
 
         <div #mainVisContainer fxLayout="column" fxFill>
@@ -30,7 +42,6 @@
 
 <mat-card class="card-demo">
     <mat-card-title><a href="" target="_blank">Subgraphs</a></mat-card-title>
-    <mat-card-subtitle>Using 'fxFill' to fill available width and height of parent container.</mat-card-subtitle>
     <mat-card-content class="large" style="height: 20vh; margin: 10px; border: 2px solid black;">
 
         <div fxLayout="column" fxFill>
