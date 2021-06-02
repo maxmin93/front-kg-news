@@ -358,7 +358,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
     onClickRecord(row: any[]){
         console.log(this.selectedEntity, row);
-        this.router.navigate(['w2v-browser', row[0]]);
+        this.router.navigate(['n2v-browser', row[0]]);
     }
 }
 

@@ -58,12 +58,10 @@ import { TextrankComponent } from './components/textrank/textrank.component';
 
 import { BrowserComponent } from './components/browser/browser.component';
 import { CanvasComponent } from './components/browser/canvas/canvas.component';
-import { W2vBrowserComponent } from './components/w2v-browser/w2v-browser.component';
-import { W2vCanvasComponent } from './components/w2v-browser/w2v-canvas/w2v-canvas.component';
-import { W2vDialogComponent } from './components/w2v-browser/w2v-dialog/w2v-dialog.component';
 import { Doc2vecComponent } from './components/doc2vec/doc2vec.component';
 import { DgraphComponent } from './components/dgraph/dgraph.component';
 import { N2vBrowserComponent } from './components/n2v-browser/n2v-browser.component';
+import { VocabDialogComponent } from './components/n2v-browser/vocab-dialog/vocab-dialog.component';
 
 
 // ** if you miss "--routing" option:
@@ -96,9 +94,9 @@ import { N2vBrowserComponent } from './components/n2v-browser/n2v-browser.compon
         TextrankComponent,
         BrowserComponent,
         CanvasComponent,
-        W2vBrowserComponent,
-        W2vCanvasComponent,
-        W2vDialogComponent,
+        // W2vBrowserComponent,
+        // W2vCanvasComponent,
+        VocabDialogComponent,
         Doc2vecComponent,
         DgraphComponent,
         N2vBrowserComponent,
@@ -160,6 +158,6 @@ import { N2vBrowserComponent } from './components/n2v-browser/n2v-browser.compon
     bootstrap: [
         AppComponent
     ],
-    entryComponents: [AppComponent, W2vDialogComponent],
+    entryComponents: [AppComponent, VocabDialogComponent],
 })
 export class AppModule { }

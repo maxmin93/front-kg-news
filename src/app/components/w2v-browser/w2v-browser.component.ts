@@ -1,4 +1,5 @@
 import { Component, ViewChild, ElementRef, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 
@@ -11,7 +12,6 @@ declare const vis:any;
 import { ILabel, IElement, IGraph } from '../../services/graph-models';
 
 import { MatDialog } from '@angular/material/dialog';
-import { W2vDialogComponent } from '../w2v-browser/w2v-dialog/w2v-dialog.component';
 
 
 @Component({
@@ -21,18 +21,25 @@ import { W2vDialogComponent } from '../w2v-browser/w2v-dialog/w2v-dialog.compone
 })
 export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
 
-    positives: string[] = ['박근혜'];
+    positives: string[] = [];
     negatives: string[] = [];
-    topN: number = 50;
+    topN: number = 30;
     threshold: number = 0.60;
     sizeOfSubGraphs: number = 5;
+    messageOfSubGraph: string = undefined;
 
     mainGraph: any;
-    subGraphs: any[] = new Array(this.sizeOfSubGraphs);
+    subGraphs: any[];
     segments: Map<string,any>;
 
     @ViewChild('mainVisContainer', {static: false}) private mainVisContainer: ElementRef;
     @ViewChild('subVisContainers', {static: false}) private subVisContainers: ElementRef;
+
+    formWords = new FormGroup({
+        positives: new FormControl('', Validators.pattern('([^,\s]+)')),
+        negatives: new FormControl('', Validators.pattern('([^,\s]+)')),
+        threshold: new FormControl(this.threshold, [Validators.min(0.5), Validators.max(1.0)]),
+    });
 
     pivot: string;
     pivots: any;            // N2vDialog { label: [[noun, tf, df, tfidf], ..], }
@@ -61,6 +68,7 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.pivot = params.get('pivot');
                 console.log('pivot:', this.pivot);
                 if( this.pivot ){
+                    this.formWords.setValue({positives: this.pivot, negatives: '', threshold: this.threshold});
                     this.positives = [ this.pivot ];
                     this.negatives = [];
                     this.load_words_graph();
@@ -76,7 +84,8 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit(): void{
-        // this.load_words_graph();
+        this.sizeOfSubGraphs = this.subVisContainers.nativeElement.children.length;
+        this.subGraphs = new Array(this.sizeOfSubGraphs);
     }
 
     ngOnDestroy(): void{
@@ -96,6 +105,7 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             if( this.subGraphs[sg_idx] ){
                 this.subGraphs[sg_idx].destroy();
                 this.subGraphs[sg_idx] = undefined;
+                this.messageOfSubGraph = undefined;
             }
         }
     }
@@ -109,6 +119,26 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         }
 
         this.handler_graph = this.getW2vWordsGraph(this.positives, this.negatives, this.topN, this.threshold);
+    }
+
+    onSubmit(){
+        console.log(`submit: positives="${this.formWords.get('positives').value}", negatives="${this.formWords.get('negatives').value}"`);
+        if( this.formWords.get('positives').value.length > 0 ){
+            this.positives = this.formWords.get('positives').value.split(' ');
+            this.negatives = this.formWords.get('negatives').value.split(' ');
+            this.threshold = this.formWords.get('threshold').value;
+            this.load_words_graph();
+        }
+    }
+
+    onClickSubG(idx:number){
+        if( this.subGraphs[idx] ){
+            // console.log('sg.size=', this.subGraphs[idx]['_sg_size']);
+            this.messageOfSubGraph = `(G[${idx}].size = ${this.subGraphs[idx]['_sg_size']})`;
+        }
+        else{
+            this.messageOfSubGraph = undefined;
+        }
     }
 
 
@@ -137,10 +167,10 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
 
+    /*
     //////////////////////////////////////////////
     //  TFIDF Dialog
     //
-
 
     openDialog() {
         const dialogRef = this.pivotsDialog.open(W2vDialogComponent, {
@@ -156,6 +186,7 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             }
         });
     }
+    */
 
 
     ////////////////////////////////////////////////////
@@ -241,6 +272,7 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             if( params.nodes.length > 0 ){
                 console.log("doubleClick:", nodes_data.get(params.nodes[0]));
                 this.pivot = nodes_data.get(params.nodes[0]).label;
+                this.formWords.setValue({positives: this.pivot, negatives: '', threshold: this.threshold});
                 this.positives = [ this.pivot ];
                 this.negatives = [];
                 this.load_words_graph();
@@ -268,17 +300,17 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
                 });
                 if(sg['sg_type'] == 'chain'){
                     if(i > 0){
-                        edges.add({ from: i-1, to: i });
+                        edges.add({ from: i-1, to: i, label: sg['sg_dtags'][i-1] });
                     }
                 }
                 else{
                     if(i < sg['sg_nodes'].length-1){
-                        edges.add({ from: i, to: sg['sg_nodes'].length-1 });
+                        edges.add({ from: i, to: sg['sg_nodes'].length-1, label: sg['sg_dtags'][i] });
                     }
                 }
             }
             let root = sg['sg_nodes'].length - 1;
-            nodes.get(root)['borderWidth'] = 2;     // root 노드 강조!
+            nodes.get(root)['borderWidth'] = 3;     // root 노드 강조!
 
             // create a network
             let container = this.subVisContainers.nativeElement.children[sg_idx];

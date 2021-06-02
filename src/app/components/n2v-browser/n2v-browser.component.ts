@@ -1,18 +1,15 @@
 import { Component, ViewChild, ElementRef, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 import { WordsApiService } from 'src/app/services/words-api.service';
 import { UiApiService } from '../../services/ui-api.service';
-import { ColorProviderService } from '../../services/color-provider.service';
 
 declare const vis:any;
 
-import { ILabel, IElement, IGraph } from '../../services/graph-models';
-
 import { MatDialog } from '@angular/material/dialog';
-import { W2vDialogComponent } from '../w2v-browser/w2v-dialog/w2v-dialog.component';
+import { VocabDialogComponent } from './vocab-dialog/vocab-dialog.component';
 
 
 @Component({
@@ -22,33 +19,36 @@ import { W2vDialogComponent } from '../w2v-browser/w2v-dialog/w2v-dialog.compone
 })
 export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
 
-    positives: string[] = ['박근혜'];
+    positives: string[] = [];
     negatives: string[] = [];
-    topN: number = 50;
+    topN: number = 30;
     threshold: number = 0.60;
     sizeOfSubGraphs: number = 5;
+    messageOfSubGraph: string = undefined;
 
     mainGraph: any;
-    subGraphs: any[] = new Array(this.sizeOfSubGraphs);
+    subGraphs: any[];
     segments: Map<string,any>;
 
     @ViewChild('mainVisContainer', {static: false}) private mainVisContainer: ElementRef;
     @ViewChild('subVisContainers', {static: false}) private subVisContainers: ElementRef;
 
+    apiSwitch: boolean = true;      // true: node2vec, false: word2vec
     formWords = new FormGroup({
         positives: new FormControl('', Validators.pattern('([^,\s]+)')),
         negatives: new FormControl('', Validators.pattern('([^,\s]+)')),
+        threshold: new FormControl(this.threshold, [Validators.min(0.5), Validators.max(1.0)]),
     });
 
     pivot: string;
-    pivots: any;            // N2vDialog { label: [[noun, tf, df, tfidf], ..], }
+    entity_pivots: any;     // N2vDialog { label: [[noun, tf, df, tfidf], ..], }
     words: Set<string>;     // unique synonyms 유지 (확장시 체크)
 
     debug: boolean = false;
     handler_pivots:Subscription;
     handler_graph:Subscription;
 
-    @ViewChild('tippy_test', {static: false}) private tippy_test: ElementRef;
+    // @ViewChild('tippy_test', {static: false}) private tippy_test: ElementRef;
 
     constructor(
         private route: ActivatedRoute,
@@ -69,6 +69,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.pivot = params.get('pivot');
                 console.log('pivot:', this.pivot);
                 if( this.pivot ){
+                    this.formWords.setValue({positives: this.pivot, negatives: '', threshold: this.threshold});
                     this.positives = [ this.pivot ];
                     this.negatives = [];
                     this.load_words_graph();
@@ -84,7 +85,8 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit(): void{
-        // this.load_words_graph();
+        this.sizeOfSubGraphs = this.subVisContainers.nativeElement.children.length;
+        this.subGraphs = new Array(this.sizeOfSubGraphs);
     }
 
     ngOnDestroy(): void{
@@ -105,6 +107,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             if( this.subGraphs[sg_idx] ){
                 this.subGraphs[sg_idx].destroy();
                 this.subGraphs[sg_idx] = undefined;
+                this.messageOfSubGraph = undefined;
             }
         }
     }
@@ -117,15 +120,34 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             this.vis_destroy_subgraphs();
         }
         if( this.positives.length > 0 ){
-            this.handler_graph = this.getN2vWordsGraph(this.positives, this.negatives, this.topN, this.threshold);
+            this.handler_graph = this.getWordsGraph(this.positives, this.negatives, this.topN, this.threshold);
         }
     }
 
     onSubmit(){
         console.log(`submit: positives="${this.formWords.get('positives').value}", negatives="${this.formWords.get('negatives').value}"`);
         if( this.formWords.get('positives').value.length > 0 ){
-            this.positives = this.formWords.get('positives').value.split(' ');
-            this.negatives = this.formWords.get('negatives').value.split(' ');
+            this.positives = this.formWords.get('positives').value.trim().length > 0 ? this.formWords.get('positives').value.split(' ') : [];
+            this.negatives = this.formWords.get('negatives').value.trim().length > 0 ? this.formWords.get('negatives').value.split(' ') : [];
+            this.threshold = this.formWords.get('threshold').value;
+            this.load_words_graph();
+        }
+    }
+
+    onClickSubG(idx:number){
+        if( this.subGraphs[idx] ){
+            // console.log('sg.size=', this.subGraphs[idx]['_sg_size']);
+            this.messageOfSubGraph = `(G[${idx}].size = ${this.subGraphs[idx]['_sg_size']})`;
+        }
+        else{
+            this.messageOfSubGraph = undefined;
+        }
+    }
+
+    changeApiMode(){
+        this.apiSwitch = !this.apiSwitch;
+        // console.log('apiType changed:', this.apiSwitch);
+        if( this.positives.length > 0 ){
             this.load_words_graph();
         }
     }
@@ -139,20 +161,24 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     // return: { entity: [[noun, tf, df, tfidf], ..], }
     getN2vPivots(): Subscription{
         return this.wordsService.getStatTfidfOfEntities().subscribe(x=>{
-            this.pivots = x;
+            this.entity_pivots = x;
         });
     }
 
     // return: { pivot, nodes[], edges_syn[], edges_fof[] }
-    getN2vWordsGraph(positives: string[], negatives: string[]=[], topN: number=20, threshold: number=0.65): Subscription{
-        return this.wordsService.getN2vWordsGraph(positives, negatives, topN, threshold).subscribe(x=>{
-            console.log('graph data:', x);
-            this.mainGraph = this.vis_graph(x);
-
-            // this.positives = x['positives'];
-            // this.negatives = x['negatives'];
-            // this.graph = this.makeGraph(x);
-        });
+    getWordsGraph(positives: string[], negatives: string[]=[], topN: number=20, threshold: number=0.65): Subscription{
+        if( this.apiSwitch ){
+            return this.wordsService.getN2vWordsGraph(positives, negatives, topN, threshold).subscribe(x=>{
+                // console.log('graph data:', x);
+                this.mainGraph = this.vis_graph(x);
+            });
+        }
+        else{
+            return this.wordsService.getW2vWordsGraph(positives, negatives, topN, threshold).subscribe(x=>{
+                // console.log('graph data:', x);
+                this.mainGraph = this.vis_graph(x);
+            });
+        }
     }
 
 
@@ -161,17 +187,21 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     //
 
     openDialog() {
-        const dialogRef = this.pivotsDialog.open(W2vDialogComponent, {
+        const dialogRef = this.pivotsDialog.open(VocabDialogComponent, {
             width : '800px',
             height: '740px',
-            data: this.pivots
+            data: this.entity_pivots
         });
 
         dialogRef.afterClosed().subscribe(result => {
             if( result ){
-                // this.searchStr = result.noun;
-                // this.searchSubmit(this.searchStr);
-            }
+                console.log('Dialog closed:', result);
+                this.pivot = result['noun'];
+                this.formWords.setValue({positives: this.pivot, negatives: '', threshold: this.threshold});
+                this.positives = [ this.pivot ];
+                this.negatives = [];
+                this.load_words_graph();
+        }
         });
     }
 
@@ -257,6 +287,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             if( params.nodes.length > 0 ){
                 console.log("doubleClick:", nodes_data.get(params.nodes[0]));
                 this.pivot = nodes_data.get(params.nodes[0]).label;
+                this.formWords.setValue({positives: this.pivot, negatives: '', threshold: this.threshold});
                 this.positives = [ this.pivot ];
                 this.negatives = [];
                 this.load_words_graph();
@@ -284,17 +315,17 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
                 });
                 if(sg['sg_type'] == 'chain'){
                     if(i > 0){
-                        edges.add({ from: i-1, to: i });
+                        edges.add({ from: i-1, to: i, label: sg['sg_dtags'][i-1] });
                     }
                 }
                 else{
                     if(i < sg['sg_nodes'].length-1){
-                        edges.add({ from: i, to: sg['sg_nodes'].length-1 });
+                        edges.add({ from: i, to: sg['sg_nodes'].length-1, label: sg['sg_dtags'][i] });
                     }
                 }
             }
             let root = sg['sg_nodes'].length - 1;
-            nodes.get(root)['borderWidth'] = 2;     // root 노드 강조!
+            nodes.get(root)['borderWidth'] = 3;     // root 노드 강조!
 
             // create a network
             let container = this.subVisContainers.nativeElement.children[sg_idx];
@@ -304,10 +335,10 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
                 },
                 layout: {
                     randomSeed: root,
-                }
+                },
             };
             this.subGraphs[sg_idx] = new vis.Network(container, {nodes: nodes, edges: edges}, options);
-            // this.subGraphs[sg_idx].redraw();
+            this.subGraphs[sg_idx]['_sg_size'] = sg['size'];    // user data
 
             // next
             sg_idx += 1;
