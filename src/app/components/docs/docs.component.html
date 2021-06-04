@@ -1,23 +1,24 @@
-<div fxLayout="column" fxLayoutAlign="space-around center" fxLayoutGap="10px">
+<div fxLayout="column" fxLayoutAlign="space-around center">
 
-<div fxLayout="row" fxLayoutAlign="space-around center" fxLayoutGap="10px" >
-  <mat-form-field class="search-form">
-    <input #search_input matInput placeholder="search keyword" type="text">
-  </mat-form-field>
-  <button button="submit" mat-raised-button color="primary" (click)="onSearch()">Search</button>
-  <mat-paginator
-    (page)="handlePageEvent($event)"
-    [length]="length"
-    [pageSize]="pageSize"
-    [showFirstLastButtons]="showFirstLastButtons"
-    [pageSizeOptions]="pageSizeOptions"
-    [pageIndex]="pageIndex">
-  </mat-paginator>
+<div fxLayout="row" fxLayout.lt-sm="column" fxLayoutAlign="space-around center" style="margin-bottom: 10px;" >
+    <mat-form-field fxFlex="25%" color="accent" class="custom-form-field">
+        <input #search_input matInput type="text" placeholder="search keyword"
+            (keydown.enter)="onSearch()" formControlName="positives">
+    </mat-form-field>
+    <mat-paginator hidePageSize="true"
+        (page)="handlePageEvent($event)"
+        [length]="length"
+        [pageSize]="pageSize"
+        [showFirstLastButtons]="showFirstLastButtons"
+        [pageSizeOptions]="pageSizeOptions"
+        [pageIndex]="pageIndex">
+    </mat-paginator>
 </div>
 
-<div fxLayout="row wrap" fxLayoutAlign="space-around center">
-  <mat-card class="news-card" *ngFor="let article of docs">
-    <mat-card-header fxLayout="column">
+<div fxLayout="column" fxLayoutAlign="space-around center" fxLayoutGap="10px">
+
+  <mat-card class="news-card" *ngFor="let article of docs" style="max-width: 1000px;">
+    <mat-card-header>
         <!-- div mat-card-avatar [ngStyle]="{'background': 'url(../assets/images/' + article.source.id + '.png)'}"
            class="example-header-image"></div -->
         <mat-card-title style="margin-bottom: 0">

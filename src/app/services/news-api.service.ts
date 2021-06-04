@@ -86,6 +86,11 @@ export class NewsApiService {
         return this.http.get<any>(url);
     }
 
+    getDtagTerms(docid:string): Observable<any>{
+        let url = `${this.api_url}/${docid}/terms/d_tag`;
+        return this.http.get<any>(url);
+    }
+
     getEntityNouns(docid:string): Observable<any>{
         let url = `${this.api_url}/${docid}/nouns/agg`;
         return this.http.get<any>(url);

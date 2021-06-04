@@ -55,6 +55,33 @@
 
     <mat-card class="news-card">
     <mat-card-header>
+        <mat-card-title>의존태그(Dependency Tag) 리스트</mat-card-title>
+        <mat-card-subtitle class="example-action-buttons" fxLayout="row">
+                <button mat-button (click)="openAllaccordDtag()">모두 펼치기</button>
+                <button mat-button (click)="closeAllaccordDtag()">모두 접기</button>
+        </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+    <mat-accordion #accordDtag="matAccordion" *ngIf="dtag_terms" class="example-headers-align news-card" multi>
+        <mat-expansion-panel *ngFor="let pos of dtag_terms | keyvalue">
+            <mat-expansion-panel-header>
+                <mat-panel-title>{{ dtag_ko(pos.key)[0] }}/{{ pos.key }} ({{ pos.value.length }})</mat-panel-title>
+                <mat-panel-description>{{ dtag_ko(pos.key)[1] }}</mat-panel-description>
+            </mat-expansion-panel-header>
+            <p>
+                <span *ngFor="let term of pos.value; index as i"
+                    class="news-provider" style="display: inline-block; margin-right: 5px" (click)="highlight(term[0])">
+                    {{ i > 0 ? ', &nbsp;' : '' }}{{ term[0] }}({{ term[1] }})
+                </span>
+                <!-- span class="news-provider" matBadge="1" matBadgeSize="small" matBadgeOverlap="false">Text with large badge</span -->
+            </p>
+        </mat-expansion-panel>
+    </mat-accordion>
+    </mat-card-content>
+    </mat-card>
+
+    <mat-card class="news-card">
+    <mat-card-header>
         <mat-card-title>개체(Entity) 리스트</mat-card-title>
         <mat-card-subtitle class="example-action-buttons" fxLayout="row">
                 <button mat-button (click)="openAllaccordEntity()">모두 펼치기</button>

@@ -1,6 +1,6 @@
 <div fxLayout="column" fxLayoutAlign="space-around center" fxLayoutGap="10px">
 
-    <mat-card *ngIf="document" class="news-card">
+    <mat-card *ngIf="document" class="news-card" [ngStyle.md]="{'min-width': '1000px'}">
     <mat-card-header fxLayout="column">
         <!-- div mat-card-avatar [ngStyle]="{'background': 'url(../assets/images/' + article.source.id + '.png)'}"
            class="example-header-image"></div -->
@@ -17,7 +17,7 @@
         <span class="news-wdate">{{ document.wdate | date:'mediumDate' }}</span>
     </div>
     <mat-card-content>
-      <p #content [innerHTML]="document_content"></p>
+      <p #content [innerHTML]="document_content" style="max-width: 1000px;"></p>
     </mat-card-content>
     <!-- mat-card-actions class="action-buttons">
         <button mat-button (click)="openAllaccordPruned()">모두 펼치기</button>
@@ -29,13 +29,13 @@
         <img [attr.src]="image_path + dgraph.fname" />
     </div -->
 
-    <mat-card class="news-card">
+    <mat-card class="news-card" [ngStyle.md]="{'min-width': '1000px'}">
     <mat-card-header>
         <mat-card-title>전체그래프</mat-card-title>
     </mat-card-header>
     <mat-card-content>
 
-        <mat-accordion #accordPruned="matAccordion" class="example-headers-align news-card">
+        <mat-accordion #accordPruned="matAccordion">
             <mat-expansion-panel *ngIf="dgraph_origin" [expanded]="true">
                 <mat-expansion-panel-header>
                     <mat-panel-title>의존그래프 (원본)</mat-panel-title>
@@ -60,24 +60,24 @@
     </mat-card-content>
     </mat-card>
 
-    <mat-card class="news-card" *ngFor="let sentence of sentences; index as i;">
+    <mat-card class="news-card" *ngFor="let sentence of sentences; index as i;" [ngStyle.md]="{'min-width': '1000px'}">
     <mat-card-header>
         <mat-card-title>서브그래프&#9839;{{i}} (sentence)</mat-card-title>
         <mat-card-subtitle class="example-action-buttons" fxLayout="row">
-            <p>{{ sentence.text }}</p>
+            <p style="max-width: 960px;">{{ sentence.text }}</p>
         </mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
 
-        <mat-accordion *ngIf="subgraphs_pruned" #accordPruned="matAccordion" class="example-headers-align news-card">
+        <mat-accordion *ngIf="subgraphs_pruned" #accordPruned="matAccordion" >
             <mat-expansion-panel *ngIf="subgraphs_pruned[i]"
                     (opened)="figurePanelState(i, 'pruned', true)" (closed)="figurePanelState(i, 'pruned', false)">
                 <mat-expansion-panel-header>
                     <mat-panel-title>의존그래프 (가지치기)</mat-panel-title>
                     <mat-panel-description>nodes={{ (subgraphs_pruned[i] | async)?.nodes }}, edges={{ (subgraphs_pruned[i] | async)?.edges }}</mat-panel-description>
                 </mat-expansion-panel-header>
-                <div *ngIf="subgraphs_pruned[i]" style="margin-left: 10px;">
-                    <img [attr.src]="image_path + (subgraphs_pruned[i] | async)?.fname" />
+                <div *ngIf="subgraphs_pruned[i]" style="margin: auto;">
+                    <img class="dgraph" [attr.src]="image_path + (subgraphs_pruned[i] | async)?.fname" />
                 </div>
             </mat-expansion-panel>
 
@@ -87,8 +87,8 @@
                     <mat-panel-title>의존그래프 (원본)</mat-panel-title>
                     <mat-panel-description>nodes={{ (subgraphs_origin[i] | async)?.nodes }}, edges={{ (subgraphs_origin[i] | async)?.edges }}</mat-panel-description>
                 </mat-expansion-panel-header>
-                <div *ngIf="subgraphs_origin[i]" style="margin-left: 10px;">
-                    <img [attr.src]="image_path + (subgraphs_origin[i] | async)?.fname" />
+                <div *ngIf="subgraphs_origin[i]" style="margin: auto;">
+                    <img class="dgraph" [attr.src]="image_path + (subgraphs_origin[i] | async)?.fname" />
                 </div>
             </mat-expansion-panel>
         </mat-accordion>
