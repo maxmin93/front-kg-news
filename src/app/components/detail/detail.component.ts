@@ -10,14 +10,15 @@ import { Document, Sentence, Token } from 'src/app/services/news-models';
 
 
 // https://cloud.google.com/natural-language/docs/reference/rest/v1/Token?hl=ko-kr&skip_cache=true#label
+// https://m.blog.naver.com/PostView.naver?isHttpsRedirect=true&blogId=yoojung428&logNo=221342972294
 const DTAG_TAGS = {
     'UNKNOWN':	    ['분류안됨', 'Unknown'],
     'ABBREV':	    ['약어 수식어', 'Abbreviation modifier'],
     'ACOMP':	    ['형용사 보어', 'Adjectival complement'],
     'ADVCL':	    ['부사 보조', 'Adverbial clause modifier'],
     'ADVMOD':	    ['부사 수식어', 'Adverbial modifier'],
-    'AMOD':	        ['NP의 형용사 수식어', 'Adjectival modifier of an NP'],
-    'APPOS':	    ['NP의 동격 수식어', 'Appositional modifier of an NP'],
+    'AMOD':	        ['명사구의 형용사 수식어', 'Adjectival modifier of an NP'],
+    'APPOS':	    ['명사구의 동격 수식어', 'Appositional modifier of an NP'],
     'ATTR':	        ['동사 보조', 'Attribute dependent of a copular verb'],
     'AUX':	        ['보조 동사', 'Auxiliary (non-main) verb'],
     'AUXPASS':	    ['수동 보조', 'Passive auxiliary'],
@@ -59,8 +60,8 @@ const DTAG_TAGS = {
     'PRT':	        ['조사', 'Particle'],
     'PS':	        ['연관성/소유성 마커', 'Associative or possessive marker'],
     'QUANTMOD':	    ['정량화 구 수식어', 'Quantifier phrase modifier'],
-    'RCMOD':	    ['상대절 수식어', 'Relative clause modifier'],
-    'RCMODREL':	    ['상대절 종결', 'Complementizer in relative clause'],
+    'RCMOD':	    ['관계절 수식어', 'Relative clause modifier'],
+    'RCMODREL':	    ['관계절의 보어', 'Complementizer in relative clause'],
     'RDROP':	    ['줄임표 (선행조건자가 없는)', 'Ellipsis without a preceding predicate'],
     'REF':	        ['참조', 'Referent'],
     'REMNANT':	    ['잔여절', 'Remnant'],
