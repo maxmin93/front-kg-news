@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute } from '@angular/router';
 
@@ -16,7 +17,6 @@ const DEFAULT_PAGE_INDEX: number = 0;
 })
 export class DocsComponent implements OnInit {
 
-    data: any;
     docs: Document[] = [];
 
     // for pagination
@@ -26,7 +26,9 @@ export class DocsComponent implements OnInit {
     pageSizeOptions = [5, 10, 25];
     showFirstLastButtons = true;
 
-    @ViewChild('search_input', {static: false}) private searchInput: ElementRef;
+    formSearch = new FormGroup({
+        query: new FormControl('', Validators.pattern('([^,\s]+)'))
+    });
 
     constructor(
         private route: ActivatedRoute,
@@ -38,15 +40,31 @@ export class DocsComponent implements OnInit {
         // data of routes
         this.route.data.subscribe(data => {
             this.uiService.pushRouterData(data);
+
+            // init parameters
+            let value1 = localStorage.getItem('docs_index');
+            if( value1 && !isNaN(Number(value1)) ) this.pageIndex = Number(value1);
+            let value2 = localStorage.getItem('docs_query');
+            if( value2 ){
+                this.formSearch.setValue({ query: String(value2) });
+            }
+            console.log(`docs params: query="${this.formSearch.get('query').value}", index=${this.pageIndex}`);
+            // 최신 뉴스 리스트: q=''
+            this.onSearch();
         });
-        // 최신 뉴스 리스트: q=''
-        this.onSearch(DEFAULT_PAGE_SIZE, DEFAULT_PAGE_INDEX);
     }
 
     // 뉴스 검색
-    onSearch(page_size=DEFAULT_PAGE_SIZE, page_index=DEFAULT_PAGE_INDEX){
-        let text:string = this.searchInput != undefined ? this.searchInput.nativeElement.value : '';
-        this.newsService.getNewsResponse(text.trim(), page_size, page_index).subscribe( (x:NewsResponse) => {
+    onSearch(){
+        let text: string = this.formSearch.get('query').value;
+        if( text != localStorage.getItem('docs_query') ){
+            this.pageIndex = 0;
+        }
+        localStorage.setItem('docs_index', String(this.pageIndex));
+        localStorage.setItem('docs_query', text);
+        // console.log(`docs params: query="${text}", index=${this.pageIndex}`);
+
+        this.newsService.getNewsResponse(text, this.pageIndex, DEFAULT_PAGE_SIZE).subscribe( (x:NewsResponse) => {
             // console.log(x.hits, x.page_size, x.page_index, x.documents.length);
             this.docs = [...x.documents];       // refresh
             this.length = x.hits;
@@ -60,6 +78,6 @@ export class DocsComponent implements OnInit {
         this.length = event.length;
         this.pageSize = event.pageSize;
         this.pageIndex = event.pageIndex;
-        this.onSearch(this.pageSize, this.pageIndex)
+        this.onSearch();
     }
 }

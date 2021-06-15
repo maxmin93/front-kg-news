@@ -55,7 +55,7 @@ export class NewsApiService {
     //  Documents list
     //
 
-    getNewsResponse(text:string='', size=10, page=0): Observable<NewsResponse>{
+    getNewsResponse(text:string='', page=0, size=10): Observable<NewsResponse>{
         let url = `${this.api_url}/search?size=${size}&page=${page}&q=${encodeURIComponent(text)}`;
         return this.http.get<NewsResponse>(url).pipe(
             map(x=>this.convertStr2Date(x))

@@ -1,10 +1,11 @@
 <div fxLayout="column" fxLayoutAlign="space-around center">
 
-<div fxLayout="row" fxLayout.lt-sm="column" fxLayoutAlign="space-around center" style="margin-bottom: 10px;" >
-    <mat-form-field fxFlex="25%" color="accent" class="custom-form-field">
-        <input #search_input matInput type="text" placeholder="search keyword"
-            (keydown.enter)="onSearch()" formControlName="positives">
-    </mat-form-field>
+<div fxLayout="row" fxLayout.lt-sm="column" fxLayoutAlign="space-around center" fxLayoutGap="10px" style="margin-bottom: 10px;" >
+    <form [formGroup]="formSearch" (ngSubmit)="onSearch()">
+        <mat-form-field color="accent" class="custom-form-field">
+            <input matInput type="text" placeholder="search text" (keydown.enter)="onSearch()" formControlName="query">
+        </mat-form-field>
+    </form>
     <mat-paginator hidePageSize="true"
         (page)="handlePageEvent($event)"
         [length]="length"
