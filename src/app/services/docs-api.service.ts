@@ -23,8 +23,8 @@ export class DocsApiService {
     //
 
     // http://localhost:8888/docs/doc2vec/D67273415
-    getDoc2Vec(docid:string): Observable<any>{
-        let url = `${this.api_url}/doc2vec/${docid}`;
+    getDoc2Vec(docid:string, mode:string): Observable<any>{
+        let url = `${this.api_url}/doc2vec/${mode}/${docid}`;
         return this.http.get<any>(url);
     }
 

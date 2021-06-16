@@ -24,8 +24,12 @@ export class Doc2vecComponent implements OnInit {
     document: Document;
 
     // results of doc2vec
-    clusters: any;
-    figure_path: string;
+    clusters: any = undefined;
+    figure_path: string = undefined;
+    docs_size: number = 0;
+
+    apiSwitch: boolean = true;      // true: dbscan, false: kmeans
+    apiMode: string = 'KMeans';
 
     handler_document: Subscription;
     handler_similars: Subscription;
@@ -51,7 +55,7 @@ export class Doc2vecComponent implements OnInit {
                 });
                 // loading data
                 this.handler_document = this.getDocument(this.docid);
-                this.handler_similars = this.getSimilars(this.docid);
+                this.handler_similars = this.getSimilars(this.docid, this.apiMode);
             }
         });
         this.route.queryParams.subscribe(params => {
@@ -63,6 +67,13 @@ export class Doc2vecComponent implements OnInit {
     ngOnDestroy(): void{
         this.handler_document.unsubscribe();
         this.handler_similars.unsubscribe();
+    }
+
+    changeApiMode(){
+        this.apiSwitch = !this.apiSwitch;
+        this.apiMode = this.apiSwitch ? 'KMeans' : 'DBScan';
+        console.log('API:', this.apiMode);
+        this.getSimilars(this.docid, this.apiMode);
     }
 
     //////////////////////////////////////////////////
@@ -77,11 +88,14 @@ export class Doc2vecComponent implements OnInit {
         });
     }
 
-    getSimilars(docid:string): Subscription{
-        return this.docsService.getDoc2Vec(docid).subscribe(x=>{
+    getSimilars(docid:string, apiMode:string): Subscription{
+        return this.docsService.getDoc2Vec(docid, apiMode.toLowerCase()).subscribe(x=>{
             // console.log('doc2vec:', x);
-            this.figure_path = NewsConfig.URL + '/static/' + x['figure'];
+            if( x['figure'] ) this.figure_path = NewsConfig.URL + '/static/' + x['figure'];
+            else this.figure_path = undefined;
+
             this.clusters = x['clusters'] as Map<number, Array<Array<any>>>;
+            this.docs_size = 0;
             // add Document observable
             for( let [key, items] of Object.entries(this.clusters) ){
                 for( let item of (<Array<Array<any>>> items) ){
@@ -92,6 +106,7 @@ export class Doc2vecComponent implements OnInit {
                     });
                     // let doc$ = this.newsService.getNewsById(item[0]);
                     // (<Array<any>> item).push( doc$ );
+                    this.docs_size += 1;
                 }
             }
             console.log('clusters:', this.clusters);
