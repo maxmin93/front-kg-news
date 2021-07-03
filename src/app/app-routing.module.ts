@@ -16,6 +16,7 @@ import { BrowserComponent } from './components/browser/browser.component';
 import { N2vBrowserComponent } from './components/n2v-browser/n2v-browser.component';
 import { Doc2vecComponent } from './components/doc2vec/doc2vec.component';
 import { DgraphComponent } from './components/dgraph/dgraph.component';
+import { DtriplesComponent } from './components/dtriples/dtriples.component';
 
 
 const routes: Routes = [
@@ -42,6 +43,10 @@ const routes: Routes = [
   {
     path: 'dgraph/:id', data :{ title: "Dependency Graph of Document" },
     component: DgraphComponent
+  },
+  {
+    path: 'dtriples/:id', data :{ title: "Triples Graph of Document" },
+    component: DtriplesComponent
   },
   {
     path: 'detail/:id', data :{ title: "Detail of Document" },

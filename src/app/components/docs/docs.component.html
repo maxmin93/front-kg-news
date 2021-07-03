@@ -31,6 +31,7 @@
     </mat-card-header>
     <!-- img mat-card-image class="img-article" src="{{ article.urlToImage }}" alt="" -->
     <div class="news-subtitle">
+        <span class="news-wdate">{{ article.id }}</span>
         <span class="news-provider">{{ article.provider }}</span>
         <span class="news-cate">{{ article.category }}</span>
         <span class="news-wdate">{{ article.reporter }}</span>
@@ -43,11 +44,12 @@
       </p>
     </mat-card-content>
     <mat-card-actions class="action-buttons">
-      <a mat-button [routerLink]="['/textrank', article.id]"><mat-icon>thumb_up_alt</mat-icon>요약(TextRank)</a>
-      <a mat-button [routerLink]="['/doc2vec', article.id]"><mat-icon>group</mat-icon>유사(Doc2Vec)</a>
-      <a mat-button [routerLink]="['/dgraph', article.id]"><mat-icon>open_in_browser</mat-icon>의존(Doc2Graph)</a>
+      <a mat-button [routerLink]="['/textrank', article.id]"><mat-icon>thumb_up_alt</mat-icon> &nbsp; 요약(TextRank)</a>
+      <a mat-button [routerLink]="['/doc2vec', article.id]"><mat-icon>group</mat-icon> &nbsp; 유사(Doc2Vec)</a>
+      <a mat-button [routerLink]="['/dgraph', article.id]"><mat-icon>open_in_browser</mat-icon> &nbsp; 의존(DGraph)</a>
+      <a mat-button [routerLink]="['/dtriples', article.id]"><mat-icon>picture_in_picture</mat-icon> &nbsp; 의미(DTriples)</a>
       <!-- button mat-button><mat-icon>share</mat-icon> 키워드트렌드</button -->
-      <a mat-flat-button href="http://tonyne.iptime.org:28082/workspace/{{ article.datasource }}" target="_blank"><mat-icon>open_in_browser</mat-icon>그래프</a>
+      <!-- a mat-flat-button href="http://tonyne.iptime.org:28082/workspace/{{ article.datasource }}" target="_blank"><mat-icon>open_in_browser</mat-icon>그래프</a -->
     </mat-card-actions>
   </mat-card>
 </div>

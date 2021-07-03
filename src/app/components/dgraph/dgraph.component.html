@@ -17,7 +17,7 @@
         <span class="news-wdate">{{ document.wdate | date:'mediumDate' }}</span>
     </div>
     <mat-card-content>
-      <p #content [innerHTML]="document_content" style="max-width: 1000px;"></p>
+        <p #content [innerHTML]="document_content" style="max-width: 1000px; margin: auto"></p>
     </mat-card-content>
     <!-- mat-card-actions class="action-buttons">
         <button mat-button (click)="openAllaccordPruned()">모두 펼치기</button>
@@ -41,7 +41,7 @@
                     <mat-panel-title>의존그래프 (원본)</mat-panel-title>
                     <mat-panel-description>nodes={{ (dgraph_origin | async)?.nodes }}, edges={{ (dgraph_origin | async)?.edges }}</mat-panel-description>
                 </mat-expansion-panel-header>
-                <div *ngIf="dgraph_origin" style="margin: auto;">
+                <div *ngIf="dgraph_origin" class="img-container">
                     <img class="dgraph" [attr.src]="image_path + (dgraph_origin | async)?.fname" />
                 </div>
             </mat-expansion-panel>
@@ -51,7 +51,7 @@
                     <mat-panel-title>의존그래프 (단순화)</mat-panel-title>
                     <mat-panel-description>nodes={{ (dgraph_simplified | async)?.nodes }}, edges={{ (dgraph_simplified | async)?.edges }}</mat-panel-description>
                 </mat-expansion-panel-header>
-                <div *ngIf="dgraph_simplified" style="margin: auto;">
+                <div *ngIf="dgraph_simplified" class="img-container">
                     <img class="dgraph" [attr.src]="image_path + (dgraph_simplified | async)?.fname" />
                 </div>
             </mat-expansion-panel>
@@ -76,7 +76,7 @@
                     <mat-panel-title>의존그래프 (가지치기)</mat-panel-title>
                     <mat-panel-description>nodes={{ (subgraphs_pruned[i] | async)?.nodes }}, edges={{ (subgraphs_pruned[i] | async)?.edges }}</mat-panel-description>
                 </mat-expansion-panel-header>
-                <div *ngIf="subgraphs_pruned[i]" style="margin: auto;">
+                <div *ngIf="subgraphs_pruned[i]" class="img-container">
                     <img class="dgraph" [attr.src]="image_path + (subgraphs_pruned[i] | async)?.fname" />
                 </div>
             </mat-expansion-panel>
@@ -87,7 +87,7 @@
                     <mat-panel-title>의존그래프 (원본)</mat-panel-title>
                     <mat-panel-description>nodes={{ (subgraphs_origin[i] | async)?.nodes }}, edges={{ (subgraphs_origin[i] | async)?.edges }}</mat-panel-description>
                 </mat-expansion-panel-header>
-                <div *ngIf="subgraphs_origin[i]" style="margin: auto;">
+                <div *ngIf="subgraphs_origin[i]" class="img-container">
                     <img class="dgraph" [attr.src]="image_path + (subgraphs_origin[i] | async)?.fname" />
                 </div>
             </mat-expansion-panel>

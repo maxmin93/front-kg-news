@@ -58,10 +58,11 @@ import { TextrankComponent } from './components/textrank/textrank.component';
 
 import { BrowserComponent } from './components/browser/browser.component';
 import { CanvasComponent } from './components/browser/canvas/canvas.component';
-import { Doc2vecComponent } from './components/doc2vec/doc2vec.component';
-import { DgraphComponent } from './components/dgraph/dgraph.component';
 import { N2vBrowserComponent } from './components/n2v-browser/n2v-browser.component';
 import { VocabDialogComponent } from './components/n2v-browser/vocab-dialog/vocab-dialog.component';
+import { Doc2vecComponent } from './components/doc2vec/doc2vec.component';
+import { DgraphComponent } from './components/dgraph/dgraph.component';
+import { DtriplesComponent } from './components/dtriples/dtriples.component';
 
 
 // ** if you miss "--routing" option:
@@ -98,8 +99,9 @@ import { VocabDialogComponent } from './components/n2v-browser/vocab-dialog/voca
         // W2vCanvasComponent,
         VocabDialogComponent,
         Doc2vecComponent,
-        DgraphComponent,
         N2vBrowserComponent,
+        DgraphComponent,
+        DtriplesComponent,
     ],
     imports: [
         BrowserModule,
