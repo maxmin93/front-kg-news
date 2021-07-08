@@ -6,7 +6,12 @@ import { Subscription } from 'rxjs';
 import { WordsApiService } from 'src/app/services/words-api.service';
 import { UiApiService } from '../../services/ui-api.service';
 
-declare const vis:any;
+// **NOTE: You don't need to install vis-data. (standalone)
+// https://stackoverflow.com/a/60937676
+// https://tillias.wordpress.com/2020/10/11/visualize-graph-data-using-vis-network-and-angular/
+import { Node, Edge, Network } from "vis-network/standalone/esm/vis-network"
+import { DataSet } from "vis-network/standalone/esm/vis-network"
+// npm i vis-data --save-dev
 
 import { MatDialog } from '@angular/material/dialog';
 import { VocabDialogComponent } from './vocab-dialog/vocab-dialog.component';
@@ -215,8 +220,8 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         if( this.negatives.length > 0 ) pivot += `\n-(${this.negatives.join(",")})`;
 
         // id: number or string
-        let nodes_data = new vis.DataSet([{ id: 0, label: pivot, group: 0, shape: "box" }], {});
-        let edges_data = new vis.DataSet([], {});
+        let nodes_data = new DataSet<any>([{ id: 0, label: pivot, group: 0, shape: "box" }], {});
+        let edges_data = new DataSet<any>([], {});
         // console.log(nodes_data.get(0));
 
         this.segments = new Map(Object.entries(x['segments']));
@@ -259,7 +264,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         };
 
         // initialize your network!
-        let network = new vis.Network(container, data, options);
+        let network = new Network(container, data, options);
 
         // event: selectNode 를 설정해도 selectEdge 가 같이 fire 됨 (오류!)
         network.on("select", (params)=>{
@@ -267,10 +272,10 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
                 // target: nodes
                 // console.log("Selection Node:", nodes_data.get(params.nodes[0]));
                 if( params.nodes.length == 1 ){
-                    if( nodes_data.get(params.nodes[0]).group == 1 ){
+                    if( nodes_data.get(params.nodes[0])["group"] == 1 ){
                         let sg_pivots: string[] = [...x['positives']];
-                        sg_pivots.push(nodes_data.get(params.nodes[0]).label);
-                        let sg_list = this.segments.get( nodes_data.get(params.nodes[0]).label );
+                        sg_pivots.push(nodes_data.get(params.nodes[0])["label"]);
+                        let sg_list = this.segments.get( nodes_data.get(params.nodes[0])["label"] );
                         console.log(`${sg_pivots}: sg_list=${sg_list.length}`);
                         // subgraphs 그리기
                         this.vis_subgraphs(sg_pivots, sg_list);
@@ -286,7 +291,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         network.on("doubleClick", (params)=>{
             if( params.nodes.length > 0 ){
                 console.log("doubleClick:", nodes_data.get(params.nodes[0]));
-                this.pivot = nodes_data.get(params.nodes[0]).label;
+                this.pivot = nodes_data.get(params.nodes[0])["label"];
                 this.formWords.setValue({positives: this.pivot, negatives: '', threshold: this.threshold});
                 this.positives = [ this.pivot ];
                 this.negatives = [];
@@ -303,8 +308,8 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
 
         let sg_idx = 0;
         for(let sg of sg_list){
-            let nodes = new vis.DataSet();
-            let edges = new vis.DataSet();
+            let nodes = new DataSet<any>();
+            let edges = new DataSet<any>();
 
             for( let i=0; i<sg['sg_nodes'].length; i+=1 ){
                 let token = sg['sg_nodes'][i];
@@ -337,7 +342,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
                     randomSeed: root,
                 },
             };
-            this.subGraphs[sg_idx] = new vis.Network(container, {nodes: nodes, edges: edges}, options);
+            this.subGraphs[sg_idx] = new Network(container, {nodes: nodes, edges: edges}, options);
             this.subGraphs[sg_idx]['_sg_size'] = sg['size'];    // user data
 
             // next

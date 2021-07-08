@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 
@@ -7,17 +7,13 @@ import { UiApiService } from '../../services/ui-api.service';
 
 import { Document, Sentence, Token } from 'src/app/services/news-models';
 
-import tippy from 'tippy.js';
-
-// declare const tippy:any;
-
 
 @Component({
     selector: 'app-browser',
     templateUrl: './browser.component.html',
     styleUrls: ['./browser.component.scss']
 })
-export class BrowserComponent implements OnInit, OnDestroy, AfterViewInit {
+export class BrowserComponent implements OnInit, OnDestroy {
 
     showSearch: boolean = false;
     searchStr: string;
@@ -67,15 +63,6 @@ export class BrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             this.debug = params['debug'];
         });
 
-    }
-
-    ngAfterViewInit(): void{
-        tippy( this.tippy_test.nativeElement, {
-            content: 'My tooltip!',
-            theme: 'light',
-            placement: 'top-start',
-            arrow: true,
-        });
     }
 
     ngOnDestroy(): void{

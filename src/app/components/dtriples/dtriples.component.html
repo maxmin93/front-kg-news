@@ -32,7 +32,7 @@
     <div #subVisContainers fxLayout="column" fxLayoutGap="10px">
         <mat-card class="news-card" *ngFor="let sentence of sentences; index as i;" [ngStyle.md]="{'min-width': '1000px'}">
         <mat-card-header>
-            <mat-card-title>문장&#9839;{{i}} (sentence)</mat-card-title>
+            <mat-card-title>Sentence &#9839;{{i | number:'2.0'}}</mat-card-title>
             <mat-card-subtitle class="example-action-buttons" fxLayout="row">
                 <p style="max-width: 960px;">{{ sentence.text }}</p>
             </mat-card-subtitle>

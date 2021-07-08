@@ -25,14 +25,8 @@
     "@popperjs/core": "^2.0.6",
     "chart.js": "^2.9.4",
     "chartjs-plugin-datalabels": "^1.0.0",
-    "cytoscape": "^3.18.1",
-    "cytoscape-dagre": "^2.3.2",
-    "cytoscape-euler": "^1.2.2",
-    "cytoscape-klay": "^3.1.4",
-    "cytoscape-popper": "^2.0.0",
     "lodash-es": "^4.17.21",
     "rxjs": "~6.6.0",
-    "tippy.js": "^6.3.1",
     "tslib": "^2.0.0",
     "vis-network": "^9.0.4",
     "zone.js": "~0.11.3"
@@ -55,6 +49,7 @@
     "protractor": "~7.0.0",
     "ts-node": "~8.3.0",
     "tslint": "~6.1.0",
-    "typescript": "~4.1.2"
+    "typescript": "~4.1.2",
+    "vis-data": "^7.1.2"
   }
 }
