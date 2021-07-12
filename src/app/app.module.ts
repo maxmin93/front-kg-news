@@ -63,6 +63,7 @@ import { VocabDialogComponent } from './components/n2v-browser/vocab-dialog/voca
 import { Doc2vecComponent } from './components/doc2vec/doc2vec.component';
 import { DgraphComponent } from './components/dgraph/dgraph.component';
 import { DtriplesComponent } from './components/dtriples/dtriples.component';
+import { QtriplesComponent } from './components/qtriples/qtriples.component';
 
 
 // ** if you miss "--routing" option:
@@ -102,6 +103,7 @@ import { DtriplesComponent } from './components/dtriples/dtriples.component';
         N2vBrowserComponent,
         DgraphComponent,
         DtriplesComponent,
+        QtriplesComponent,
     ],
     imports: [
         BrowserModule,

@@ -80,4 +80,20 @@ export class DocsComponent implements OnInit {
         this.pageIndex = event.pageIndex;
         this.onSearch();
     }
+
+    resetPagination(){
+        let text = '';
+        this.formSearch.get('query').setValue(text);
+        localStorage.setItem('docs_query', text);
+        this.pageIndex = 0;
+        localStorage.setItem('docs_index', String(this.pageIndex));
+
+        this.newsService.getNewsResponse(text, this.pageIndex, DEFAULT_PAGE_SIZE).subscribe( (x:NewsResponse) => {
+            // console.log(x.hits, x.page_size, x.page_index, x.documents.length);
+            this.docs = [...x.documents];       // refresh
+            this.length = x.hits;
+            this.pageSize = x.page_size;
+            this.pageIndex = x.page_index;
+            });
+    }
 }

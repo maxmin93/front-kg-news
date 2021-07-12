@@ -3,9 +3,10 @@
 <div fxLayout="row" fxLayout.lt-sm="column" fxLayoutAlign="space-around center" fxLayoutGap="10px" style="margin-bottom: 10px;" >
     <form [formGroup]="formSearch" (ngSubmit)="onSearch()">
         <mat-form-field color="accent" class="custom-form-field">
-            <input matInput type="text" placeholder="search text" (keydown.enter)="onSearch()" formControlName="query">
+            <input matInput type="text" placeholder="Type query and Press enter-key" (keydown.enter)="onSearch()" formControlName="query">
         </mat-form-field>
     </form>
+    <button mat-mini-fab color="primary" (click)="resetPagination()" aria-label="Reset pagenation"><mat-icon>cancel</mat-icon></button>
     <mat-paginator hidePageSize="true"
         (page)="handlePageEvent($event)"
         [length]="length"
