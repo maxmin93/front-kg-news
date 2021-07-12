@@ -1,9 +1,7 @@
 import { Component, ViewChild, ElementRef, ChangeDetectorRef, OnInit, OnDestroy } from '@angular/core';
-import { MatAccordion } from '@angular/material/expansion';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription, of } from 'rxjs';
 
-import { NewsConfig } from 'src/app/app.config';
 import { NewsApiService } from '../../services/news-api.service';
 import { UiApiService } from '../../services/ui-api.service';
 
@@ -178,6 +176,16 @@ export class DtriplesComponent implements OnInit, OnDestroy {
 
     ////////////////////////////////////////////////////
 
+    vis_text_coloring(text: string, tokens: string[][]){
+        let done = []
+        for(let t of tokens){
+            if( done.includes(t[0]) ) continue;
+            text = text.replace(t[0], `<i>${t[0]}</i>`);
+            done.push(t[0]);
+        }
+        return text;
+    }
+
     vis_main_graph(s_roots: any, triples: any){
         if(!triples || !s_roots) return undefined;
 
@@ -200,10 +208,10 @@ export class DtriplesComponent implements OnInit, OnDestroy {
             let t_arr = triples[i] as ITriple[];
             for(let t of t_arr){
                 let label_value = //`${t.pred}`;
-                    `<b>S:</b> [ ${t.subj.join('|')} ]\n`
-                    + `<b>P: ${t.pred}</b>\n`
-                    + `<b>O:</b> [ ${t.objs.join('|')} ]\n`
-                    + `<b>A:</b> [ ${t.rest.join('|')} ]`;
+                    `<b>S:</b> [ ${ this.vis_text_coloring(t.subj.join('|'), t.subj_entities) } ]\n`
+                    + `<b>P: ${ this.vis_text_coloring(t.pred, t.pred_entities) }</b>\n`
+                    + `<b>O:</b> [ ${ this.vis_text_coloring(t.objs.join('|'), t.objs_entities) } ]\n`
+                    + `<b>A:</b> [ ${ this.vis_text_coloring(t.rest.join('|'), t.rest_entities) } ]`;
                 nodes_data.add({
                     id: t.id, label: label_value, group: Number(i), shape: "box", margin: 5,
                 });
@@ -221,7 +229,11 @@ export class DtriplesComponent implements OnInit, OnDestroy {
         let options = {
             nodes: {
                 // https://stackoverflow.com/a/51777791
-                font: { size: 11, face: 'arial', multi: 'html', bold: '12px courier black', align: 'left' }
+                font: {
+                    size: 11, face: 'arial', multi: 'html', align: 'left'
+                    , bold: '12px courier black'
+                    , ital: '11px arial darkred'
+                }
             },
             edges: {
                 // width 관련 설정하면 edge label 이 wrap 처리됨 (오류)
@@ -285,10 +297,10 @@ export class DtriplesComponent implements OnInit, OnDestroy {
         let t_arr = triples as ITriple[];
         for(let t of t_arr){
             let label_value = //`${t.pred}`;
-                `<b>S:</b> [ ${t.subj.join('|')} ]\n`
-                + `<b>P: ${t.pred}</b>\n`
-                + `<b>O:</b> [ ${t.objs.join('|')} ]\n`
-                + `<b>A:</b> [ ${t.rest.join('|')} ]`;
+                `<b>S:</b> [ ${ this.vis_text_coloring(t.subj.join('|'), t.subj_entities) } ]\n`
+                + `<b>P: ${ this.vis_text_coloring(t.pred, t.pred_entities) }</b>\n`
+                + `<b>O:</b> [ ${ this.vis_text_coloring(t.objs.join('|'), t.objs_entities) } ]\n`
+                + `<b>A:</b> [ ${ this.vis_text_coloring(t.rest.join('|'), t.rest_entities) } ]`;
             nodes_data.add({ id: t.id, label: label_value, group: Number(s_idx), shape: "box", margin: 5 });
             edges_data.add({ from: t.id, to: t.parent, label: t.sg_type });   // t.head
         }
@@ -301,7 +313,11 @@ export class DtriplesComponent implements OnInit, OnDestroy {
         let options = {
             nodes: {
                 // https://stackoverflow.com/a/51777791
-                font: { size: 11, face: 'arial', multi: 'html', bold: '12px courier black', align: 'left' }
+                font: {
+                    size: 11, face: 'arial', multi: 'html', align: 'left'
+                    , bold: '12px courier black'
+                    , ital: '11px arial darkred'
+                }
             },
             edges: {
                 // width 관련 설정하면 edge label 이 wrap 처리됨 (오류)
@@ -376,10 +392,15 @@ export interface ITriple {
     sg_type: string;
     parent: string;
     cpoint?: string;
-    head: string
+    head: string;
     subj: string[];
     pred: string;
     objs: string[];
     rest: string[];
+    // color
+    subj_entities: string[][];
+    pred_entities: string[][];
+    objs_entities: string[][];
+    rest_entities: string[][];
 }
 
