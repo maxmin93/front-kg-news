@@ -11,19 +11,19 @@
         <span class="toolbar-spacer"></span>
         <!-- 상단 메뉴 : 데스크탑 전체 화면용 (모바일 전환시 감춰짐) -->
         <div fxShow="true" fxHide.lt-md="true">
-            <a mat-button [routerLink]="'/dashboard'">
+            <a mat-button [routerLink]="['dashboard']">
                 <mat-icon>dashboard</mat-icon>
                 Dashboard
             </a>
-            <a mat-button [routerLink]="'/docs'">
+            <a mat-button [routerLink]="['docs']">
                 <mat-icon>article</mat-icon>
                 Documents
             </a>
-            <a mat-button [routerLink]="'/qtriples'">
+            <a mat-button [routerLink]="['qtriples','D71692521']">
                 <mat-icon>find_in_page</mat-icon>
                 Query
             </a>
-            <a mat-button [routerLink]="'/n2v-browser'">
+            <a mat-button [routerLink]="['n2v-browser']">
                 <mat-icon>extension</mat-icon>
                 Words
             </a>
@@ -39,7 +39,7 @@
         <mat-nav-list>
             <a mat-list-item (click)="sidenav.close()" [routerLink]="'/dashboard'" routerLinkActive="list-item-active"> <mat-icon>dashboard</mat-icon> &nbsp; Dashboard </a>
             <a mat-list-item (click)="sidenav.close()" [routerLink]="'/docs'" routerLinkActive="list-item-active"> <mat-icon>article</mat-icon> &nbsp; Documents </a>
-            <a mat-list-item (click)="sidenav.close()" [routerLink]="'/qtriples'" routerLinkActive="list-item-active"> <mat-icon>find_in_page</mat-icon> &nbsp; Query </a>
+            <a mat-list-item (click)="sidenav.close()" [routerLink]="['qtriples','D71692521']" routerLinkActive="list-item-active"> <mat-icon>find_in_page</mat-icon> &nbsp; Query </a>
             <a mat-list-item (click)="sidenav.close()" [routerLink]="'/n2v-browser'" routerLinkActive="list-item-active"> <mat-icon>extension</mat-icon> &nbsp; Words </a>
             <!-- a mat-list-item (click)="sidenav.close()" [routerLink]="'/layout'" routerLinkActive="list-item-active"> Layout Test </a -->
             <a mat-list-item (click)="sidenav.close()" href=""> <mat-icon>close</mat-icon> Close</a>

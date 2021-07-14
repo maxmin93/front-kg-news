@@ -67,5 +67,10 @@ export class DocsApiService {
         return this.http.get<any>(url);
     }
 
+    // http://localhost:8888/api/docs/dgraph/D67113626/triples
+    getQryTriples(qry:string): Observable<any>{
+        let url = `${this.api_url}/query/triples?q=${encodeURI(qry)}`;
+        return this.http.get<any>(url);
+    }
 
 }

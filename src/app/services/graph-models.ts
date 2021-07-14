@@ -46,3 +46,25 @@ export interface IEvent {
     type: string;
     data: any;
 };
+
+//////////////////////////////////////
+
+// dtriples, qtriples 에서 사용
+export interface ITriple {
+    id: string;
+    sg_type: string;
+    parent: string;
+    cpoint?: string;
+    head: string;
+    subj: string[];
+    pred: string;
+    objs: string[];
+    rest: string[];
+    // 부가정보
+    pred_stems: string[];
+    subj_tokens: string[][];
+    pred_tokens: string[][];
+    objs_tokens: string[][];
+    rest_tokens: string[][];
+}
+

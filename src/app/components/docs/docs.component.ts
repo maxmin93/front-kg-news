@@ -27,7 +27,8 @@ export class DocsComponent implements OnInit {
     showFirstLastButtons = true;
 
     formSearch = new FormGroup({
-        query: new FormControl('', Validators.pattern('([^,\s]+)'))
+        // 공백과 콤마가 아닌 모든 문자로 시작
+        query: new FormControl('', [ Validators.pattern('[^,]*') ])
     });
 
     constructor(

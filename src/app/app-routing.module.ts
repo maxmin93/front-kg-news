@@ -50,7 +50,7 @@ const routes: Routes = [
     component: DtriplesComponent
   },
   {
-    path: 'qtriples', data :{ title: "Triples Graph of User Query" },
+    path: 'qtriples/:id', data :{ title: "Triples Graph of User Query" },
     component: QtriplesComponent
   },
   {

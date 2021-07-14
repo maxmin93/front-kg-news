@@ -40,9 +40,9 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
 
     apiSwitch: boolean = true;      // true: node2vec, false: word2vec
     formWords = new FormGroup({
-        positives: new FormControl('', Validators.pattern('([^,\s]+)')),
-        negatives: new FormControl('', Validators.pattern('([^,\s]+)')),
-        threshold: new FormControl(this.threshold, [Validators.min(0.5), Validators.max(1.0)]),
+        positives: new FormControl('', [ Validators.pattern('([^,\s]+)') ]),
+        negatives: new FormControl('', [ Validators.pattern('([^,\s]+)') ]),
+        threshold: new FormControl(this.threshold, [ Validators.min(0.5), Validators.max(1.0) ]),
     });
 
     pivot: string;

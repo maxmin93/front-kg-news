@@ -2,8 +2,9 @@ import { Component, ViewChild, ElementRef, ChangeDetectorRef, OnInit, OnDestroy 
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription, of } from 'rxjs';
 
-import { NewsApiService } from '../../services/news-api.service';
-import { UiApiService } from '../../services/ui-api.service';
+import { NewsApiService } from 'src/app/services/news-api.service';
+import { UiApiService } from 'src/app/services/ui-api.service';
+import { ITriple } from 'src/app/services/graph-models';
 
 import { Document, Sentence, Token } from 'src/app/services/news-models';
 import { DocsApiService } from 'src/app/services/docs-api.service';
@@ -180,6 +181,7 @@ export class DtriplesComponent implements OnInit, OnDestroy {
         let done = []
         for(let t of tokens){
             if( done.includes(t[0]) ) continue;
+            if( t[1] == null || t[1] == 'OTHER' ) continue;
             text = text.replace(t[0], `<i>${t[0]}</i>`);
             done.push(t[0]);
         }
@@ -208,10 +210,10 @@ export class DtriplesComponent implements OnInit, OnDestroy {
             let t_arr = triples[i] as ITriple[];
             for(let t of t_arr){
                 let label_value = //`${t.pred}`;
-                    `<b>S:</b> [ ${ this.vis_text_coloring(t.subj.join('|'), t.subj_entities) } ]\n`
-                    + `<b>P: ${ this.vis_text_coloring(t.pred, t.pred_entities) }</b>\n`
-                    + `<b>O:</b> [ ${ this.vis_text_coloring(t.objs.join('|'), t.objs_entities) } ]\n`
-                    + `<b>A:</b> [ ${ this.vis_text_coloring(t.rest.join('|'), t.rest_entities) } ]`;
+                    `<b>S:</b> [ ${ this.vis_text_coloring(t.subj.join('|'), t.subj_tokens) } ]\n`
+                    + `<b>P: ${ this.vis_text_coloring(t.pred, t.pred_tokens) }</b>\n`
+                    + `<b>O:</b> [ ${ this.vis_text_coloring(t.objs.join('|'), t.objs_tokens) } ]\n`
+                    + `<b>A:</b> [ ${ this.vis_text_coloring(t.rest.join('|'), t.rest_tokens) } ]`;
                 nodes_data.add({
                     id: t.id, label: label_value, group: Number(i), shape: "box", margin: 5,
                 });
@@ -233,6 +235,7 @@ export class DtriplesComponent implements OnInit, OnDestroy {
                     size: 11, face: 'arial', multi: 'html', align: 'left'
                     , bold: '12px courier black'
                     , ital: '11px arial darkred'
+                    , boldital: '12px arial darkred'
                 }
             },
             edges: {
@@ -297,10 +300,10 @@ export class DtriplesComponent implements OnInit, OnDestroy {
         let t_arr = triples as ITriple[];
         for(let t of t_arr){
             let label_value = //`${t.pred}`;
-                `<b>S:</b> [ ${ this.vis_text_coloring(t.subj.join('|'), t.subj_entities) } ]\n`
-                + `<b>P: ${ this.vis_text_coloring(t.pred, t.pred_entities) }</b>\n`
-                + `<b>O:</b> [ ${ this.vis_text_coloring(t.objs.join('|'), t.objs_entities) } ]\n`
-                + `<b>A:</b> [ ${ this.vis_text_coloring(t.rest.join('|'), t.rest_entities) } ]`;
+                `<b>S:</b> [ ${ this.vis_text_coloring(t.subj.join('|'), t.subj_tokens) } ]\n`
+                + `<b>P: ${ this.vis_text_coloring(t.pred, t.pred_tokens) }</b>\n`
+                + `<b>O:</b> [ ${ this.vis_text_coloring(t.objs.join('|'), t.objs_tokens) } ]\n`
+                + `<b>A:</b> [ ${ this.vis_text_coloring(t.rest.join('|'), t.rest_tokens) } ]`;
             nodes_data.add({ id: t.id, label: label_value, group: Number(s_idx), shape: "box", margin: 5 });
             edges_data.add({ from: t.id, to: t.parent, label: t.sg_type });   // t.head
         }
@@ -317,6 +320,7 @@ export class DtriplesComponent implements OnInit, OnDestroy {
                     size: 11, face: 'arial', multi: 'html', align: 'left'
                     , bold: '12px courier black'
                     , ital: '11px arial darkred'
+                    , boldital: '12px arial darkred'
                 }
             },
             edges: {
@@ -387,20 +391,3 @@ export class DtriplesComponent implements OnInit, OnDestroy {
     ]
 },
 */
-export interface ITriple {
-    id: string;
-    sg_type: string;
-    parent: string;
-    cpoint?: string;
-    head: string;
-    subj: string[];
-    pred: string;
-    objs: string[];
-    rest: string[];
-    // color
-    subj_entities: string[][];
-    pred_entities: string[][];
-    objs_entities: string[][];
-    rest_entities: string[][];
-}
-
