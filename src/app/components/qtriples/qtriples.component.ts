@@ -51,6 +51,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
 
     @ViewChild('docsVisContainer', {static: false}) private docsVisContainer: ElementRef;
     @ViewChild('qryVisContainer', {static: false}) private qryVisContainer: ElementRef;
+    @ViewChild('resultVisContainer', {static: false}) private resultVisContainer: ElementRef;
 
     constructor(
         private route: ActivatedRoute,
@@ -132,6 +133,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
         // );
     }
 
+    // query triples graph
     doQuery(){
         let query = this.formQuery.get('text').value;
         console.log('query:', query);
@@ -145,7 +147,23 @@ export class QtriplesComponent implements OnInit, OnDestroy {
 
             // this.ref.detectChanges();
             // documents graph
-            this.qryGraph = this.vis_qry_graph(x['docid'], s_roots, triples);
+            this.qryGraph = this.draw_vis_graph(this.qryVisContainer, x['docid'], s_roots, triples);
+        });
+    }
+
+    // result triples graph
+    doSearch(){
+        let query = this.formQuery.get('text').value;
+        if(query.length == 0) return;
+
+        this.docsService.getResultTriples(query, this.docid).subscribe(x=>{
+            console.log('RTriples:', x);
+            let triples = x['triples'];
+            let s_roots = x['roots'];
+
+            // this.ref.detectChanges();
+            // documents graph
+            this.qryGraph = this.draw_vis_graph(this.resultVisContainer, x['docid'], s_roots, triples);
         });
     }
 
@@ -177,7 +195,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
                 // detect div of subgraphs
                 this.ref.detectChanges();
                 // documents graph
-                this.docsGraph = this.vis_docs_graph(x['docid'], this.s_roots, this.triples);
+                this.docsGraph = this.draw_vis_graph(this.docsVisContainer, x['docid'], this.s_roots, this.triples);
             }
         });
     }
@@ -196,7 +214,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
         return text;
     }
 
-    vis_docs_graph(docid: string, s_roots: any, triples: any){
+    draw_vis_graph(container: ElementRef, docid: string, s_roots: any, triples: any){
         if(!triples || !s_roots) return undefined;
 
         let nodes_data = new DataSet<any>([]);
@@ -234,7 +252,6 @@ export class QtriplesComponent implements OnInit, OnDestroy {
         }
 
         // create a network
-        let container = this.docsVisContainer.nativeElement;
         let data = { nodes: nodes_data, edges: edges_data };
 
         // styles
@@ -267,107 +284,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
         };
 
         // initialize your network!
-        let network = new Network(container, data, options);
-        window['vis'] = network;
-
-        // event: selectNode 를 설정해도 selectEdge 가 같이 fire 됨 (오류!)
-        network.on("select", (params)=>{
-            if( params.nodes.length > 0 ){
-                // target: nodes
-                console.log("Selection Node:", nodes_data.get(params.nodes[0]));
-                if( params.nodes.length == 1 ){
-                    // if( nodes_data.get(params.nodes[0]).group == 1 ){
-                    // }
-                }
-            }
-            // select 가 nodes 에 반응하지 않은 경우만 edges 처리
-            else if( params.edges.length > 0 ){
-                // console.log("Selected Edges:", params.edges);
-            }
-        });
-        // event: doubleClick
-        network.on("doubleClick", (params)=>{
-            if( params.nodes.length > 0 ){
-                console.log("doubleClick:", nodes_data.get(params.nodes[0]));
-
-            }
-        });
-
-        return network;
-    }
-
-    vis_qry_graph(qid: string, s_roots: any, triples: any){
-        if(!triples || !s_roots) return undefined;
-
-        let nodes_data = new DataSet<any>([]);
-        let edges_data = new DataSet<any>([]);
-
-        // roots of sentences
-        for(let i of Object.keys(s_roots)){
-            if( !s_roots[i] ) continue;
-            nodes_data.add({
-                id: this.rootID(qid, Number(i)), label: `<b>ROOT${i}</b>`, group: Number(i),
-                shape: "circle", borderWidth: 2, margin: 5,
-                color: { border: 'black', background: 'white' },
-                font: { align: 'center' },
-            });
-        }
-
-        for(let i of Object.keys(triples)){
-            if( triples[i].length == 0 ) continue;
-            let t_arr = triples[i] as ITriple[];
-            for(let t of t_arr){
-                let pred_orgin = t.pred.replace(/\s/g, "").replace(/,/g, "");   // 같으면 따로 표시 안함
-                let pred_stems = (pred_orgin == t.pred_stems.join('')) ? '' : `(${t.pred_stems.join('|')})`;
-                let label_value = //`${t.pred}`;
-                    `<b>S:</b> [ ${ this.vis_text_coloring(t.subj.join('|'), t.subj_tokens) } ]\n`
-                    + `<b>P: ${ this.vis_text_coloring(t.pred, t.pred_tokens) }</b> ${pred_stems}\n`
-                    + `<b>O:</b> [ ${ this.vis_text_coloring(t.objs.join('|'), t.objs_tokens) } ]\n`
-                    + `<b>A:</b> [ ${ this.vis_text_coloring(t.rest.join('|'), t.rest_tokens) } ]`;
-                nodes_data.add({
-                    id: t.id, label: label_value, group: Number(i), shape: "box", margin: 5,
-                });
-                edges_data.add({
-                    from: t.id, to: t.parent, label: t.sg_type
-                });
-            }
-        }
-
-        // create a network
-        let container = this.qryVisContainer.nativeElement;
-        let data = { nodes: nodes_data, edges: edges_data };
-
-        // styles
-        let options = {
-            autoResize: true,
-            nodes: {
-                // https://stackoverflow.com/a/51777791
-                font: {
-                    size: 11, face: 'arial', multi: 'html', align: 'left'
-                    , bold: '12px courier black'
-                    , ital: '11px arial darkred'
-                    , boldital: '12px arial darkred'
-                }
-            },
-            edges: {
-                // width 관련 설정하면 edge label 이 wrap 처리됨 (오류)
-                // width: 1, widthConstraint: { maximum: 10 },
-                font: { size: 11, align: "middle" },
-                arrows: { to: { type: 'arrow', enabled: true, scaleFactor: 0.5 }, },
-            },
-            physics: {
-                // enabled: true,
-                hierarchicalRepulsion: { avoidOverlap: 1, },
-            },
-            // https://visjs.github.io/vis-network/docs/network/layout.html
-            layout: {
-                improvedLayout: true,
-                hierarchical: { enabled: true, direction: 'UD', nodeSpacing: 10, treeSpacing: 20 },
-            },
-        };
-
-        // initialize your network!
-        let network = new Network(container, data, options);
+        let network = new Network(container.nativeElement, data, options);
         window['vis'] = network;
 
         // event: selectNode 를 설정해도 selectEdge 가 같이 fire 됨 (오류!)

@@ -61,16 +61,21 @@ export class DocsApiService {
     //  DocTriples
     //
 
-    // http://localhost:8888/api/docs/dgraph/D67113626/triples
+    // http://localhost:28888/api/docs/dgraph/D67113626/triples
     getDocTriples(docid:string): Observable<any>{
         let url = `${this.api_url}/dgraph/${docid}/triples`;
         return this.http.get<any>(url);
     }
 
-    // http://localhost:8888/api/docs/dgraph/D67113626/triples
+    // http://localhost:28888/api/docs/query/triples?q=
     getQryTriples(qry:string): Observable<any>{
         let url = `${this.api_url}/query/triples?q=${encodeURI(qry)}`;
         return this.http.get<any>(url);
     }
 
+    // http://localhost:28888/api/docs/search/triples?q=
+    getResultTriples(qry: string, docid: string): Observable<any>{
+        let url = `${this.api_url}/search/triples?docid=${docid}&q=${encodeURI(qry)}`;
+        return this.http.get<any>(url);
+    }
 }

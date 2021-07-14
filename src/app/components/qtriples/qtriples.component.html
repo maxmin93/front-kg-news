@@ -22,6 +22,20 @@
     </mat-card>
 
 
+    <mat-card class="news-card" [ngStyle.md]="{'min-width': '1000px'}">
+    <mat-card-header fxLayout="row">
+        <mat-card-title>Results</mat-card-title>
+        <button mat-button color="primary" style="height: 100%" (click)="doSearch()" aria-label="Search result triples"><mat-icon>plagiarism</mat-icon>Search</button>
+    </mat-card-header>
+    <mat-card-content class="large" style="height: 40vh; margin: 10px; border: 2px solid black;">
+
+        <div #resultVisContainer fxFill>
+        </div>
+
+    </mat-card-content>
+    </mat-card>
+
+
     <mat-card *ngIf="document" class="news-card" [ngStyle.md]="{'min-width': '1000px'}">
     <mat-card-header fxLayout="column">
         <mat-card-title>
