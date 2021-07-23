@@ -31,7 +31,7 @@ export class DtriplesComponent implements OnInit, OnDestroy {
     sentences: Sentence[] = [];
 
     zeroPad: Function = (num, places) => String(num).padStart(places, '0');
-    rootID: Function = (num) => `${this.docid}_${this.zeroPad(num, 2)}_ROOT`;
+    rootID: Function = (num) => `${this.docid}_${this.zeroPad(num, 2)}`;
 
     // triples data for vis_network
     triples: any;   // Map<string,ITriple[]>;

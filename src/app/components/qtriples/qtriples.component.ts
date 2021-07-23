@@ -34,7 +34,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
     document: Document;
 
     zeroPad: Function = (num, places) => String(num).padStart(places, '0');
-    rootID: Function = (_id, num) => `${_id}_${this.zeroPad(num, 2)}_ROOT`;
+    rootID: Function = (_id, num) => `${_id}_${this.zeroPad(num, 2)}`;
 
     // triples data for vis_network
     triples: any;   // Map<string,ITriple[]>;
@@ -157,7 +157,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
         if(query.length == 0) return;
 
         this.docsService.getResultTriples(query, this.docid).subscribe(x=>{
-            console.log('RTriples:', x);
+            console.log('AnsTriples:', x);
             let triples = x['triples'];
             let s_roots = x['roots'];
 
