@@ -118,7 +118,7 @@ export class DgraphComponent implements OnInit {
             console.log('Dgraph:', x);
             this.dgraph = x;
             this.dgraph_origin = of(x);
-            this.dgraph_simplified = this.docsService.getDgraphDocSimplified(docid);
+            // this.dgraph_simplified = this.docsService.getDgraphDocSimplified(docid);
 
             // subgaphs
             this.subgraphs_pruned = Array<Observable<any>>();
