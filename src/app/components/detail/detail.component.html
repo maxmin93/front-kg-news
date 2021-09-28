@@ -98,7 +98,10 @@
             <p>
                 <span *ngFor="let term of tag.value; index as i"
                     class="news-provider" style="display: inline-block; margin-right: 5px" (click)="highlight(term[0])">
-                    {{ i > 0 ? ', &nbsp;' : '' }}{{ term[0] }}({{ term[1] }})
+                    {{ i > 0 ? ', &nbsp;' : '' }}
+                    <a *ngIf="term[0][1].length" href="https://www.google.com/search?kgmid={{term[0][1]}}&kponly" target="_blank">{{ term[0][0] }}</a>
+                    <a *ngIf="!term[0][1].length" style="text-decoration:none; color:inherit" href="javascript:void(0)">{{ term[0][0] }}</a>
+                    ({{ term[1] }})
                 </span>
                 <!-- span class="news-provider" matBadge="1" matBadgeSize="small" matBadgeOverlap="false">Text with large badge</span -->
             </p>
