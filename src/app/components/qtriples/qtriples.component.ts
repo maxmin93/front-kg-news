@@ -5,7 +5,7 @@ import { Observable, Subscription, of } from 'rxjs';
 
 import { NewsApiService } from 'src/app/services/news-api.service';
 import { UiApiService } from 'src/app/services/ui-api.service';
-import { ITriple } from 'src/app/services/graph-models';
+import { ITripleNode, ITripleEdge } from 'src/app/services/graph-models';
 
 import { Document, Sentence, Token } from 'src/app/services/news-models';
 import { DocsApiService } from 'src/app/services/docs-api.service';
@@ -142,12 +142,16 @@ export class QtriplesComponent implements OnInit, OnDestroy {
 
         this.docsService.getQryTriples(query).subscribe(x=>{
             console.log('QTriples:', x);
-            let triples = x['triples'];
-            let s_roots = x['roots'];
 
-            // this.ref.detectChanges();
+            let q_roots = x['roots'] as Map<number,string>;    // Object 로 인식됨 (Map 안됨)
+            let q_nodes = x['nodes'] as ITripleNode[];
+            let q_edges = x['edges'] as ITripleEdge[];
+            console.log('Q.roots:', q_roots);
+            console.log('Q.nodes:', q_nodes);
+            console.log('Q.edges:', q_edges);
+
             // documents graph
-            this.qryGraph = this.draw_vis_graph(this.qryVisContainer, x['docid'], s_roots, triples);
+            this.qryGraph = this.draw_vis_graph(this.qryVisContainer, x['docid'], q_roots, q_nodes, q_edges);
         });
     }
 
@@ -158,12 +162,17 @@ export class QtriplesComponent implements OnInit, OnDestroy {
 
         this.docsService.getResultTriples(query, this.docid).subscribe(x=>{
             console.log('AnsTriples:', x);
-            let triples = x['triples'];
-            let s_roots = x['roots'];
+
+            let a_roots = x['roots'] as Map<number,string>;    // Object 로 인식됨 (Map 안됨)
+            let a_nodes = x['nodes'] as ITripleNode[];
+            let a_edges = x['edges'] as ITripleEdge[];
+            console.log('A.roots:', a_roots);
+            console.log('A.nodes:', a_nodes);
+            console.log('A.edges:', a_edges);
 
             // this.ref.detectChanges();
             // documents graph
-            this.qryGraph = this.draw_vis_graph(this.resultVisContainer, x['docid'], s_roots, triples);
+            this.qryGraph = this.draw_vis_graph(this.resultVisContainer, x['docid'], a_roots, a_nodes, a_edges);
         });
     }
 
@@ -180,75 +189,77 @@ export class QtriplesComponent implements OnInit, OnDestroy {
     }
 
     getDocTriples(docid:string): Subscription{
-        return this.docsService.getDocTriples(docid).subscribe(x=>{
+        return this.docsService.getTripleGraphs(docid).subscribe(x=>{
             if( !x || Object.keys(x).length == 0 ){
                 console.log(`Empty response by docid=[${docid}]`);
             }
-            console.log('DocTriples:', x);
-            if( x.hasOwnProperty('triples') && x.hasOwnProperty('roots') ){
-                this.triples = x['triples'];
-                this.s_roots = x['roots'];
-                // use object instead of Map<>
-                // console.log(`triples(size=${Object.keys(this.triples).length}):`, Object.keys(this.triples), Object.values(this.triples) );
-                // console.log(`s_roots(size=${Object.keys(this.s_roots).length}):`, Object.keys(this.s_roots), Object.values(this.s_roots) );
+            let d_roots = x['roots'] as Map<number,string>;    // Object 로 인식됨 (Map 안됨)
+            let d_nodes = x['nodes'] as ITripleNode[];
+            let d_edges = x['edges'] as ITripleEdge[];
+            // use object instead of Map<>
+            console.log('D.roots:', d_roots);
+            console.log('D.nodes:', d_nodes);
+            console.log('D.edges:', d_edges);
 
-                // detect div of subgraphs
-                this.ref.detectChanges();
-                // documents graph
-                this.docsGraph = this.draw_vis_graph(this.docsVisContainer, x['docid'], this.s_roots, this.triples);
-            }
+            // detect div of subgraphs
+            this.ref.detectChanges();
+            // documents graph
+            this.docsGraph = this.draw_vis_graph(this.docsVisContainer, x['docid'], d_roots, d_nodes, d_edges);
         });
     }
 
 
     ////////////////////////////////////////////////////
 
-    vis_text_coloring(text: string, tokens: string[][]){
-        let done = []
+    vis_text_coloring(tokens: any[]){
+        let result = []
         for(let t of tokens){
-            if( done.includes(t[0]) ) continue;
-            if( t[1] == null || t[1] == 'OTHER' ) continue;
-            text = text.replace(t[0], `<i>${t[0]}</i>`);
-            done.push(t[0]);
+            let text = t[0];
+            for(let e of t[1]){
+                text = text.replace(e, `<i>${e}</i>`);
+            }
+            result.push(text);
         }
-        return text;
+        return result;
     }
 
-    draw_vis_graph(container: ElementRef, docid: string, s_roots: any, triples: any){
-        if(!triples || !s_roots) return undefined;
-
+    draw_vis_graph(container: ElementRef, docid: string, roots: Map<number,string>, nodes: ITripleNode[], edges: ITripleEdge[]){
         let nodes_data = new DataSet<any>([]);
         let edges_data = new DataSet<any>([]);
 
-        // roots of sentences
-        for(let i of Object.keys(s_roots)){
-            if( !s_roots[i] ) continue;
+        // root
+        for(const [key, value] of Object.entries(roots)){
+            const s_idx = Number(key);
+            const root_id = this.rootID(s_idx);
             nodes_data.add({
-                id: this.rootID(docid, Number(i)), label: `<b>ROOT${i}</b>`, group: Number(i),
+                id: root_id, label: `<b>ROOT${s_idx}</b>`, group: s_idx,
                 shape: "circle", borderWidth: 2, margin: 5,
                 color: { border: 'black', background: 'white' },
                 font: { align: 'center' },
             });
+            edges_data.add({
+                from: value, to: root_id, group: s_idx, label: ''
+            });
         }
-
-        for(let i of Object.keys(triples)){
-            if( triples[i].length == 0 ) continue;
-            let t_arr = triples[i] as ITriple[];
-            for(let t of t_arr){
-                let pred_orgin = t.pred.replace(/\s/g, "").replace(/,/g, "");   // 같으면 따로 표시 안함
-                let pred_stems = (pred_orgin == t.pred_stems.join('')) ? '' : `(${t.pred_stems.join('|')})`;
-                let label_value = //`${t.pred}`;
-                    `<b>S:</b> [ ${ this.vis_text_coloring(t.subj.join('|'), t.subj_tokens) } ]\n`
-                    + `<b>P: ${ this.vis_text_coloring(t.pred, t.pred_tokens) }</b> ${pred_stems}\n`
-                    + `<b>O:</b> [ ${ this.vis_text_coloring(t.objs.join('|'), t.objs_tokens) } ]\n`
-                    + `<b>A:</b> [ ${ this.vis_text_coloring(t.rest.join('|'), t.rest_tokens) } ]`;
-                nodes_data.add({
-                    id: t.id, label: label_value, group: Number(i), shape: "box", margin: 5,
-                });
-                edges_data.add({
-                    from: t.id, to: t.parent, label: t.sg_type
-                });
-            }
+        // nodes
+        for(let data of nodes){
+            const t = data as ITripleNode;
+            let label_value = //`${t.pred}`;
+                `<b>S:</b> [ ${ this.vis_text_coloring(t.subj).join('|') } ]\n`
+                + `<b>P:</b> <b><i>${t.pred}</i></b>\n`
+                + `<b>O:</b> [ ${ this.vis_text_coloring(t.objs).join('|') } ]\n`
+                + `<b>C:</b> [ ${ this.vis_text_coloring(t.rest).join('|') } ]`;
+            nodes_data.add({
+                id: t.id, label: label_value, group: t.group, shape: "box", margin: 5,
+            });
+        }
+        // edges
+        for(let data of edges){
+            const e = data as ITripleEdge;
+            let label_value = `${e.joint[0]}`;
+            edges_data.add({
+                from: e.from, to: e.to, group: e.group, label: label_value
+            });
         }
 
         // create a network
@@ -263,7 +274,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
                     size: 11, face: 'arial', multi: 'html', align: 'left'
                     , bold: '12px courier black'
                     , ital: '11px arial darkred'
-                    , boldital: '12px arial darkred'
+                    , boldital: '12px arial darkblue'
                 }
             },
             edges: {

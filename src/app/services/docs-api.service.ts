@@ -61,6 +61,12 @@ export class DocsApiService {
     //  DocTriples
     //
 
+    // http://localhost:28888/api/docs/tgraph/D67113626
+    getTripleGraphs(docid:string): Observable<any>{
+        let url = `${this.api_url}/tgraph/${docid}`;
+        return this.http.get<any>(url);
+    }
+
     // http://localhost:28888/api/docs/dgraph/D67113626/triples
     getDocTriples(docid:string): Observable<any>{
         let url = `${this.api_url}/dgraph/${docid}/triples`;

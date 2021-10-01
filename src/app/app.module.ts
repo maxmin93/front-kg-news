@@ -64,6 +64,7 @@ import { Doc2vecComponent } from './components/doc2vec/doc2vec.component';
 import { DgraphComponent } from './components/dgraph/dgraph.component';
 import { DtriplesComponent } from './components/dtriples/dtriples.component';
 import { QtriplesComponent } from './components/qtriples/qtriples.component';
+import { TGraphComponent } from './components/tgraph/tgraph.component';
 
 
 // ** if you miss "--routing" option:
@@ -104,6 +105,7 @@ import { QtriplesComponent } from './components/qtriples/qtriples.component';
         DgraphComponent,
         DtriplesComponent,
         QtriplesComponent,
+        TGraphComponent,
     ],
     imports: [
         BrowserModule,

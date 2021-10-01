@@ -4,7 +4,7 @@ import { Observable, Subscription, of } from 'rxjs';
 
 import { NewsApiService } from 'src/app/services/news-api.service';
 import { UiApiService } from 'src/app/services/ui-api.service';
-import { ITriple } from 'src/app/services/graph-models';
+import { ITripleNode, ITripleEdge } from 'src/app/services/graph-models';
 
 import { Document, Sentence, Token } from 'src/app/services/news-models';
 import { DocsApiService } from 'src/app/services/docs-api.service';
@@ -17,11 +17,12 @@ import { DataSet } from "vis-network/standalone/esm/vis-network"
 // npm i vis-data --save-dev
 
 @Component({
-  selector: 'app-dtriples',
-  templateUrl: './dtriples.component.html',
-  styleUrls: ['./dtriples.component.scss']
+  selector: 'app-tgraph',
+  templateUrl: './tgraph.component.html',
+  styleUrls: ['./tgraph.component.scss']
 })
-export class DtriplesComponent implements OnInit, OnDestroy {
+export class TGraphComponent implements OnInit, OnDestroy {
+
 
     document_content:string = 'ABC<mark>EFG</mark>HIJ';
     debug: boolean = false;
@@ -34,8 +35,9 @@ export class DtriplesComponent implements OnInit, OnDestroy {
     rootID: Function = (num) => `${this.docid}_${this.zeroPad(num, 2)}`;
 
     // triples data for vis_network
-    triples: any;   // Map<string,ITriple[]>;
-    s_roots: any;   // Map<string,string>;
+    t_roots: Map<number,string>;
+    t_nodes: ITripleNode[];
+    t_edges: ITripleEdge[];
 
     // vis_network objects
     mainGraph: any;
@@ -137,90 +139,97 @@ export class DtriplesComponent implements OnInit, OnDestroy {
     }
 
     getDocTriples(docid:string): Subscription{
-        return this.docsService.getDocTriples(docid).subscribe(x=>{
+        return this.docsService.getTripleGraphs(docid).subscribe(x=>{
             if( !x || Object.keys(x).length == 0 ){
                 console.log(`Empty response by docid=[${docid}]`);
+                return;
             }
-            console.log('DocTriples:', x);
-            if( x.hasOwnProperty('triples') && x.hasOwnProperty('roots') ){
-                this.triples = x['triples'];
-                this.s_roots = x['roots'];
-                // use object instead of Map<>
-                // console.log(`triples(size=${Object.keys(this.triples).length}):`, Object.keys(this.triples), Object.values(this.triples) );
-                // console.log(`s_roots(size=${Object.keys(this.s_roots).length}):`, Object.keys(this.s_roots), Object.values(this.s_roots) );
+            this.t_roots = x['roots'] as Map<number,string>;    // Object 로 인식됨 (Map 안됨)
+            this.t_nodes = x['nodes'] as ITripleNode[];
+            this.t_edges = x['edges'] as ITripleEdge[];
+            // use object instead of Map<>
+            console.log('roots:', this.t_roots);
+            console.log('nodes:', this.t_nodes);
+            console.log('edges:', this.t_edges);
 
-                // main graph
-                this.mainGraph = this.vis_main_graph(this.s_roots, this.triples);
+            // main graph
+            this.mainGraph = this.vis_main_graph(this.t_roots, this.t_nodes, this.t_edges);
 
-                // detect div of subgraphs
-                this.ref.detectChanges();
+            // detect div of subgraphs
+            this.ref.detectChanges();
 
-                // sub graphs
-                // **NOTE: dynamic elements need some time for creating DOM
-                setTimeout(()=>{
-                    let subIndices = Object.keys(this.s_roots);
-                    let subDivs = this.subVisContainers.nativeElement.querySelectorAll('#subVisContainer');
-                    subDivs.forEach((divContainer, index) => {
-                        let s_idx = subIndices[index];         // string
-                        let subRoot = this.s_roots[s_idx];
-                        let subTriples = this.triples[s_idx];
-                        // console.log(`subDiv[${s_idx}]:`, subRoot, subTriples);
-                        if( subRoot != null && subTriples.length > 0 ){
-                            this.subGraphs[ Number(s_idx) ] = this.vis_sub_graph(s_idx, subTriples, divContainer);
-                        }
-                    });
-                }, 10);
-            }
+            // sub graphs
+            // **NOTE: dynamic elements need some time for creating DOM
+            setTimeout(()=>{
+                let subDivs = this.subVisContainers.nativeElement.querySelectorAll('#subVisContainer');
+                subDivs.forEach((divContainer, index) => {
+                    if( !(index in this.t_roots) ){             // if not exists, skip
+                        this.subGraphs[ index ] = undefined;
+                    }
+                    else{                                       // if exists, draw graph
+                        let s_idx = index;
+                        let root = this.t_roots[s_idx];
+                        let nodes = this.t_nodes.filter((e)=>e.group == s_idx);
+                        let edges = this.t_edges.filter((e)=>e.group == s_idx);
+                        this.subGraphs[ s_idx ] = this.vis_sub_graph(s_idx, root, nodes, edges, divContainer);
+                    }
+                });
+            }, 10);
         });
     }
 
 
     ////////////////////////////////////////////////////
 
-    vis_text_coloring(text: string, tokens: string[][]){
-        let done = []
+    vis_text_coloring(tokens: any[]){
+        let result = []
         for(let t of tokens){
-            if( done.includes(t[0]) ) continue;
-            if( t[1] == null || t[1] == 'OTHER' ) continue;
-            text = text.replace(t[0], `<i>${t[0]}</i>`);
-            done.push(t[0]);
+            let text = t[0];
+            for(let e of t[1]){
+                text = text.replace(e, `<i>${e}</i>`);
+            }
+            result.push(text);
         }
-        return text;
+        return result;
     }
 
-    vis_main_graph(s_roots: any, triples: any){
-        if(!triples || !s_roots) return undefined;
-
+    vis_main_graph(roots: any, nodes: any[], edges: any[]){
         let nodes_data = new DataSet<any>([]);
         let edges_data = new DataSet<any>([]);
 
-        // roots of sentences
-        for(let i of Object.keys(s_roots)){
-            if( !s_roots[i] ) continue;
+        // root
+        for(const [key, value] of Object.entries(roots)){
+            const s_idx = Number(key);
+            const root_id = this.rootID(s_idx);
             nodes_data.add({
-                id: this.rootID(Number(i)), label: `<b>ROOT${i}</b>`, group: Number(i),
+                id: root_id, label: `<b>ROOT${s_idx}</b>`, group: s_idx,
                 shape: "circle", borderWidth: 2, margin: 5,
                 color: { border: 'black', background: 'white' },
                 font: { align: 'center' },
             });
+            edges_data.add({
+                from: value, to: root_id, group: s_idx, label: ''
+            });
         }
-
-        for(let i of Object.keys(triples)){
-            if( triples[i].length == 0 ) continue;
-            let t_arr = triples[i] as ITriple[];
-            for(let t of t_arr){
-                let label_value = //`${t.pred}`;
-                    `<b>S:</b> [ ${ this.vis_text_coloring(t.subj.join('|'), t.subj_tokens) } ]\n`
-                    + `<b>P: ${ this.vis_text_coloring(t.pred, t.pred_tokens) }</b>\n`
-                    + `<b>O:</b> [ ${ this.vis_text_coloring(t.objs.join('|'), t.objs_tokens) } ]\n`
-                    + `<b>C:</b> [ ${ this.vis_text_coloring(t.rest.join('|'), t.rest_tokens) } ]`;
-                nodes_data.add({
-                    id: t.id, label: label_value, group: Number(i), shape: "box", margin: 5,
-                });
-                edges_data.add({
-                    from: t.id, to: t.parent, label: t.sg_type
-                });
-            }
+        // nodes
+        for(let data of nodes){
+            const t = data as ITripleNode;
+            let label_value = //`${t.pred}`;
+                `<b>S:</b> [ ${ this.vis_text_coloring(t.subj).join('|') } ]\n`
+                + `<b>P:</b> <b><i>${t.pred}</i></b>\n`
+                + `<b>O:</b> [ ${ this.vis_text_coloring(t.objs).join('|') } ]\n`
+                + `<b>C:</b> [ ${ this.vis_text_coloring(t.rest).join('|') } ]`;
+            nodes_data.add({
+                id: t.id, label: label_value, group: t.group, shape: "box", margin: 5,
+            });
+        }
+        // edges
+        for(let data of edges){
+            const e = data as ITripleEdge;
+            let label_value = `${e.joint[0]}`;
+            edges_data.add({
+                from: e.from, to: e.to, group: e.group, label: label_value
+            });
         }
 
         // create a network
@@ -235,7 +244,7 @@ export class DtriplesComponent implements OnInit, OnDestroy {
                     size: 11, face: 'arial', multi: 'html', align: 'left'
                     , bold: '12px courier black'
                     , ital: '11px arial darkred'
-                    , boldital: '12px arial darkred'
+                    , boldital: '12px arial darkblue'
                 }
             },
             edges: {
@@ -285,27 +294,41 @@ export class DtriplesComponent implements OnInit, OnDestroy {
         return network;
     }
 
-    vis_sub_graph(s_idx: string, triples: any[], divContainer: any){
+    vis_sub_graph(s_idx: number, root: string, nodes: any[], edges: any[], divContainer: any){
         let nodes_data = new DataSet<any>([]);
         let edges_data = new DataSet<any>([]);
 
-        // roots of sentences
+        // root
+        const root_id = this.rootID(s_idx);
         nodes_data.add({
-            id: this.rootID(Number(s_idx)), label: `<b>ROOT${s_idx}</b>`, group: Number(s_idx),
+            id: root_id, label: `<b>ROOT${s_idx}</b>`, group: s_idx,
             shape: "circle", borderWidth: 2, margin: 5,
             color: { border: 'black', background: 'white' },
             font: { align: 'center' },
         });
+        edges_data.add({
+            from: root, to: root_id, group: s_idx, label: ''
+        });
 
-        let t_arr = triples as ITriple[];
-        for(let t of t_arr){
+        // nodes
+        for(let data of nodes){
+            const t = data as ITripleNode;
             let label_value = //`${t.pred}`;
-                `<b>S:</b> [ ${ this.vis_text_coloring(t.subj.join('|'), t.subj_tokens) } ]\n`
-                + `<b>P: ${ this.vis_text_coloring(t.pred, t.pred_tokens) }</b>\n`
-                + `<b>O:</b> [ ${ this.vis_text_coloring(t.objs.join('|'), t.objs_tokens) } ]\n`
-                + `<b>C:</b> [ ${ this.vis_text_coloring(t.rest.join('|'), t.rest_tokens) } ]`;
-            nodes_data.add({ id: t.id, label: label_value, group: Number(s_idx), shape: "box", margin: 5 });
-            edges_data.add({ from: t.id, to: t.parent, label: t.sg_type });   // t.head
+                `<b>S:</b> [ ${ this.vis_text_coloring(t.subj).join('|') } ]\n`
+                + `<b>P:</b> <b><i>${t.pred}</i></b>\n`
+                + `<b>O:</b> [ ${ this.vis_text_coloring(t.objs).join('|') } ]\n`
+                + `<b>C:</b> [ ${ this.vis_text_coloring(t.rest).join('|') } ]`;
+            nodes_data.add({
+                id: t.id, label: label_value, group: t.group, shape: "box", margin: 5,
+            });
+        }
+        // edges
+        for(let data of edges){
+            const e = data as ITripleEdge;
+            let label_value = `${e.joint[0]}(${e.joint[1]})`;
+            edges_data.add({
+                from: e.from, to: e.to, group: e.group, label: label_value
+            });
         }
 
         // create a network
@@ -320,7 +343,7 @@ export class DtriplesComponent implements OnInit, OnDestroy {
                     size: 11, face: 'arial', multi: 'html', align: 'left'
                     , bold: '12px courier black'
                     , ital: '11px arial darkred'
-                    , boldital: '12px arial darkred'
+                    , boldital: '12px arial darkblue'
                 }
             },
             edges: {
@@ -373,21 +396,51 @@ export class DtriplesComponent implements OnInit, OnDestroy {
 
 /*
 {
-    "id": "D71331926_00_828fd027",
-    "sg_type": "joint",
-    "parent": "D71331926_00_ROOT",
-    "cpoint": null,
-    "head": "ROOT",
-    "subj": [
-        "한국투자증권 김진우 연구원"
+    "roots": {
+        "0": "D71332522_00_T000",
+        "1": "D71332522_01_T003",
+        "2": "D71332522_02_T004",
+        "3": "D71332522_03_T005",
+        "4": "D71332522_04_T008",
+        "5": "D71332522_05_T009"
+    },
+    "nodes": [
+        {
+        "id": "D71332522_00_T000",
+        "group": 0,
+        "subj": [ ["대우증권",["대우증권"]] ],
+        "pred": "밝혔다",
+        "objs": [ ],
+        "rest": [ ["31일",["31일"]], ["투자의견",[]] ]
+        },
+        {
+        "id": "D71332522_00_T001",
+        "group": 0,
+        "subj": [ ],
+        "pred": "대해",
+        "objs": [ ],
+        "rest": [ ["SK텔레콤",["SK텔레콤"]] ]
+        },
+        {
+        "id": "D71332522_00_T002",
+        "group": 0,
+        "subj": [ ["매수, 목표주가",[]] ],
+        "pred": "유지",
+        "objs": [ ["28만원",["28만원"]] ],
+        "rest": [ ]
+        },
     ],
-    "pred": "제시",
-    "objs": [
-        "투자의견 매수, 목표주가 81,000원"
-    ],
-    "rest": [
-        "31일",
-        "대해"
+    "edges": [
+        {
+        "from": "D71332522_00_T002",
+        "to": "D71332522_00_T000",
+        "label": "밝혔다"
+        },
+        {
+        "from": "D71332522_00_T001",
+        "to": "D71332522_00_T000",
+        "label": "밝혔다"
+        },
     ]
-},
+}
 */

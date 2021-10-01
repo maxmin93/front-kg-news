@@ -66,5 +66,20 @@ export interface ITriple {
     pred_tokens: string[][];
     objs_tokens: string[][];
     rest_tokens: string[][];
-}
+};
 
+export interface ITripleNode {
+    id: string;
+    group: number;
+    subj: any[];
+    pred: string;
+    objs: any[];
+    rest: any[];
+};
+
+export interface ITripleEdge {
+    from: string;
+    to: string;
+    group: number;
+    joint: string[];
+};
