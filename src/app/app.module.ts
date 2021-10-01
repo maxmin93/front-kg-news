@@ -62,7 +62,6 @@ import { N2vBrowserComponent } from './components/n2v-browser/n2v-browser.compon
 import { VocabDialogComponent } from './components/n2v-browser/vocab-dialog/vocab-dialog.component';
 import { Doc2vecComponent } from './components/doc2vec/doc2vec.component';
 import { DgraphComponent } from './components/dgraph/dgraph.component';
-import { DtriplesComponent } from './components/dtriples/dtriples.component';
 import { QtriplesComponent } from './components/qtriples/qtriples.component';
 import { TGraphComponent } from './components/tgraph/tgraph.component';
 
@@ -103,7 +102,6 @@ import { TGraphComponent } from './components/tgraph/tgraph.component';
         Doc2vecComponent,
         N2vBrowserComponent,
         DgraphComponent,
-        DtriplesComponent,
         QtriplesComponent,
         TGraphComponent,
     ],

@@ -214,9 +214,13 @@ export class TGraphComponent implements OnInit, OnDestroy {
         // nodes
         for(let data of nodes){
             const t = data as ITripleNode;
-            let label_value = //`${t.pred}`;
+            // VERB 의 기본형
+            let stems = (t.pred[1].length == 0 || t.pred[0].replace(' ','') == t.pred[1].join(''))
+                        ? "" : `(${ t.pred[1].join('|') })`;
+            // Triple 라벨
+            let label_value =
                 `<b>S:</b> [ ${ this.vis_text_coloring(t.subj).join('|') } ]\n`
-                + `<b>P:</b> <b><i>${t.pred}</i></b>\n`
+                + `<b>P:</b> <b><i>${t.pred[0]}</i></b>${stems}\n`
                 + `<b>O:</b> [ ${ this.vis_text_coloring(t.objs).join('|') } ]\n`
                 + `<b>C:</b> [ ${ this.vis_text_coloring(t.rest).join('|') } ]`;
             nodes_data.add({
@@ -313,9 +317,13 @@ export class TGraphComponent implements OnInit, OnDestroy {
         // nodes
         for(let data of nodes){
             const t = data as ITripleNode;
-            let label_value = //`${t.pred}`;
+            // VERB 의 기본형
+            let stems = (t.pred[1].length == 0 || t.pred[0].replace(' ','') == t.pred[1].join(''))
+                        ? "" : `(${ t.pred[1].join('|') })`;
+            // Triple 라벨
+            let label_value =
                 `<b>S:</b> [ ${ this.vis_text_coloring(t.subj).join('|') } ]\n`
-                + `<b>P:</b> <b><i>${t.pred}</i></b>\n`
+                + `<b>P:</b> <b><i>${t.pred[0]}</i></b>${stems}\n`
                 + `<b>O:</b> [ ${ this.vis_text_coloring(t.objs).join('|') } ]\n`
                 + `<b>C:</b> [ ${ this.vis_text_coloring(t.rest).join('|') } ]`;
             nodes_data.add({

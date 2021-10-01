@@ -17,7 +17,6 @@ import { N2vBrowserComponent } from './components/n2v-browser/n2v-browser.compon
 import { Doc2vecComponent } from './components/doc2vec/doc2vec.component';
 import { DgraphComponent } from './components/dgraph/dgraph.component';
 import { TGraphComponent } from './components/tgraph/tgraph.component';
-import { DtriplesComponent } from './components/dtriples/dtriples.component';
 import { QtriplesComponent } from './components/qtriples/qtriples.component';
 
 
@@ -49,10 +48,6 @@ const routes: Routes = [
   {
     path: 'tgraph/:id', data :{ title: "Triples Graph of Document" },
     component: TGraphComponent
-  },
-  {
-    path: 'dtriples/:id', data :{ title: "Triples Graph of Document" },
-    component: DtriplesComponent
   },
   {
     path: 'qtriples/:id', data :{ title: "Triples Graph of User Query" },

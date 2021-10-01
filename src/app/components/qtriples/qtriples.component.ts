@@ -36,10 +36,6 @@ export class QtriplesComponent implements OnInit, OnDestroy {
     zeroPad: Function = (num, places) => String(num).padStart(places, '0');
     rootID: Function = (_id, num) => `${_id}_${this.zeroPad(num, 2)}`;
 
-    // triples data for vis_network
-    triples: any;   // Map<string,ITriple[]>;
-    s_roots: any;   // Map<string,string>;
-
     // vis_network objects
     qryGraph: any;
     docsGraph: any;     // query 에 매칭된 모든 documents 들의 그래프
@@ -244,9 +240,13 @@ export class QtriplesComponent implements OnInit, OnDestroy {
         // nodes
         for(let data of nodes){
             const t = data as ITripleNode;
-            let label_value = //`${t.pred}`;
+            // VERB 의 기본형
+            let stems = (t.pred[1].length == 0 || t.pred[0].replace(' ','') == t.pred[1].join(''))
+                        ? "" : `(${ t.pred[1].join('|') })`;
+            // Triple 라벨
+            let label_value =
                 `<b>S:</b> [ ${ this.vis_text_coloring(t.subj).join('|') } ]\n`
-                + `<b>P:</b> <b><i>${t.pred}</i></b>\n`
+                + `<b>P:</b> <b><i>${t.pred[0]}</i></b>${stems}\n`
                 + `<b>O:</b> [ ${ this.vis_text_coloring(t.objs).join('|') } ]\n`
                 + `<b>C:</b> [ ${ this.vis_text_coloring(t.rest).join('|') } ]`;
             nodes_data.add({
