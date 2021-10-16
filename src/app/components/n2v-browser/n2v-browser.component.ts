@@ -4,7 +4,10 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 import { WordsApiService } from 'src/app/services/words-api.service';
+import { DocsApiService } from 'src/app/services/docs-api.service';
 import { UiApiService } from '../../services/ui-api.service';
+
+import { ITripleNode, ITripleEdge } from 'src/app/services/graph-models';
 
 // **NOTE: You don't need to install vis-data. (standalone)
 // https://stackoverflow.com/a/60937676
@@ -32,11 +35,13 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     messageOfSubGraph: string = undefined;
 
     mainGraph: any;
+    triplesGraph: any;
     subGraphs: any[];
     segments: Map<string,any>;
 
     @ViewChild('mainVisContainer', {static: false}) private mainVisContainer: ElementRef;
-    @ViewChild('subVisContainers', {static: false}) private subVisContainers: ElementRef;
+    // @ViewChild('subVisContainers', {static: false}) private subVisContainers: ElementRef;
+    @ViewChild('triplesVisContainer', {static: false}) private triplesVisContainer: ElementRef;
 
     apiSwitch: boolean = true;      // true: node2vec, false: word2vec
     formWords = new FormGroup({
@@ -59,6 +64,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         private route: ActivatedRoute,
         private uiService: UiApiService,
         private wordsService: WordsApiService,
+        private docsService: DocsApiService,
         // private colorService: ColorProviderService,
         public pivotsDialog: MatDialog
     ) { }
@@ -90,8 +96,8 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit(): void{
-        this.sizeOfSubGraphs = this.subVisContainers.nativeElement.children.length;
-        this.subGraphs = new Array(this.sizeOfSubGraphs);
+        // this.sizeOfSubGraphs = this.subVisContainers.nativeElement.children.length;
+        // this.subGraphs = new Array(this.sizeOfSubGraphs);
     }
 
     ngOnDestroy(): void{
@@ -108,12 +114,17 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     vis_destroy_subgraphs(){
-        for(let sg_idx=0; sg_idx<this.sizeOfSubGraphs; sg_idx+=1){
-            if( this.subGraphs[sg_idx] ){
-                this.subGraphs[sg_idx].destroy();
-                this.subGraphs[sg_idx] = undefined;
-                this.messageOfSubGraph = undefined;
-            }
+        // for(let sg_idx=0; sg_idx<this.sizeOfSubGraphs; sg_idx+=1){
+        //     if( this.subGraphs[sg_idx] ){
+        //         this.subGraphs[sg_idx].destroy();
+        //         this.subGraphs[sg_idx] = undefined;
+        //         this.messageOfSubGraph = undefined;
+        //     }
+        // }
+        if( this.triplesGraph ){
+            this.triplesGraph.destroy();
+            this.triplesGraph = undefined;
+            this.messageOfSubGraph = undefined;
         }
     }
 
@@ -175,13 +186,13 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         if( this.apiSwitch ){
             return this.wordsService.getN2vWordsGraph(positives, negatives, topN, threshold).subscribe(x=>{
                 // console.log('graph data:', x);
-                this.mainGraph = this.vis_graph(x);
+                this.mainGraph = this.vis_main_graph(x);
             });
         }
         else{
             return this.wordsService.getW2vWordsGraph(positives, negatives, topN, threshold).subscribe(x=>{
                 // console.log('graph data:', x);
-                this.mainGraph = this.vis_graph(x);
+                this.mainGraph = this.vis_main_graph(x);
             });
         }
     }
@@ -213,7 +224,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
 
     ////////////////////////////////////////////////////
 
-    vis_graph(x: any){
+    vis_main_graph(x: any){
         if(!x) return;
 
         let pivot = `${this.positives.join("+")}`;
@@ -224,16 +235,17 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         let edges_data = new DataSet<any>([], {});
         // console.log(nodes_data.get(0));
 
-        this.segments = new Map(Object.entries(x['segments']));
+        this.segments = new Map(x['segments']);
         let order = 1;
 
         // neighbors
         for(let nbr of x['neighbors']){
             nodes_data.add({ id: order, label: nbr[0], group: 1 });     // label 있으면 size 조정 안됨
-            let sg_size = this.segments.get(nbr[0]).length;
+            let sg_size = this.segments.has(nbr[0]) ? this.segments.get(nbr[0]).length : 0;
             edges_data.add({
                 from: 0, to: order, arrows: {to: {enabled: true}},
-                width: 1+2*Math.log10(sg_size+1),       // sg 개수만큼 line 굵게 그리기
+                // width: 1+2*Math.log10(sg_size+1),    // sg 개수만큼 line 굵게 그리기
+                width: sg_size + 1,                     // sg 개수만큼 line 굵게 그리기
                 dashes: (sg_size>0) ? false : true,     // sg 가 하나도 없으면 dash-line
                 label: `${nbr[1].toFixed(4)}`, font: { align: "middle" }
             });
@@ -270,16 +282,26 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         network.on("select", (params)=>{
             if( params.nodes.length > 0 ){
                 // target: nodes
-                // console.log("Selection Node:", nodes_data.get(params.nodes[0]));
-                if( params.nodes.length == 1 ){
-                    if( nodes_data.get(params.nodes[0])["group"] == 1 ){
-                        let sg_pivots: string[] = [...x['positives']];
-                        sg_pivots.push(nodes_data.get(params.nodes[0])["label"]);
-                        let sg_list = this.segments.get( nodes_data.get(params.nodes[0])["label"] );
-                        console.log(`${sg_pivots}: sg_list=${sg_list.length}`);
-                        // subgraphs 그리기
-                        this.vis_subgraphs(sg_pivots, sg_list);
-                    }
+                let target = nodes_data.get(params.nodes[0]);
+                console.log("Selection Node:", target);
+                if( this.segments.has(target["label"]) ){
+                    let sg_terms: string[] = [...x['positives']];
+                    sg_terms.push( target["label"] );   
+                    // 클릭된 단어가 포함된 sg_id 리스트
+                    let sg_list = this.segments.get( target["label"] );
+                    console.log(`${sg_terms}: sg_list=${sg_list.length}`);
+                    // message 출력
+                    this.messageOfSubGraph = `(terms=[${x['positives'].join(',')}] & [${target["label"]}], sg.size=${sg_list.length})`;
+
+                    // 1) 해당 sg_list 의 triples 를 불러서 subgraphs를 그리고 (최대 5개)
+                    // 2) sg_terms 의 단어들을 강조 표시
+                    this.docsService.getTriplesGraphBySgListWithTerms(sg_list, sg_terms).subscribe(x=>{
+                        console.log('response:', x);    // roots, nodes, edges, options
+                        if( x.hasOwnProperty('options') && x['options'].hasOwnProperty('docids') ){
+                            this.messageOfSubGraph += ` ==> [${x['options']['docids'].join(',')}]`;
+                        }
+                        this.vis_triples_graph(x['roots'], x['nodes'], x['edges'], x['options']);
+                    });
                 }
             }
             // select 가 nodes 에 반응하지 않은 경우만 edges 처리
@@ -302,6 +324,122 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         return network;
     }
 
+    vis_text_coloring(tokens: any[]){
+        let result = []
+        for(let t of tokens){
+            let text = t[0];
+            for(let e of t[1]){
+                text = text.replace(e, `<i>${e}</i>`);
+            }
+            result.push(text);
+        }
+        return result;
+    }
+
+    vis_triples_graph(roots: any, nodes: any[], edges: any[], g_options: any){
+        let nodes_data = new DataSet<any>([]);
+        let edges_data = new DataSet<any>([]);
+
+        // root
+        for(const [key, value] of Object.entries(roots)){
+            // const s_idx = Number(key);
+            const root_key = key;    // this.rootID(s_idx);
+            nodes_data.add({
+                id: root_key, label: `<b>ROOT${root_key.split('_')[1]}</b>`, group: root_key,
+                shape: "circle", borderWidth: 2, margin: 5,
+                color: { border: 'black', background: 'white' },
+                font: { align: 'center' },
+            });
+            edges_data.add({
+                from: value, to: root_key, group: root_key, label: ''
+            });
+        }
+        // nodes
+        for(let data of nodes){
+            const t = data as ITripleNode;
+            // VERB 의 기본형
+            let stems = (t.pred[1].length == 0 || t.pred[0].replace(' ','') == t.pred[1].join(''))
+                        ? "" : `(${ t.pred[1].join('|') })`;
+            // Triple 라벨
+            let label_value =
+                `<b>S:</b> [ ${ this.vis_text_coloring(t.subj).join('|') } ]\n`
+                + `<b>P:</b> <b><i>${t.pred[0]}</i></b>${stems}\n`
+                + `<b>O:</b> [ ${ this.vis_text_coloring(t.objs).join('|') } ]\n`
+                + `<b>C:</b> [ ${ this.vis_text_coloring(t.rest).join('|') } ]`;
+            nodes_data.add({
+                id: t.id, label: label_value, group: t.group, shape: "box", margin: 5,
+            });
+        }
+        // edges
+        for(let data of edges){
+            const e = data as ITripleEdge;
+            let label_value = `${e.joint[0]}`;
+            edges_data.add({
+                from: e.from, to: e.to, group: e.group, label: label_value
+            });
+        }
+
+        // create a network
+        let container = this.triplesVisContainer.nativeElement;
+        let data = { nodes: nodes_data, edges: edges_data };
+
+        // styles
+        let options = {
+            nodes: {
+                // https://stackoverflow.com/a/51777791
+                font: {
+                    size: 11, face: 'arial', multi: 'html', align: 'left'
+                    , bold: '12px courier black'
+                    , ital: '11px arial darkred'
+                    , boldital: '12px arial darkblue'
+                }
+            },
+            edges: {
+                // width 관련 설정하면 edge label 이 wrap 처리됨 (오류)
+                // width: 1, widthConstraint: { maximum: 10 },
+                font: { size: 11, align: "middle" },
+                arrows: { to: { type: 'arrow', enabled: true, scaleFactor: 0.5 }, },
+            },
+            physics: {
+                // enabled: true,
+                hierarchicalRepulsion: { avoidOverlap: 1, },
+            },
+            // https://visjs.github.io/vis-network/docs/network/layout.html
+            layout: {
+                improvedLayout: true,
+                hierarchical: { enabled: true, direction: 'UD', nodeSpacing: 10, treeSpacing: 20 },
+            },
+        };
+
+        // initialize your network!
+        let network = new Network(container, data, options);
+        window['vis'] = network;
+
+        // event: selectNode 를 설정해도 selectEdge 가 같이 fire 됨 (오류!)
+        network.on("select", (params)=>{
+            if( params.nodes.length > 0 ){
+                let target = nodes_data.get(params.nodes[0]);
+                console.log("Selection Node:", target);
+                // pass
+            }
+            // select 가 nodes 에 반응하지 않은 경우만 edges 처리
+            else if( params.edges.length > 0 ){
+                // console.log("Selected Edges:", params.edges);
+            }
+        });
+        // event: doubleClick
+        network.on("doubleClick", (params)=>{
+            if( params.nodes.length > 0 ){
+                let target = nodes_data.get(params.nodes[0]);
+                console.log("doubleClick:", target);
+                // pass
+            }
+        });
+
+        return network;
+    }
+
+    /*
     vis_subgraphs(sg_pivots: string[], sg_list:any[]){
         // clear
         this.vis_destroy_subgraphs();
@@ -350,6 +488,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             if( sg_idx > this.sizeOfSubGraphs ) break;
         }
     }
+    */
 
 }
 

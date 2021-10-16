@@ -1,4 +1,4 @@
-<mat-card class="card-demo" style="margin-bottom: 10px;">
+<mat-card class="news-card" [ngStyle.md]="{'min-width': '1000px'}" style="margin-bottom: 10px;">
     <mat-card-title>Word Graph ({{ apiSwitch ? "node2vec" : "word2vec" }})</mat-card-title>
     <mat-card-subtitle>
         <form [formGroup]="formWords" (ngSubmit)="onSubmit()" class="example-form">
@@ -29,15 +29,24 @@
     </mat-card-footer>
 </mat-card>
 
+<mat-card class="news-card" [ngStyle.md]="{'min-width': '1000px'}">
+    <mat-card-title>Subgraphs</mat-card-title>
+    <mat-card-subtitle *ngIf="messageOfSubGraph"><span>{{ messageOfSubGraph }}</span></mat-card-subtitle>
+    <mat-card-content class="large" style="height: 60vh; margin: 10px; border: 2px solid black;">
+
+        <div #triplesVisContainer fxFill>
+        </div>
+
+    </mat-card-content>
+</mat-card>
+
+<!--
 <mat-card class="card-demo">
     <mat-card-subtitle>Subgraphs <span>{{ messageOfSubGraph }}</span></mat-card-subtitle>
     <mat-card-content class="large" style="height: 20vh; margin: 10px; border: 2px solid black;">
 
         <div fxLayout="column" fxFill>
             <div #subVisContainers fxFlex fxLayoutGap="2px" fxFlex="100" fxLayoutAlign="center center">
-                <!-- div *ngFor="let subg of subGraphs" fxLayout="row" fxFlex="20%" fxLayoutAlign="center center"
-                        style="border: 1px solid black; height: 96%; margin-top: 2px; margin-bottom: 2px;">
-                </div -->
                 <div id="subVisContainer0" fxLayout="row" fxFlex="20%" fxLayoutAlign="center center"
                         style="border: 1px solid black; height: 96%; margin-top: 2px; margin-bottom: 2px;"
                         (click)="onClickSubG(0)">
@@ -66,3 +75,8 @@
         <div class="hint"></div>
     </mat-card-footer>
 </mat-card>
+-->
+
+                <!-- div *ngFor="let subg of subGraphs" fxLayout="row" fxFlex="20%" fxLayoutAlign="center center"
+                        style="border: 1px solid black; height: 96%; margin-top: 2px; margin-bottom: 2px;">
+                </div -->

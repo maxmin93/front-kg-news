@@ -139,7 +139,7 @@ export class TGraphComponent implements OnInit, OnDestroy {
     }
 
     getDocTriples(docid:string): Subscription{
-        return this.docsService.getTripleGraphs(docid).subscribe(x=>{
+        return this.docsService.getTriplesGraphByDocid(docid).subscribe(x=>{
             if( !x || Object.keys(x).length == 0 ){
                 console.log(`Empty response by docid=[${docid}]`);
                 return;
@@ -162,16 +162,20 @@ export class TGraphComponent implements OnInit, OnDestroy {
             // **NOTE: dynamic elements need some time for creating DOM
             setTimeout(()=>{
                 let subDivs = this.subVisContainers.nativeElement.querySelectorAll('#subVisContainer');
+                let root_keys = Object.keys(this.t_roots);
+                let r_indices = Object.keys(this.t_roots).map(x=> Number(x.split('_')[1]) );
+                // console.log('root_keys', root_keys, r_indices);
                 subDivs.forEach((divContainer, index) => {
-                    if( !(index in this.t_roots) ){             // if not exists, skip
+                    if( r_indices.indexOf(index) < 0 ){             // if not exists, skip
                         this.subGraphs[ index ] = undefined;
                     }
                     else{                                       // if exists, draw graph
-                        let s_idx = index;
-                        let root = this.t_roots[s_idx];
-                        let nodes = this.t_nodes.filter((e)=>e.group == s_idx);
-                        let edges = this.t_edges.filter((e)=>e.group == s_idx);
-                        this.subGraphs[ s_idx ] = this.vis_sub_graph(s_idx, root, nodes, edges, divContainer);
+                        let root_key = root_keys[ r_indices.indexOf(index) ];
+                        let root_id = this.t_roots[root_key];
+                        // console.log(`subGraphs[${index}]`, root_key, root_id);
+                        let nodes = this.t_nodes.filter((e)=>e.group == root_key);
+                        let edges = this.t_edges.filter((e)=>e.group == root_key);
+                        this.subGraphs[ index ] = this.vis_sub_graph(root_key, root_id, nodes, edges, divContainer);
                     }
                 });
             }, 10);
@@ -199,16 +203,16 @@ export class TGraphComponent implements OnInit, OnDestroy {
 
         // root
         for(const [key, value] of Object.entries(roots)){
-            const s_idx = Number(key);
-            const root_id = this.rootID(s_idx);
+            // const s_idx = Number(key);
+            const root_key = key;    // this.rootID(s_idx);
             nodes_data.add({
-                id: root_id, label: `<b>ROOT${s_idx}</b>`, group: s_idx,
+                id: root_key, label: `<b>ROOT${root_key.split('_')[1]}</b>`, group: root_key,
                 shape: "circle", borderWidth: 2, margin: 5,
                 color: { border: 'black', background: 'white' },
                 font: { align: 'center' },
             });
             edges_data.add({
-                from: value, to: root_id, group: s_idx, label: ''
+                from: value, to: root_key, group: root_key, label: ''
             });
         }
         // nodes
@@ -298,20 +302,20 @@ export class TGraphComponent implements OnInit, OnDestroy {
         return network;
     }
 
-    vis_sub_graph(s_idx: number, root: string, nodes: any[], edges: any[], divContainer: any){
+    vis_sub_graph(root_key: string, root_id: string, nodes: any[], edges: any[], divContainer: any){
         let nodes_data = new DataSet<any>([]);
         let edges_data = new DataSet<any>([]);
 
         // root
-        const root_id = this.rootID(s_idx);
+        // const root_id = this.rootID(s_idx);
         nodes_data.add({
-            id: root_id, label: `<b>ROOT${s_idx}</b>`, group: s_idx,
+            id: root_key, label: `<b>ROOT${root_key.split('_')[1]}</b>`, group: root_key,
             shape: "circle", borderWidth: 2, margin: 5,
             color: { border: 'black', background: 'white' },
             font: { align: 'center' },
         });
         edges_data.add({
-            from: root, to: root_id, group: s_idx, label: ''
+            from: root_id, to: root_key, group: root_key, label: ''
         });
 
         // nodes

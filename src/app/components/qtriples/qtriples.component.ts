@@ -73,7 +73,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
 
                 // loading data
                 this.handler_document = this.getDocument(this.docid);
-                this.handler_dtriples = this.getDocTriples(this.docid);
+                // this.handler_dtriples = this.getDocTriples(this.docid);
 
                 this.initQuery(this.docid);
             }
@@ -137,8 +137,6 @@ export class QtriplesComponent implements OnInit, OnDestroy {
         // let blank_count = (query.match(/ /g)||[]).length;
 
         this.docsService.getQryTriples(query).subscribe(x=>{
-            console.log('QTriples:', x);
-
             let q_roots = x['roots'] as Map<number,string>;    // Object 로 인식됨 (Map 안됨)
             let q_nodes = x['nodes'] as ITripleNode[];
             let q_edges = x['edges'] as ITripleEdge[];
@@ -185,7 +183,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
     }
 
     getDocTriples(docid:string): Subscription{
-        return this.docsService.getTripleGraphs(docid).subscribe(x=>{
+        return this.docsService.getTriplesGraphByDocid(docid).subscribe(x=>{
             if( !x || Object.keys(x).length == 0 ){
                 console.log(`Empty response by docid=[${docid}]`);
             }
@@ -224,17 +222,17 @@ export class QtriplesComponent implements OnInit, OnDestroy {
         let edges_data = new DataSet<any>([]);
 
         // root
-        for(const [key, value] of Object.entries(roots)){
-            const s_idx = Number(key);
-            const root_id = this.rootID(s_idx);
+        for(const [root_key, value] of Object.entries(roots)){
+            // const s_idx = Number(key);
+            // const root_id = this.rootID(s_idx);
             nodes_data.add({
-                id: root_id, label: `<b>ROOT${s_idx}</b>`, group: s_idx,
+                id: root_key, label: `<b>ROOT${root_key.split('_')[1]}</b>`, group: root_key,
                 shape: "circle", borderWidth: 2, margin: 5,
                 color: { border: 'black', background: 'white' },
                 font: { align: 'center' },
             });
             edges_data.add({
-                from: value, to: root_id, group: s_idx, label: ''
+                from: value, to: root_key, group: root_key, label: ''
             });
         }
         // nodes

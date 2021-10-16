@@ -53,7 +53,7 @@ export interface IEvent {
 
 export interface ITripleNode {
     id: string;
-    group: number;
+    group: string;
     subj: any[];
     pred: any[];
     objs: any[];
@@ -63,6 +63,6 @@ export interface ITripleNode {
 export interface ITripleEdge {
     from: string;
     to: string;
-    group: number;
+    group: string;
     joint: string[];
 };
