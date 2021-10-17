@@ -1,10 +1,10 @@
 <mat-card class="news-card" [ngStyle.md]="{'min-width': '1000px'}" style="margin-bottom: 10px;">
-    <mat-card-title>Word Graph ({{ apiSwitch ? "node2vec" : "word2vec" }})</mat-card-title>
+    <mat-card-title>Words Graph ({{ apiSwitch ? "node2vec" : "word2vec" }})</mat-card-title>
     <mat-card-subtitle>
         <form [formGroup]="formWords" (ngSubmit)="onSubmit()" class="example-form">
             <div fxLayout="row" fxFlexFill fxLayout.lt-sm="column" fxLayoutGap="20px" style="padding-left: 10vw; padding-right: 10vw;">
                 <mat-slide-toggle style="height: 50px;" fxFlex="10%" color="accent" labelPosition="before"
-                    checked="true" (toggleChange)="changeApiMode()">API</mat-slide-toggle>
+                    checked="true" (toggleChange)="changeApiMode()">MODEL</mat-slide-toggle>
                 <button mat-stroked-button type="button" (click)="openDialog()" fxFlex="10%" color="primary" style="height: 50px;">Vocab</button>
                 <mat-form-field fxFlex="25%" color="accent">
                     <input matInput type="text" (keydown.enter)="onSubmit()" placeholder="positive words" formControlName="positives">
@@ -30,7 +30,7 @@
 </mat-card>
 
 <mat-card class="news-card" [ngStyle.md]="{'min-width': '1000px'}">
-    <mat-card-title>Subgraphs</mat-card-title>
+    <mat-card-title>Triples Graph</mat-card-title>
     <mat-card-subtitle *ngIf="messageOfSubGraph"><span>{{ messageOfSubGraph }}</span></mat-card-subtitle>
     <mat-card-content class="large" style="height: 60vh; margin: 10px; border: 2px solid black;">
 
