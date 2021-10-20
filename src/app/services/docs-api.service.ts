@@ -74,11 +74,11 @@ export class DocsApiService {
         return this.http.get<any>(url);
     }
 
-    // http://localhost:28888/api/docs/tgraph/sglist-with-terms?sg=&t=
-    getTriplesGraphBySgListWithTerms(sglist:string[], terms:string[]): Observable<any>{
+    // http://localhost:28888/api/docs/tgraph/sglist-with-matched?sg=&t=
+    getTriplesGraphBySgListWithTerms(sglist:string[], matched:string[]): Observable<any>{
         let params_sglist = sglist.map(x=>`sg=${x}`);
-        let params_terms = terms.map(x=>`t=${x}`);
-        let url = `${this.api_url}/tgraph/sglist-with-terms?${params_sglist.join('&')}&${params_terms.join('&')}`;
+        let params_matched = matched.map(x=>`t=${x}`);
+        let url = `${this.api_url}/tgraph/sglist-with-matched?${params_sglist.join('&')}&${params_matched.join('&')}`;
         return this.http.get<any>(url);
     }
     
@@ -90,13 +90,13 @@ export class DocsApiService {
 
     // http://localhost:28888/api/docs/query/triples?q=
     getQryTriples(qry:string): Observable<any>{
-        let url = `${this.api_url}/qgraph/triples?q=${encodeURI(qry)}`;
+        let url = `${this.api_url}/qgraph?q=${encodeURI(qry)}`;
         return this.http.get<any>(url);
     }
 
     // http://localhost:28888/api/docs/search/triples?q=
-    getResultTriples(qry: string, docid: string): Observable<any>{
-        let url = `${this.api_url}/search/triples?docid=${docid}&q=${encodeURI(qry)}`;
+    getResultTriples(qry: string): Observable<any>{
+        let url = `${this.api_url}/qgraph/search?q=${encodeURI(qry)}`;
         return this.http.get<any>(url);
     }
 }

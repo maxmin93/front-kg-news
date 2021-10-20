@@ -107,7 +107,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
             '서울중앙지검 증권범죄 합동수사단은 누구에 대해 구속영장을 청구했는가?'
         );
         else if( docid == 'D71692521') this.formQuery.get('text').setValue(
-            '새벽 인력시장을 누가 방문했는가? 그리고 언제 방문했는가? 새벽인력시장은 어디에 위치하는가?'
+            '윤석금 웅진그룹회장은 윤회장이다. 새벽 인력시장을 누가 방문했는가? 그리고 언제 방문했는가? 새벽인력시장은 어디에 위치하는가?'
         );
         else if( docid == 'D67108918') this.formQuery.get('text').setValue(
             '일본 주권회복기념식 행사에 누가 참석했는가?'
@@ -141,8 +141,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
             let q_nodes = x['nodes'] as ITripleNode[];
             let q_edges = x['edges'] as ITripleEdge[];
             console.log('Q.roots:', q_roots);
-            console.log('Q.nodes:', q_nodes);
-            console.log('Q.edges:', q_edges);
+            console.log('Q.options:', x['options']);
 
             // documents graph
             this.qryGraph = this.draw_vis_graph(this.qryVisContainer, x['docid'], q_roots, q_nodes, q_edges);
@@ -154,13 +153,14 @@ export class QtriplesComponent implements OnInit, OnDestroy {
         let query = this.formQuery.get('text').value;
         if(query.length == 0) return;
 
-        this.docsService.getResultTriples(query, this.docid).subscribe(x=>{
+        this.docsService.getResultTriples(query).subscribe(x=>{
             console.log('AnsTriples:', x);
 
             let a_roots = x['roots'] as Map<number,string>;    // Object 로 인식됨 (Map 안됨)
             let a_nodes = x['nodes'] as ITripleNode[];
             let a_edges = x['edges'] as ITripleEdge[];
             console.log('A.roots:', a_roots);
+            console.log('A.options:', x['options']);
             console.log('A.nodes:', a_nodes);
             console.log('A.edges:', a_edges);
 
@@ -192,8 +192,8 @@ export class QtriplesComponent implements OnInit, OnDestroy {
             let d_edges = x['edges'] as ITripleEdge[];
             // use object instead of Map<>
             console.log('D.roots:', d_roots);
-            console.log('D.nodes:', d_nodes);
-            console.log('D.edges:', d_edges);
+            // console.log('D.nodes:', d_nodes);
+            // console.log('D.edges:', d_edges);
 
             // detect div of subgraphs
             this.ref.detectChanges();
@@ -209,9 +209,12 @@ export class QtriplesComponent implements OnInit, OnDestroy {
         let result = []
         for(let t of tokens){
             let text = t[0];
+            // match entities
             for(let e of t[1]){
                 text = text.replace(e, `<i>${e}</i>`);
             }
+            // match question clues
+            text = text.replace(/(\$\w+\$)/g,"<i>$1</i>");
             result.push(text);
         }
         return result;

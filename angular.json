@@ -30,6 +30,7 @@
                 "chart.js"
             ],
             "assets": [
+              "src/robots.txt",
               "src/favicon.ico",
               "src/assets"
             ],
@@ -102,6 +103,7 @@
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "karma.conf.js",
             "assets": [
+              "src/robots.txt",
               "src/favicon.ico",
               "src/assets"
             ],

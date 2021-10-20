@@ -289,15 +289,17 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
                     sg_terms.push( target["label"] );   
                     // 클릭된 단어가 포함된 sg_id 리스트
                     let sg_list = Object.keys(this.segments.get( target["label"] ));
-                    let matched_size = Object.values(this.segments.get( target["label"] )).reduce((sum:number,curr:string[])=>sum + curr.length, 0) ;
-                    console.log(`${sg_terms}: sg_list=${sg_list.length}`);
+                    let matched = Object.values(this.segments.get( target["label"] )).reduce((acc:string[], val:string[]) => acc.concat(val), []);
+                    // let matched_size = Object.values(this.segments.get( target["label"] )).reduce((sum:number,curr:string[])=>sum + curr.length, 0) ;
+                    console.log(`${sg_terms}: sg_list=${sg_list.length}`, matched as string[]);
 
                     // message 출력
-                    this.messageOfSubGraph = `TERMS=[ ${x['positives'].join(',')} ]&[ ${target["label"]} ], SG.size=${sg_list.length} (Triples.size=${matched_size})`;
+                    this.messageOfSubGraph = `TERMS=[ ${x['positives'].join(',')} ]&[ ${target["label"]} ], SG.size=${sg_list.length}`;
+                    this.messageOfSubGraph += ` (Triples.size=${(matched as string[]).length})`;
 
                     // 1) 해당 sg_list 의 triples 를 불러서 subgraphs를 그리고 (최대 5개)
                     // 2) sg_terms 의 단어들을 강조 표시
-                    this.docsService.getTriplesGraphBySgListWithTerms(sg_list, sg_terms).subscribe(x=>{
+                    this.docsService.getTriplesGraphBySgListWithTerms(sg_list, matched as string[]).subscribe(x=>{
                         console.log('response:', x);    // roots, nodes, edges, options
                         if( x.hasOwnProperty('options') && x['options'].hasOwnProperty('docids') ){
                             this.messageOfSubGraph += ` ==> [ ${x['options']['docids'].join(' , ')} ]`;
@@ -362,7 +364,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         }
 
         // let matched = g_options.hasOwnProperty('matched') ? g_options['matched'] : [];
-        let s_paths = g_options.hasOwnProperty('s_paths') ? g_options['s_paths'] : {} as any;;
+        let sg_paths = g_options.hasOwnProperty('sg_paths') ? g_options['sg_paths'] : {} as any;;
 
         // nodes
         for(let data of nodes){
@@ -381,7 +383,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
                 , borderWidth: t.group in matched && matched[t.group].includes(t.id) ? 3 : 1
                 // color 를 설정하면 group 에 의한 스타일 자동 설정이 해제됨
                 // , color: matched.includes(t.id) ? { border: 'darkred' } : {}
-                // , hidden: t.group in s_paths && s_paths[t.group].includes(t.id) ? false : true
+                // , hidden: t.group in sg_paths && sg_paths[t.group].includes(t.id) ? false : true
             });
         }
         // edges
@@ -390,8 +392,8 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             let label_value = `${e.joint[0]}`;
             edges_data.add({
                 from: e.from, to: e.to, group: e.group, label: label_value
-                , width: e.group in s_paths && s_paths[e.group].includes(e.from) && s_paths[e.group].includes(e.to) ? 3 : 1
-                , dashes: e.group in s_paths && s_paths[e.group].includes(e.from) && s_paths[e.group].includes(e.to) ? false : true
+                , width: e.group in sg_paths && sg_paths[e.group].includes(e.from) && sg_paths[e.group].includes(e.to) ? 3 : 1
+                , dashes: e.group in sg_paths && sg_paths[e.group].includes(e.from) && sg_paths[e.group].includes(e.to) ? false : true
             });
         }
 

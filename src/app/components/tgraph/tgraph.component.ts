@@ -149,8 +149,8 @@ export class TGraphComponent implements OnInit, OnDestroy {
             this.t_edges = x['edges'] as ITripleEdge[];
             // use object instead of Map<>
             console.log('roots:', this.t_roots);
-            console.log('nodes:', this.t_nodes);
-            console.log('edges:', this.t_edges);
+            // console.log('nodes:', this.t_nodes);
+            // console.log('edges:', this.t_edges);
 
             // main graph
             this.mainGraph = this.vis_main_graph(this.t_roots, this.t_nodes, this.t_edges);
