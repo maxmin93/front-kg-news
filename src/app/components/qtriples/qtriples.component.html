@@ -9,7 +9,7 @@
         <form [formGroup]="formQuery" style="width: 100%; min-width: 400px; max-width: 800px">
             <mat-form-field style="width: 100%" appearance="fill">
                 <mat-label>Type query</mat-label>
-                <textarea matInput formControlName="text" placeholder="ex) 새벽인력시장에 방문한 사람은 누구인가?"></textarea>
+                <textarea matInput formControlName="text" placeholder="ex) 가정은 자녀의 양육비로 얼마를 지출하는가?"></textarea>
             </mat-form-field>
         </form>
     </mat-card-subtitle>
@@ -29,31 +29,7 @@
     </mat-card-header>
     <mat-card-content class="large" style="height: 40vh; margin: 10px; border: 2px solid black;">
 
-        <div #resultVisContainer fxFill>
-        </div>
-
-    </mat-card-content>
-    </mat-card>
-
-
-    <mat-card *ngIf="document" class="news-card" [ngStyle.md]="{'min-width': '1000px'}">
-    <mat-card-header fxLayout="column">
-        <mat-card-title>
-            {{ document.title }}
-        </mat-card-title>
-        <mat-card-subtitle style="margin-bottom: 10px;">
-            <span class="news-provider">{{ document.provider }}</span>
-            <span class="news-cate">{{ document.category }}</span>
-            <span class="news-wdate">{{ document.reporter }}</span>
-            <span class="subtitle-spacer"></span>
-            <span class="news-wdate">{{ document.wdate | date:'mediumDate' }}</span>
-        </mat-card-subtitle>
-        <p #content [innerHTML]="document.content" style="max-width: 1000px; margin: auto; font-size: small;"></p>
-    </mat-card-header>
-    <mat-card-content class="large" style="height: 60vh; margin: 10px; border: 2px solid black;">
-
-        <!-- "margin: auto;" 없으면 canvas 위치가 틀려지게 된다 (그래프가 선 밖으로 움직임) -->
-        <div mat-card-image #docsVisContainer style="height: 100%; width: 100%; margin: auto;">
+        <div #ansVisContainer fxFill>
         </div>
 
     </mat-card-content>
