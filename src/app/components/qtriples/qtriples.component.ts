@@ -85,9 +85,11 @@ export class QtriplesComponent implements OnInit, OnDestroy {
     initQuery(){
         let queries = [
             '가정은 자녀의 양육비로 얼마를 지출하는가? 그래서 보험사는 무엇을 개발했는가?',
+            
+            '일본 주권회복기념식 행사에 누가 참석했는가?',
+
             '서울중앙지검 증권범죄 합동수사단은 누구에 대해 구속영장을 청구했는가?',
             '윤석금 웅진그룹회장은 윤회장이다. 새벽 인력시장을 누가 방문했는가? 그리고 언제 방문했는가? 새벽인력시장은 어디에 위치하는가?',
-            '일본 주권회복기념식 행사에 누가 참석했는가?',
             '다이렉트늘안심입원비보험은 입원비를 보장해 주는가? 최고 몇세까지 보장하는가?',
             '어제 사고로 누가 숨졌나? 사고는 어떻게 난 것인가?',
             '중, 일 양국 간 영유권 갈등이 전면화 된 계기는 무엇인가?',
@@ -142,9 +144,13 @@ export class QtriplesComponent implements OnInit, OnDestroy {
         let result = []
         for(let t of tokens){
             let text = t[0];
-            // match entities
-            for(let e of t[1]){
-                text = text.replace(e, `<i>${e}</i>`);
+            let entities = [... new Set(t[1]) ];   // list of unique values
+            let ordered_entities = entities.sort((a:string, b:string)=>{
+                return b.length - a.length;
+            });                                     // sort by length (desc)
+            for(let e of ordered_entities){
+                let e_re = new RegExp(`(^|[^>])(${e})([^<]|$)`, "g");
+                text = text.replace(e_re, "$1<i>$2</i>$3");
             }
             // match question clues
             text = text.replace(/(\$\w+\$)/g,"<i>$1</i>");

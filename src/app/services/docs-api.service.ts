@@ -62,8 +62,9 @@ export class DocsApiService {
     //
 
     // http://localhost:28888/api/docs/tgraph/docid/D67113626
-    getTriplesGraphByDocid(docid:string): Observable<any>{
-        let url = `${this.api_url}/tgraph/docid/${docid}`;
+    getTriplesGraphByDocid(docid:string, from_origin=true): Observable<any>{
+        let url = from_origin ? `${this.api_url}/tgraph/origin/docid/${docid}`
+                    : `${this.api_url}/tgraph/docid/${docid}`;
         return this.http.get<any>(url);
     }
 

@@ -189,9 +189,15 @@ export class TGraphComponent implements OnInit, OnDestroy {
         let result = []
         for(let t of tokens){
             let text = t[0];
-            for(let e of t[1]){
-                text = text.replace(e, `<i>${e}</i>`);
+            let entities = [... new Set(t[1]) ];   // list of unique values
+            let ordered_entities = entities.sort((a:string, b:string)=>{
+                return b.length - a.length;
+            });                                     // sort by length (desc)
+            for(let e of ordered_entities){
+                let e_re = new RegExp(`(^|[^>])(${e})([^<]|$)`, "g");
+                text = text.replace(e_re, "$1<i>$2</i>$3");
             }
+            // console.log('text_rep:', t[0], '==>', ordered_entities, '==>', text);
             result.push(text);
         }
         return result;
