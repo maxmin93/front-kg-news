@@ -93,7 +93,7 @@ export class W2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         if(this.handler_graph) this.handler_graph.unsubscribe();
 
         // destory VisNetwork objects
-        if( this.mainGraph !== null ){
+        if( this.mainGraph ){
             this.mainGraph.destroy();
             this.mainGraph = null;
         }

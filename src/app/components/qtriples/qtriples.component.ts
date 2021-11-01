@@ -70,11 +70,11 @@ export class QtriplesComponent implements OnInit, OnDestroy {
         this.handler_qtriples.unsubscribe();
 
         // destory VisNetwork objects
-        if( this.docsGraph !== null ){
+        if( this.docsGraph ){
             this.docsGraph.destroy();
             this.docsGraph = null;
         }
-        if( this.qryGraph !== null ){
+        if( this.qryGraph ){
             this.qryGraph.destroy();
             this.qryGraph = null;
         }

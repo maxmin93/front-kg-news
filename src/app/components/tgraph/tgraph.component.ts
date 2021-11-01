@@ -93,7 +93,7 @@ export class TGraphComponent implements OnInit, OnDestroy {
         this.handler_dtriples.unsubscribe();
 
         // destory VisNetwork objects
-        if( this.mainGraph !== null ){
+        if( this.mainGraph ){
             this.mainGraph.destroy();
             this.mainGraph = null;
         }

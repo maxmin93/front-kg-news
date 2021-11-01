@@ -30,7 +30,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     positives: string[] = [];
     negatives: string[] = [];
     topN: number = 30;
-    threshold: number = 0.60;
+    threshold: number = 0.40;
     sizeOfSubGraphs: number = 5;
     messageOfSubGraph: string = undefined;
 
@@ -106,7 +106,8 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         if(this.handler_graph) this.handler_graph.unsubscribe();
 
         // destory VisNetwork objects
-        if( this.mainGraph !== null ){
+        if( this.mainGraph ){
+            console.log('mainGraph.destroy:', this.mainGraph);
             this.mainGraph.destroy();
             this.mainGraph = null;
         }
