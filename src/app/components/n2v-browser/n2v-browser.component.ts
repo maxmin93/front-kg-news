@@ -1,7 +1,8 @@
 import { Component, ViewChild, ElementRef, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { fromEvent, Subscription, merge } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, tap } from 'rxjs/operators';
 
 import { WordsApiService } from 'src/app/services/words-api.service';
 import { DocsApiService } from 'src/app/services/docs-api.service';
@@ -30,9 +31,11 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     positives: string[] = [];
     negatives: string[] = [];
     topN: number = 30;
-    threshold: number = 0.40;
+    threshold: number = 0.35;
     sizeOfSubGraphs: number = 5;
     messageOfSubGraph: string = undefined;
+
+    spinning: boolean = false;
 
     mainGraph: any;
     triplesGraph: any;
@@ -47,7 +50,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     formWords = new FormGroup({
         positives: new FormControl('', [ Validators.pattern('([^,\s]+)') ]),
         negatives: new FormControl('', [ Validators.pattern('([^,\s]+)') ]),
-        threshold: new FormControl(this.threshold, [ Validators.min(0.5), Validators.max(1.0) ]),
+        // threshold: new FormControl(this.threshold, [ Validators.min(0.5), Validators.max(1.0) ]),
     });
 
     pivot: string;
@@ -59,6 +62,8 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     handler_graph:Subscription;
 
     // @ViewChild('tippy_test', {static: false}) private tippy_test: ElementRef;
+    @ViewChild('posInput', {static: true}) private posInput: ElementRef;
+    @ViewChild('negInput', {static: true}) private negInput: ElementRef;
 
     constructor(
         private route: ActivatedRoute,
@@ -80,7 +85,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.pivot = params.get('pivot');
                 console.log('pivot:', this.pivot);
                 if( this.pivot ){
-                    this.formWords.setValue({positives: this.pivot, negatives: '', threshold: this.threshold});
+                    this.formWords.setValue({positives: this.pivot, negatives: ''});    //, threshold: this.threshold});
                     this.positives = [ this.pivot ];
                     this.negatives = [];
                     this.load_words_graph();
@@ -98,8 +103,19 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     ngAfterViewInit(): void{
         // this.sizeOfSubGraphs = this.subVisContainers.nativeElement.children.length;
         // this.subGraphs = new Array(this.sizeOfSubGraphs);
+        merge(
+            fromEvent( this.posInput.nativeElement, 'keyup' ),
+            fromEvent( this.negInput.nativeElement, 'keyup' )    
+        ).pipe(
+            debounceTime(150),
+            filter((e: KeyboardEvent) => e.key === "Enter"),
+            distinctUntilChanged(),
+        ).subscribe(()=>{
+            this.onSubmit();
+            // console.log('keyboard event!')
+        });
     }
-
+   
     ngOnDestroy(): void{
         if(this.handler_pivots) this.handler_pivots.unsubscribe();
         // if(this.handler_synonyms) this.handler_synonyms.unsubscribe();
@@ -137,16 +153,18 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             this.vis_destroy_subgraphs();
         }
         if( this.positives.length > 0 ){
-            this.handler_graph = this.getWordsGraph(this.positives, this.negatives, this.topN, this.threshold);
+            this.handler_graph = this.getWordsGraph(this.positives, this.negatives, this.topN);
         }
     }
 
     onSubmit(){
-        console.log(`submit: positives="${this.formWords.get('positives').value}", negatives="${this.formWords.get('negatives').value}"`);
         if( this.formWords.get('positives').value.length > 0 ){
             this.positives = this.formWords.get('positives').value.trim().length > 0 ? this.formWords.get('positives').value.split(' ') : [];
             this.negatives = this.formWords.get('negatives').value.trim().length > 0 ? this.formWords.get('negatives').value.split(' ') : [];
-            this.threshold = this.formWords.get('threshold').value;
+            // this.threshold = this.formWords.get('threshold').value;
+
+            this.spinning = true;
+            console.log(`submit: pos="${this.positives}", neg="${this.negatives}"`);
             this.load_words_graph();
         }
     }
@@ -183,15 +201,17 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     // return: { pivot, nodes[], edges_syn[], edges_fof[] }
-    getWordsGraph(positives: string[], negatives: string[]=[], topN: number=20, threshold: number=0.65): Subscription{
+    getWordsGraph(positives: string[], negatives: string[]=[], topN: number=30, threshold: number=0.35): Subscription{
         if( this.apiSwitch ){
             return this.wordsService.getN2vWordsGraph(positives, negatives, topN, threshold).subscribe(x=>{
+                this.spinning = false;
                 // console.log('graph data:', x);
                 this.mainGraph = this.vis_main_graph(x);
             });
         }
         else{
             return this.wordsService.getW2vWordsGraph(positives, negatives, topN, threshold).subscribe(x=>{
+                this.spinning = false;
                 // console.log('graph data:', x);
                 this.mainGraph = this.vis_main_graph(x);
             });

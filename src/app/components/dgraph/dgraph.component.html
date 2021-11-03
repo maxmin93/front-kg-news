@@ -35,6 +35,10 @@
     </mat-card-header>
     <mat-card-content>
 
+        <div *ngIf="spinning" style="display: flex; justify-content: center; align-items: center; height: calc(60vh - 40px);">
+            <mat-spinner style="margin:0 auto;"></mat-spinner>
+        </div>
+
         <mat-accordion #accordPruned="matAccordion">
             <mat-expansion-panel *ngIf="dgraph_origin" [expanded]="true">
                 <mat-expansion-panel-header>

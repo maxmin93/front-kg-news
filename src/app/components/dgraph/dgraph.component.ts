@@ -24,6 +24,8 @@ export class DgraphComponent implements OnInit {
     document: Document;
     sentences: Sentence[] = [];
 
+    spinning: boolean = true;
+
     dgraph: any;
     dgraph_origin: Observable<any>;
     dgraph_simplified: Observable<any>;
@@ -131,6 +133,10 @@ export class DgraphComponent implements OnInit {
                 this.panelstate_pruned.push(false);
                 this.panelstate_origin.push(false);
             }
+
+            setTimeout(()=>{
+                this.spinning = false;
+            }, 2000);       // image 전송시간 고려
         });
     }
 

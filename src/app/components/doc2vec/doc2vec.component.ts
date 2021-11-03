@@ -29,7 +29,7 @@ export class Doc2vecComponent implements OnInit {
     docs_size: number = 0;
 
     apiSwitch: boolean = true;      // true: dbscan, false: kmeans
-    apiMode: string = 'KMeans';
+    apiMode: string = 'DBScan';     // 'KMeans';
 
     handler_document: Subscription;
     handler_similars: Subscription;
@@ -71,7 +71,7 @@ export class Doc2vecComponent implements OnInit {
 
     changeApiMode(){
         this.apiSwitch = !this.apiSwitch;
-        this.apiMode = this.apiSwitch ? 'KMeans' : 'DBScan';
+        this.apiMode = this.apiSwitch ? 'DBScan' : 'KMeans';
         console.log('API:', this.apiMode);
         this.getSimilars(this.docid, this.apiMode);
     }

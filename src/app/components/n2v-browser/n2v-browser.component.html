@@ -7,18 +7,22 @@
                     checked="true" (toggleChange)="changeApiMode()">MODEL</mat-slide-toggle>
                 <button mat-stroked-button type="button" (click)="openDialog()" fxFlex="10%" color="primary" style="height: 50px;">Vocab</button>
                 <mat-form-field fxFlex="25%" color="accent">
-                    <input matInput type="text" (keydown.enter)="onSubmit()" placeholder="positive words" formControlName="positives">
+                    <input #posInput matInput type="text" placeholder="positive words" formControlName="positives">
                 </mat-form-field>
                 <mat-form-field fxFlex="25%" color="accent">
-                    <input matInput type="text" (keydown.enter)="onSubmit()" placeholder="negative words" formControlName="negatives">
+                    <input #negInput matInput type="text" placeholder="negative words" formControlName="negatives">
                 </mat-form-field>
-                <mat-form-field fxFlex="10%" color="accent">
+                <!-- mat-form-field fxFlex="10%" color="accent">
                     <input matInput type="number" step="0.05" (keydown.enter)="onSubmit()" placeholder="similarity" formControlName="threshold">
-                </mat-form-field>
+                </mat-form-field -->
             </div>
         </form>
     </mat-card-subtitle>
     <mat-card-content class="large" style="height: 60vh; margin: 10px; border: 2px solid black;">
+
+        <div *ngIf="spinning" style="display: flex; justify-content: center; align-items: center; height: calc(60vh - 40px);">
+            <mat-spinner style="margin:0 auto;"></mat-spinner>
+        </div>
 
         <div #mainVisContainer fxLayout="column" fxFill>
         </div>

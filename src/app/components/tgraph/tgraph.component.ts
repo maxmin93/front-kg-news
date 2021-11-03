@@ -39,6 +39,8 @@ export class TGraphComponent implements OnInit, OnDestroy {
     t_nodes: ITripleNode[];
     t_edges: ITripleEdge[];
 
+    spinning: boolean = true;
+
     // vis_network objects
     mainGraph: any;
     subGraphs: any[];
@@ -140,10 +142,12 @@ export class TGraphComponent implements OnInit, OnDestroy {
 
     getDocTriples(docid:string): Subscription{
         return this.docsService.getTriplesGraphByDocid(docid).subscribe(x=>{
+            this.spinning = false;
             if( !x || Object.keys(x).length == 0 ){
                 console.log(`Empty response by docid=[${docid}]`);
                 return;
             }
+
             this.t_roots = x['roots'] as Map<number,string>;    // Object 로 인식됨 (Map 안됨)
             this.t_nodes = x['nodes'] as ITripleNode[];
             this.t_edges = x['edges'] as ITripleEdge[];
