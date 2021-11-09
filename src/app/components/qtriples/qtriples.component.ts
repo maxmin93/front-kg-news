@@ -84,7 +84,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
 
     initQuery(){
         let queries = [
-            '가정은 자녀의 양육비로 얼마를 지출하는가? 그래서 보험사는 무엇을 개발했는가?',
+            '가정은 자녀의 양육비로 얼마를 지출하는가?',
             
             '일본 주권회복기념식 행사에 누가 참석했는가?',
 
@@ -93,7 +93,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
             '다이렉트늘안심입원비보험은 입원비를 보장해 주는가? 최고 몇세까지 보장하는가?',
             '어제 사고로 누가 숨졌나? 사고는 어떻게 난 것인가?',
             '중, 일 양국 간 영유권 갈등이 전면화 된 계기는 무엇인가?',
-            '윤회장은 윤석금 웅진그룹 회장과 같다. 윤 회장은 무슨 혐의로 재판에 넘겨졌는가?',
+            '윤석금 웅진그룹 회장은 윤회장이다. 윤회장은 무슨 혐의로 재판에 넘겨졌는가?',
         ];
 
         let idx = 0;
@@ -289,8 +289,10 @@ export class QtriplesComponent implements OnInit, OnDestroy {
             });
         }
 
-        let sg_paths = g_options.hasOwnProperty('sg_paths') ? g_options['sg_paths'] : {} as any;
-        let matched = g_options.hasOwnProperty('matched') ? g_options['matched'] : {} as any;
+        // let sg_paths = g_options.hasOwnProperty('sg_paths') ? g_options['sg_paths'] : {} as any;
+        // let matched = g_options.hasOwnProperty('matched') ? g_options['matched'] : {} as any;
+        let sg_paths = {} as any;
+        let matched = {} as any;
 
         // nodes
         for(let data of nodes){
