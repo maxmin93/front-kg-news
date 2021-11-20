@@ -125,15 +125,20 @@ export class QtriplesComponent implements OnInit, OnDestroy {
         if(query.length == 0) return;
 
         this.docsService.getResultTriples(query).subscribe(x=>{
-            let a_roots = x['roots'] as Map<string,string>;    // Object 로 인식됨 (Map 안됨)
-            let a_nodes = x['nodes'] as ITripleNode[];
-            let a_edges = x['edges'] as ITripleEdge[];
-            console.log('A.roots:', a_roots);
-            console.log('A.options:', x['options']);
+            let graph   = x['graph'] as any;    // roots, nodes, edges, options
+            let answers = x['answers'] as any;
+            let options = x['options'] as any;
+            console.log('answers:', answers);
+            console.log('g_options:', graph['options']);
 
             // this.ref.detectChanges();
             // documents graph
-            this.qryGraph = this.draw_ans_graph(this.ansVisContainer, a_roots, a_nodes, a_edges, x['options']);
+            this.qryGraph = this.draw_ans_graph(this.ansVisContainer
+                , graph['roots'] as Map<string,any>
+                , graph['nodes'] as ITripleNode[]
+                , graph['edges'] as ITripleEdge[]
+                , graph['options'] as any
+                );
         });
     }
 
@@ -164,23 +169,24 @@ export class QtriplesComponent implements OnInit, OnDestroy {
         let nodes_data = new DataSet<any>([]);
         let edges_data = new DataSet<any>([]);
 
+        let questions = g_options.hasOwnProperty('questions') ? g_options['questions'] : {} as any;
+        let q_tids = Object.values(questions).map(x=>x['t_id']);
+
         // root
-        for(const [root_key, value] of Object.entries(roots)){
-            // const s_idx = Number(key);
+        for(const [q_id, t_id] of Object.entries(roots)){
+            const group_idx = q_id.split('_')[1];
             // const root_id = this.rootID(s_idx);
             nodes_data.add({
-                id: root_key, label: `<b>ROOT${root_key.split('_')[1]}</b>`, group: root_key,
+                id: q_id, label: `<b>Q_${q_id.split('_')[1]}</b>`, group: group_idx,
                 shape: "circle", borderWidth: 2, margin: 5,
                 color: { border: 'black', background: 'white' },
-                font: { align: 'center' },
+                font: { align: 'horizontal' },
             });
             edges_data.add({
-                from: value, to: root_key, group: root_key, label: ''
+                from: t_id, to: q_id, label: questions[q_id]['q_word'], group: group_idx,
+                font: { align: 'horizontal' },
             });
         }
-
-        let questions = g_options.hasOwnProperty('questions') ? g_options['questions'] : [] as any[];
-        let q_ids = questions.map(x=> x[1]);
 
         // nodes
         for(let data of nodes){
@@ -196,7 +202,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
                 + `<b>C:</b> [ ${ this.vis_text_coloring(t.rest).join('|') } ]`;
             nodes_data.add({
                 id: t.id, label: label_value, group: t.group, shape: "box", margin: 5
-                , borderWidth: q_ids.includes(t.id) ? 3 : 1
+                , borderWidth: q_tids.includes(t.id) ? 3 : 1
             });
         }
         // edges
@@ -226,7 +232,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
             edges: {
                 // width 관련 설정하면 edge label 이 wrap 처리됨 (오류)
                 // width: 1, widthConstraint: { maximum: 10 },
-                font: { size: 11, align: "middle" },
+                font: { size: 11, align: "horizontal" },
                 arrows: { to: { type: 'arrow', enabled: true, scaleFactor: 0.5 }, },
             },
             physics: {
@@ -236,7 +242,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
             // https://visjs.github.io/vis-network/docs/network/layout.html
             layout: {
                 improvedLayout: true,
-                hierarchical: { enabled: true, direction: 'UD', nodeSpacing: 10, treeSpacing: 20 },
+                hierarchical: { enabled: true, direction: 'LR', nodeSpacing: 10, treeSpacing: 20 },
             },
         };
 
@@ -270,33 +276,63 @@ export class QtriplesComponent implements OnInit, OnDestroy {
     }
 
     // VIS-NETWORK: Answer Graph 
-    draw_ans_graph(container: ElementRef, roots: Map<string,string>, nodes: ITripleNode[], edges: ITripleEdge[], g_options: any){
+    draw_ans_graph(container: ElementRef, roots: Map<string,any>, nodes: ITripleNode[], edges: ITripleEdge[], g_options: any){
         let nodes_data = new DataSet<any>([]);
         let edges_data = new DataSet<any>([]);
 
         // root
-        for(const [root_key, value] of Object.entries(roots)){
-            // const s_idx = Number(key);
-            // const root_id = this.rootID(s_idx);
+        for(const [q_id, sg_list] of Object.entries(roots)){
+            const group_idx = q_id.split('_')[1];
+            // depth-1: { q_id: [sg_id], .. }
             nodes_data.add({
-                id: root_key, label: `<b>ROOT${root_key.split('_')[1]}</b>`, group: root_key,
+                id: q_id, label: `<b>Q_${q_id.split('_')[1]}</b>`, group: group_idx,
                 shape: "circle", borderWidth: 2, margin: 5,
                 color: { border: 'black', background: 'white' },
                 font: { align: 'center' },
             });
-            edges_data.add({
-                from: value, to: root_key, group: root_key, label: ''
-            });
+
+            // depth-2: { sg_id: (t_id, rnk, score), .. }
+            for(const [sg_id, sg_values] of Object.entries(sg_list as any)){
+                const sg_score = Math.round(sg_values[2] * 10000)/10000.0;
+                edges_data.add({
+                    from: sg_id, to: q_id, label: `${sg_score}`, group: group_idx,
+                    dashes: false, font: { align: "horizontal" }
+                });
+    
+                nodes_data.add({
+                    id: sg_id, label: `<b>ANS_${sg_values[1]}</b>`, group: sg_id,
+                    shape: "circle", borderWidth: 2, margin: 5,
+                    color: { border: 'black' },     // , background: 'white'
+                    font: { align: 'center' },
+                });
+                edges_data.add({
+                    from: sg_values[0], to: sg_id, label: sg_id, group: sg_id,
+                    dashes: true, font: { align: "horizontal" }
+                });
+            }
         }
 
-        // let sg_paths = g_options.hasOwnProperty('sg_paths') ? g_options['sg_paths'] : {} as any;
-        // let matched = g_options.hasOwnProperty('matched') ? g_options['matched'] : {} as any;
-        let sg_paths = {} as any;
-        let matched = {} as any;
+        // 2-depth Object: { q_id: {sg_id: [ (t_id, t_val), .. ], .. }, .. }
+        let matched = g_options.hasOwnProperty('matched') ? g_options['matched'] : {} as any;
+        // 이런 더티한!!
+        let reversed_keys = new Map<string,string[]>();
+        for(const [q_id, sg_dict] of Object.entries(matched as any) ){
+            for(const sg_id of Object.keys(sg_dict as any) ){
+                if(sg_id in reversed_keys){
+                    if( !(reversed_keys[sg_id] as string[]).includes(q_id) ) 
+                        (reversed_keys[sg_id] as string[]).push(q_id);
+                }
+                else{
+                    reversed_keys[sg_id] = [ q_id ];
+                }
+            } 
+        }
 
         // nodes
         for(let data of nodes){
             const t = data as ITripleNode;
+            const q_id = t.group in reversed_keys ? reversed_keys[t.group][0] : undefined;
+            const matched_ids:string[] = q_id ? matched[q_id][t.group].map(x=>x[0]) : undefined;
             // VERB 의 기본형
             let stems = (t.pred[1].length == 0 || t.pred[0].replace(' ','') == t.pred[1].join(''))
                         ? "" : `(${ t.pred[1].join('|') })`;
@@ -308,7 +344,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
                 + `<b>C:</b> [ ${ this.vis_text_coloring(t.rest).join('|') } ]`;
             nodes_data.add({
                 id: t.id, label: label_value, group: t.group, shape: "box", margin: 5
-                , borderWidth: t.group in matched && matched[t.group].includes(t.id) ? 3 : 1
+                , borderWidth: matched_ids && matched_ids.includes(t.id) ? 3 : 1
             });
         }
         // edges
@@ -317,8 +353,8 @@ export class QtriplesComponent implements OnInit, OnDestroy {
             let label_value = `${e.joint[0]}`;
             edges_data.add({
                 from: e.from, to: e.to, group: e.group, label: label_value
-                , width: e.group in sg_paths && sg_paths[e.group].includes(e.from) && sg_paths[e.group].includes(e.to) ? 3 : 1
-                , dashes: e.group in sg_paths && sg_paths[e.group].includes(e.from) && sg_paths[e.group].includes(e.to) ? false : true
+                , width: 1
+                , dashes: true
             });
         }
 
@@ -340,7 +376,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
             edges: {
                 // width 관련 설정하면 edge label 이 wrap 처리됨 (오류)
                 // width: 1, widthConstraint: { maximum: 10 },
-                font: { size: 11, align: "middle" },
+                font: { size: 11, align: "horizontal" },
                 arrows: { to: { type: 'arrow', enabled: true, scaleFactor: 0.5 }, },
             },
             physics: {
@@ -350,7 +386,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
             // https://visjs.github.io/vis-network/docs/network/layout.html
             layout: {
                 improvedLayout: true,
-                hierarchical: { enabled: true, direction: 'UD', nodeSpacing: 10, treeSpacing: 20 },
+                hierarchical: { enabled: true, direction: 'LR', nodeSpacing: 10, treeSpacing: 20 },
             },
         };
 
