@@ -13,7 +13,7 @@
             </mat-form-field>
         </form>
     </mat-card-subtitle>
-    <mat-card-content class="large" style="height: 40vh; margin: 10px; border: 2px solid black;">
+    <mat-card-content class="large" style="height: 20vh; margin: 10px; border: 2px solid black;">
 
         <div #qryVisContainer fxFill>
         </div>
@@ -33,6 +33,18 @@
         </div>
 
     </mat-card-content>
+    <mat-card-footer fxLayout="row" style="margin: 10px;">
+
+        <mat-form-field fxFill [style.fontSize]="10" appearance="fill">
+            <mat-label>Results</mat-label>
+            <textarea matInput [(ngModel)]='ansResults'
+                      cdkTextareaAutosize
+                      #autosize="cdkTextareaAutosize"
+                      cdkAutosizeMinRows="1"
+                      cdkAutosizeMaxRows="5"></textarea>
+        </mat-form-field>
+
+    </mat-card-footer>
     </mat-card>
 
 </div>
