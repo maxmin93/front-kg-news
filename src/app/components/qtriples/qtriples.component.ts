@@ -348,12 +348,14 @@ export class QtriplesComponent implements OnInit, OnDestroy {
                 from: e.from, to: e.to, group: e.group, label: edge_label,
                 dashes: true, font: { align: "horizontal" }
             });
-            let node_label = `${e['token']}\n[${e['e_tag']}]`;
-            nodes_data.add({
-                id: e.from, group: e.group, label: node_label,
-                shape: "circle", font: { align: 'center' },
-                color: { border: 'orange', background: 'white' },
-            });
+            if( !nodes_data.get(e.from) ){
+                let node_label = `${e['token']}\n[${e['e_tag']}]`;
+                nodes_data.add({
+                    id: e.from, group: e.group, label: node_label,
+                    shape: "circle", font: { align: 'center' },
+                    color: { border: 'orange', background: 'white' },
+                });
+            }
         }
 
         // create a network
