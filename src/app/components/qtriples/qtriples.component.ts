@@ -292,6 +292,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
         let nodes = graph['nodes'] as ITripleNode[];
         let edges = graph['edges'] as ITripleEdge[];
         let g_options = graph['options'] as Map<string,any>;
+        let entities = g_options.hasOwnProperty('entities') ? g_options['entities'] as any[] : [];
 
         let nodes_data = new DataSet<any>([]);
         let edges_data = new DataSet<any>([]);
@@ -329,14 +330,29 @@ export class QtriplesComponent implements OnInit, OnDestroy {
                 , borderWidth: t.id == matched[t.group][0] ? 3 : 1
             });
         }
+
         // edges
         for(let data of edges){
             const e = data as ITripleEdge;
             let label_value = `${e.joint[0]}`;
             edges_data.add({
                 from: e.from, to: e.to, group: e.group, label: label_value
-                , width: 1
-                , dashes: true
+                , width: 1, dashes: false
+            });
+        }
+
+        // entities
+        for(let e of entities){
+            let edge_label = `${e['token']}(${e['k_tag']})`;
+            edges_data.add({
+                from: e.from, to: e.to, group: e.group, label: edge_label,
+                dashes: true, font: { align: "horizontal" }
+            });
+            let node_label = `${e['token']}\n[${e['e_tag']}]`;
+            nodes_data.add({
+                id: e.from, group: e.group, label: node_label,
+                shape: "circle", font: { align: 'center' },
+                color: { border: 'orange', background: 'white' },
             });
         }
 

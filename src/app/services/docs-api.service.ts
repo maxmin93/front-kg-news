@@ -61,10 +61,15 @@ export class DocsApiService {
     //  DocTriples
     //
 
-    // http://localhost:28888/api/docs/tgraph/docid/D67113626
-    getTriplesGraphByDocid(docid:string, from_origin=true): Observable<any>{
-        let url = from_origin ? `${this.api_url}/tgraph/origin/docid/${docid}`
-                    : `${this.api_url}/tgraph/docid/${docid}`;
+    // http://localhost:28888/api/docs/tgraph/docid/D67113626?with_entity=true
+    getTriplesGraphByDocid(docid:string, with_entity=true): Observable<any>{
+        let url = `${this.api_url}/tgraph/docid/${docid}`;
+        if( with_entity ) url += '?with_entity=true';
+        return this.http.get<any>(url);
+    }
+
+    getTriplesGraphByDocidFromOrigin(docid:string): Observable<any>{
+        let url = `${this.api_url}/tgraph/origin/docid/${docid}`
         return this.http.get<any>(url);
     }
 
@@ -82,7 +87,7 @@ export class DocsApiService {
         let url = `${this.api_url}/tgraph/sglist-with-matched?${params_sglist.join('&')}&${params_matched.join('&')}`;
         return this.http.get<any>(url);
     }
-    
+
     // http://localhost:28888/api/docs/tgraph/origin/D67113626
     // getDocTriples(docid:string): Observable<any>{
     //     let url = `${this.api_url}/tgraph/origin/${docid}`;

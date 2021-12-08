@@ -37,7 +37,7 @@
 
         <mat-form-field fxFill [style.fontSize]="10" appearance="fill">
             <mat-label>Results</mat-label>
-            <textarea matInput [(ngModel)]='ansResults'
+            <textarea matInput readonly [(ngModel)]='ansResults'
                       cdkTextareaAutosize
                       #autosize="cdkTextareaAutosize"
                       cdkAutosizeMinRows="1"

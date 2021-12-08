@@ -38,6 +38,7 @@ export class TGraphComponent implements OnInit, OnDestroy {
     t_roots: Map<number,string>;
     t_nodes: ITripleNode[];
     t_edges: ITripleEdge[];
+    t_entities: any[];
 
     spinning: boolean = true;
 
@@ -151,6 +152,8 @@ export class TGraphComponent implements OnInit, OnDestroy {
             this.t_roots = x['roots'] as Map<number,string>;    // Object 로 인식됨 (Map 안됨)
             this.t_nodes = x['nodes'] as ITripleNode[];
             this.t_edges = x['edges'] as ITripleEdge[];
+            this.t_entities = x['options'].hasOwnProperty('entities') ? x['options']['entities'] as any[] : [];
+
             // use object instead of Map<>
             console.log('roots:', this.t_roots);
             // console.log('nodes:', this.t_nodes);
@@ -179,7 +182,8 @@ export class TGraphComponent implements OnInit, OnDestroy {
                         // console.log(`subGraphs[${index}]`, root_key, root_id);
                         let nodes = this.t_nodes.filter((e)=>e.group == root_key);
                         let edges = this.t_edges.filter((e)=>e.group == root_key);
-                        this.subGraphs[ index ] = this.vis_sub_graph(root_key, root_id, nodes, edges, divContainer);
+                        let entities = this.t_entities.filter((e)=>e.group == root_key);
+                        this.subGraphs[ index ] = this.vis_sub_graph(root_key, root_id, nodes, edges, entities, divContainer);
                     }
                 });
             }, 10);
@@ -312,7 +316,7 @@ export class TGraphComponent implements OnInit, OnDestroy {
         return network;
     }
 
-    vis_sub_graph(root_key: string, root_id: string, nodes: any[], edges: any[], divContainer: any){
+    vis_sub_graph(root_key: string, root_id: string, nodes: any[], edges: any[], entities: any[], divContainer: any){
         let nodes_data = new DataSet<any>([]);
         let edges_data = new DataSet<any>([]);
 
@@ -325,7 +329,8 @@ export class TGraphComponent implements OnInit, OnDestroy {
             font: { align: 'center' },
         });
         edges_data.add({
-            from: root_id, to: root_key, group: root_key, label: ''
+            from: root_id, to: root_key, group: root_key, label: '',
+            dashes: true, font: { align: "horizontal" }
         });
 
         // nodes
@@ -344,12 +349,28 @@ export class TGraphComponent implements OnInit, OnDestroy {
                 id: t.id, label: label_value, group: t.group, shape: "box", margin: 5,
             });
         }
+
         // edges
         for(let data of edges){
             const e = data as ITripleEdge;
             let label_value = `${e.joint[0]}(${e.joint[1]})`;
             edges_data.add({
                 from: e.from, to: e.to, group: e.group, label: label_value
+            });
+        }
+
+        // entities
+        for(let e of entities){
+            let edge_label = `${e['token']}(${e['k_tag']})`;
+            edges_data.add({
+                from: e.from, to: e.to, group: e.group, label: edge_label,
+                dashes: true, font: { align: "horizontal" }
+            });
+            let node_label = `${e['token']}\n[${e['e_tag']}]`;
+            nodes_data.add({
+                id: e.from, group: e.group, label: node_label,
+                shape: "circle", font: { align: 'center' },
+                color: { border: 'orange', background: 'white' },
             });
         }
 
