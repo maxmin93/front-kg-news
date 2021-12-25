@@ -187,6 +187,7 @@ export class TGraphComponent implements OnInit, OnDestroy {
                     }
                 });
             }, 10);
+
         });
     }
 
@@ -229,6 +230,7 @@ export class TGraphComponent implements OnInit, OnDestroy {
                 from: value, to: root_key, group: root_key, label: ''
             });
         }
+
         // nodes
         for(let data of nodes){
             const t = data as ITripleNode;

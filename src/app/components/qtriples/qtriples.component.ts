@@ -137,15 +137,19 @@ export class QtriplesComponent implements OnInit, OnDestroy {
 
             let graph = x['graph'] as Map<string,any>;    // roots, nodes, edges, options
             let query = x['query'] as Map<string,any>;
-            let results = x['results'] as Map<string,any>;
+            let results = new Map<string,any[]>();
+            // extract revisions from results
+            for(const [sg_id, values] of Object.entries(x['results'])){
+                results[sg_id] = values['revision']
+            }
             console.log('results:', results);
             console.log('g_options:', graph['options']);
 
-            this.ansResults = `QUERY: q_tag='${query['question']['q_tag']}', clues=[${query['question']['clues']}], e_tags=[${query['question']['e_tags']}]\n`;
+            this.ansResults = `QUERY: q_tag='${query['question']['q_word']}(${query['question']['q_tag']})', clues=[${query['question']['clues']}], e_tags=[${query['question']['e_tags']}]\n`;
             this.ansResults += "--------------------------------------------------------------------------------------------------------\n";
-            for( const [sg_id, value] of Object.entries(results) ){
-                this.ansResults += `RNK[${value[0]}]\t: score=${value[1]}, sum_sim=${value[2]}, cnt_sim=${value[3]}, density=${value[4]}\n`;
-                this.ansResults += `\t\t==> type='${graph['options']['matched'][sg_id][1]}', answer='${graph['options']['matched'][sg_id][2]}'\n`;
+            for( const [sg_id, rank] of Object.entries(results) ){
+                this.ansResults += `RNK[${rank[0]}]\t: m_type=${rank[1]}, gscore=${rank[2]}, part=${rank[4]}\n`;
+                this.ansResults += `\t\t==> answer='${rank[5][0]} (${rank[5][1]})'\n`;
             }
 
             // this.ref.detectChanges();
@@ -306,7 +310,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
                 font: { align: 'center' },
             });
             edges_data.add({        // score
-                from: t_id, to: sg_id, label: `${results[sg_id][1]}`, group: sg_id,
+                from: t_id, to: sg_id, label: `${results[sg_id][2]}`, group: sg_id,
                 dashes: true, font: { align: "horizontal" }
             });
         }
@@ -327,7 +331,7 @@ export class QtriplesComponent implements OnInit, OnDestroy {
                 + `<b>C:</b> [ ${ this.vis_text_coloring(t.rest).join('|') } ]`;
             nodes_data.add({
                 id: t.id, label: label_value, group: t.group, shape: "box", margin: 5
-                , borderWidth: t.id == matched[t.group][0] ? 3 : 1
+                , borderWidth: results[t.group][3].includes(t.id) ? 3 : 1
             });
         }
 
@@ -337,7 +341,8 @@ export class QtriplesComponent implements OnInit, OnDestroy {
             let label_value = `${e.joint[0]}`;
             edges_data.add({
                 from: e.from, to: e.to, group: e.group, label: label_value
-                , width: 1, dashes: false
+                , width: results[e.group][3].includes(e.from) && results[e.group][3].includes(e.to) ? 3 : 1
+                , dashes: false
             });
         }
 

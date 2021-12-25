@@ -102,7 +102,8 @@ export class DocsApiService {
 
     // http://localhost:28888/api/docs/search/triples?q=
     getResultTriples(qry: string): Observable<any>{
-        let url = `${this.api_url}/qgraph/search?q=${encodeURI(qry)}`;
+        // let url = `${this.api_url}/qgraph/search?q=${encodeURI(qry)}`;
+        let url = `${this.api_url}/agraph?q=${encodeURI(qry)}`;
         return this.http.get<any>(url);
     }
 }
