@@ -1,6 +1,8 @@
 import { Component, ViewChild, ElementRef, ChangeDetectorRef, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, Subscription, of } from 'rxjs';
+
+import { Observable, Subscription, fromEvent } from 'rxjs';
+import { debounceTime, buffer, map, filter } from 'rxjs/operators';
 
 import { NewsApiService } from 'src/app/services/news-api.service';
 import { UiApiService } from 'src/app/services/ui-api.service';
@@ -50,7 +52,6 @@ export class TGraphComponent implements OnInit, OnDestroy {
     handler_document:Subscription;
     handler_sentences:Subscription;
     handler_dtriples:Subscription;
-
 
     // @ViewChild('content', {static: false}) private content: ElementRef;
     @ViewChild('mainVisContainer', {static: false}) private mainVisContainer: ElementRef;
@@ -293,25 +294,19 @@ export class TGraphComponent implements OnInit, OnDestroy {
         window['vis'] = network;
 
         // event: selectNode 를 설정해도 selectEdge 가 같이 fire 됨 (오류!)
-        network.on("select", (params)=>{
-            if( params.nodes.length > 0 ){
-                // target: nodes
-                console.log("Selection Node:", nodes_data.get(params.nodes[0]));
-                if( params.nodes.length == 1 ){
-                    // if( nodes_data.get(params.nodes[0]).group == 1 ){
-                    // }
-                }
-            }
-            // select 가 nodes 에 반응하지 않은 경우만 edges 처리
-            else if( params.edges.length > 0 ){
-                // console.log("Selected Edges:", params.edges);
-            }
-        });
+        // network.on("click", (params)=>{
+        //     if( params.nodes.length > 0 ){
+        //         console.log("Selection Node:", nodes_data.get(params.nodes[0]));
+        //     }
+        //     // select 가 nodes 에 반응하지 않은 경우만 edges 처리
+        //     else if( params.edges.length > 0 ){
+        //     }
+        // });
+
         // event: doubleClick
         network.on("doubleClick", (params)=>{
             if( params.nodes.length > 0 ){
                 console.log("doubleClick:", nodes_data.get(params.nodes[0]));
-
             }
         });
 
@@ -412,26 +407,31 @@ export class TGraphComponent implements OnInit, OnDestroy {
         // initialize your network!
         let network = new Network(container, data, options);
 
-        // event: selectNode 를 설정해도 selectEdge 가 같이 fire 됨 (오류!)
-        network.on("select", (params)=>{
-            if( params.nodes.length > 0 ){
-                // target: nodes
-                console.log("Selection Node:", nodes_data.get(params.nodes[0]));
-                if( params.nodes.length == 1 ){
-                    // if( nodes_data.get(params.nodes[0]).group == 1 ){
-                    // }
-                }
-            }
-            // select 가 nodes 에 반응하지 않은 경우만 edges 처리
-            else if( params.edges.length > 0 ){
-                // console.log("Selected Edges:", params.edges);
-            }
-        });
+        // network.on("click", (params)=>{
+        //     if( params.nodes.length > 0 ){
+        //         const target = params.nodes[0];
+        //         console.log("click Node:", nodes_data.get(target));
+        //     }
+        //     // select 가 nodes 에 반응하지 않은 경우만 edges 처리
+        //     // ==> selectNode 를 설정해도 selectEdge 가 같이 fire 됨 (오류!)
+        //     else if( params.edges.length > 0 ){
+        //         const target = params.edges[0];
+        //         console.log("click Edge:", edges_data.get(target));
+        //     }
+        // });
+        // network.on("oncontext", (params)=>{
+        //     var nodeId = network.getNodeAt(params.pointer.DOM);
+        //     console.log("onContext Node:", nodeId);
+        // });
+
         // event: doubleClick
         network.on("doubleClick", (params)=>{
             if( params.nodes.length > 0 ){
-                console.log("doubleClick:", nodes_data.get(params.nodes[0]));
-
+                let target = params.nodes[0]
+                console.log("edit Node:", target, nodes_data.get(target));
+            }
+            else{
+                console.log("add new Node!");
             }
         });
 

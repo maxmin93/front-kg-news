@@ -15,7 +15,7 @@ import { UiApiService } from './services/ui-api.service';
 })
 export class AppComponent implements OnInit, OnDestroy {
 
-    tap_title: string = 'kg-news';
+    tap_title: string = 'AgensKG';
     current_path: string;
 
     current_title: string;

@@ -54,13 +54,13 @@ export class WordsApiService {
         return this.http.get<any[]>(url);
     }
 
-    getW2vWordsGraph(positives: string[], negatives: string[]=[], topN: number=20, threshold: number=0.60): Observable<any[]>{
+    getW2vWordsGraph(positives: string[], negatives: string[]=[], topN: number=30): Observable<any[]>{
         if( positives.length == 0 ) return EMPTY;
         let params = 'p=' + positives.map(x=>encodeURIComponent(x)).join('&p=')
         if( negatives.length > 0 ){
             params += '&n=' + negatives.map(x=>encodeURIComponent(x)).join('&n=')
         }
-        let url = `${this.api_url}/w2v/graph?${params}&top_n=${topN}&threshold=${threshold}`;
+        let url = `${this.api_url}/w2v/graph?${params}&top_n=${topN}`;
         return this.http.get<any[]>(url);
     }
 
@@ -101,13 +101,13 @@ export class WordsApiService {
         return this.http.get<any[]>(url);
     }
 
-    getN2vWordsGraph(positives: string[], negatives: string[]=[], topN: number=30, threshold: number=0.35): Observable<any[]>{
+    getN2vWordsGraph(positives: string[], negatives: string[]=[], topN: number=30): Observable<any[]>{
         if( positives.length == 0 ) return EMPTY;
         let params = 'p=' + positives.map(x=>encodeURIComponent(x)).join('&p=')
         if( negatives.length > 0 ){
             params += '&n=' + negatives.map(x=>encodeURIComponent(x)).join('&n=')
         }
-        let url = `${this.api_url}/n2v/graph?${params}&top_n=${topN}&threshold=${threshold}`;
+        let url = `${this.api_url}/n2v/graph?${params}&top_n=${topN}`;
         return this.http.get<any[]>(url);
     }
 

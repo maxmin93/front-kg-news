@@ -46,11 +46,11 @@ const routes: Routes = [
     component: DgraphComponent
   },
   {
-    path: 'tgraph/:id', data :{ title: "Triples Graph of Document" },
+    path: 'tgraph/:id', data :{ title: "Quadruple Graph of Document" },
     component: TGraphComponent
   },
   {
-    path: 'qgraph', data :{ title: "Triples Graph of User Query" },
+    path: 'qgraph', data :{ title: "Quadruple Graph of User Query" },
     component: QtriplesComponent
   },
   {

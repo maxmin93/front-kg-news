@@ -105,7 +105,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
         // this.subGraphs = new Array(this.sizeOfSubGraphs);
         merge(
             fromEvent( this.posInput.nativeElement, 'keyup' ),
-            fromEvent( this.negInput.nativeElement, 'keyup' )    
+            fromEvent( this.negInput.nativeElement, 'keyup' )
         ).pipe(
             debounceTime(150),
             filter((e: KeyboardEvent) => e.key === "Enter"),
@@ -115,7 +115,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             // console.log('keyboard event!')
         });
     }
-   
+
     ngOnDestroy(): void{
         if(this.handler_pivots) this.handler_pivots.unsubscribe();
         // if(this.handler_synonyms) this.handler_synonyms.unsubscribe();
@@ -201,16 +201,16 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     // return: { pivot, nodes[], edges_syn[], edges_fof[] }
-    getWordsGraph(positives: string[], negatives: string[]=[], topN: number=30, threshold: number=0.35): Subscription{
+    getWordsGraph(positives: string[], negatives: string[]=[], topN: number=30): Subscription{
         if( this.apiSwitch ){
-            return this.wordsService.getN2vWordsGraph(positives, negatives, topN, threshold).subscribe(x=>{
+            return this.wordsService.getN2vWordsGraph(positives, negatives, topN).subscribe(x=>{
                 this.spinning = false;
                 // console.log('graph data:', x);
                 this.mainGraph = this.vis_main_graph(x);
             });
         }
         else{
-            return this.wordsService.getW2vWordsGraph(positives, negatives, topN, threshold).subscribe(x=>{
+            return this.wordsService.getW2vWordsGraph(positives, negatives, topN).subscribe(x=>{
                 this.spinning = false;
                 // console.log('graph data:', x);
                 this.mainGraph = this.vis_main_graph(x);
@@ -307,7 +307,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
                 console.log("Selection Node:", target);
                 if( this.segments.has(target["label"]) ){
                     let sg_terms: string[] = [...x['positives']];
-                    sg_terms.push( target["label"] );   
+                    sg_terms.push( target["label"] );
                     // 클릭된 단어가 포함된 sg_id 리스트
                     let sg_list = Object.keys(this.segments.get( target["label"] ));
                     let matched = Object.values(this.segments.get( target["label"] )).reduce((acc:string[], val:string[]) => acc.concat(val), []);
@@ -316,7 +316,7 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
 
                     // message 출력
                     this.messageOfSubGraph = `TERMS=[ ${x['positives'].join(',')} ]&[ ${target["label"]} ], SG.size=${sg_list.length}`;
-                    this.messageOfSubGraph += ` (Triples.size=${(matched as string[]).length})`;
+                    this.messageOfSubGraph += ` (Quadruples.size=${(matched as string[]).length})`;
 
                     // 1) 해당 sg_list 의 triples 를 불러서 subgraphs를 그리고 (최대 5개)
                     // 2) sg_terms 의 단어들을 강조 표시

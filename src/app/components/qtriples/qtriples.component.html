@@ -5,7 +5,7 @@
         <mat-card-title>Query</mat-card-title>
     </mat-card-header -->
     <mat-card-subtitle style="margin-bottom: 10px;" fxLayout="row" >
-        <button mat-button color="primary" style="height: 100%" (click)="doQuery()" aria-label="Match query triples"><mat-icon>plagiarism</mat-icon>Query</button>
+        <button mat-button color="primary" style="height: 100%" (click)="doQuery()" aria-label="Match query to Quadruples"><mat-icon>plagiarism</mat-icon>Query</button>
         <form [formGroup]="formQuery" style="width: 100%; min-width: 400px; max-width: 800px">
             <mat-form-field style="width: 100%" appearance="fill">
                 <mat-label>Type query</mat-label>
@@ -25,7 +25,7 @@
     <mat-card class="news-card" [ngStyle.md]="{'min-width': '1000px'}">
     <mat-card-header fxLayout="row">
         <mat-card-title>Answers</mat-card-title>
-        <button mat-button color="primary" style="height: 100%" (click)="doSearch()" aria-label="Search result triples"><mat-icon>plagiarism</mat-icon>Search</button>
+        <button mat-button color="primary" style="height: 100%" (click)="doSearch()" aria-label="Search Quadruples"><mat-icon>plagiarism</mat-icon>Search</button>
     </mat-card-header>
     <mat-card-content class="large" style="height: 40vh; margin: 10px; border: 2px solid black;">
 
