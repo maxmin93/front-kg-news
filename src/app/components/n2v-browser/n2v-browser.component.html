@@ -1,5 +1,5 @@
 <mat-card class="news-card" [ngStyle.md]="{'min-width': '1000px'}" style="margin-bottom: 10px;">
-    <mat-card-title>Words Graph ({{ apiSwitch ? "node2vec" : "word2vec" }})</mat-card-title>
+    <mat-card-title><small>Embedding Model:</small> {{ apiSwitch ? "node2vec" : "word2vec" }}</mat-card-title>
     <mat-card-subtitle>
         <form [formGroup]="formWords" (ngSubmit)="onSubmit()" class="example-form">
             <div fxLayout="row" fxFlexFill fxLayout.lt-sm="column" fxLayoutGap="20px" style="padding-left: 10vw; padding-right: 10vw;">

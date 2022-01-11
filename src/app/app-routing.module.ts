@@ -62,11 +62,11 @@ const routes: Routes = [
     component: BrowserComponent
   },
   {
-    path: 'n2v-browser/:pivot', data :{ title: "Word Graph (node2vec)" },
+    path: 'n2v-browser/:pivot', data :{ title: "Word Graph" },
     component: N2vBrowserComponent
   },
   {
-    path: 'n2v-browser', data :{ title: "Word Graph (node2vec)" },
+    path: 'n2v-browser', data :{ title: "Word Graph" },
     component: N2vBrowserComponent
   },
   {
