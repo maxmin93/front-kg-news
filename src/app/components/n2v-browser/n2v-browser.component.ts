@@ -146,6 +146,8 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     load_words_graph(){
+        this.spinning = true;
+
         // destory VisNetwork objects
         if( this.mainGraph !== undefined ){
             this.mainGraph.destroy();
@@ -163,7 +165,6 @@ export class N2vBrowserComponent implements OnInit, OnDestroy, AfterViewInit {
             this.negatives = this.formWords.get('negatives').value.trim().length > 0 ? this.formWords.get('negatives').value.split(' ') : [];
             // this.threshold = this.formWords.get('threshold').value;
 
-            this.spinning = true;
             console.log(`submit: pos="${this.positives}", neg="${this.negatives}"`);
             this.load_words_graph();
         }
